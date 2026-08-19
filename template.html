@@ -135,6 +135,11 @@
   .foot{margin-top:36px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
   .foot p{margin-bottom:4px}
   .foot a{color:var(--muted)}
+  .foot .disclaimer{margin-top:12px;padding:10px 14px;background:var(--red-bg);border:1px solid var(--red-line);
+    border-radius:9px;color:var(--red);font-size:13px;font-weight:600}
+  .foot .disclaimer b{font-weight:800}
+  .route-note{margin-top:12px;padding:9px 13px;background:#fdf6e8;border:1px solid #e8cf9a;border-radius:9px;
+    font-size:12.5px;color:#8a6116;line-height:1.55}
   .foot .copyright{margin-top:12px;font-size:12.5px}
   .foot .copyright a{color:var(--red);text-decoration:none;font-weight:600}
   .foot .copyright a:hover{text-decoration:underline}
@@ -275,7 +280,8 @@
   <div class="foot">
     <p>票价公式（基准价）：现状 0-6km 3 元，之后每 10km +1；方案一 0-4km 3 元，之后 4/4/4/7/7/7/10/10/10km，67km 以上每 15km +1；方案二 0-6km 4 元，之后 6/8/8/10/10/12/12km，72km 以上每 14km +1。</p>
     <p>平均影响：方案一 +23.3%（4.23→5.22 元），方案二 +22.9%（4.23→5.20 元）。</p>
-    <p>站到站里程按线网<b>最短路径里程</b>计价（换乘不计里程），站间距来自维基百科各线路词条，为官方设计/环评数据的米级精度。本页为自行整理的对比工具，非官方页面。</p>
+    <p>站到站里程按线网<b>最短路径里程</b>计价（换乘不计里程），站间距来自维基百科各线路词条，为官方设计/环评数据的米级精度。</p>
+    <p class="disclaimer">⚠️ 本页面为个人自行整理的对比工具，<b>非官方页面</b>，数据仅供参考，以上海地铁官方计价为准。</p>
     <p class="copyright">© 2026 <a href="https://miaotony.xyz" target="_blank" rel="noopener">MiaoTony</a> · metrochan</p>
   </div>
 
@@ -641,8 +647,9 @@ function renderCostTable(container, km, rides, useDisc){
     var html = '<div class="route-summary">'
       + '<div><div class="k">里程（最短路径）</div><div class="v">'+km.toFixed(2)+' 公里</div></div>'
       + '<div><div class="k">途经</div><div class="v">'+(path.length)+' 站</div></div>'
-      + '<div><div class="k">换乘</div><div class="v">'+(transfers>0?transfers+' 次':'直达')+'</div></div>'
-      + '</div>';
+      + '<div><div class="k">路径分段</div><div class="v">'+(transfers>0?transfers+' 次跨线':'单线')+'</div></div>'
+      + '</div>'
+      + '<div class="route-note">⚠️ 以下是<b>计价用的最短里程路径</b>（票价按此计算，与实际怎么坐无关），<b>不是乘车换乘建议</b>——实际乘坐可优先选直达或少换乘路线，票价不变。</div>';
 
     html += '<div class="route-lines">';
     segs.forEach(function(seg){
