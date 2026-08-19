@@ -168,63 +168,12 @@
   </header>
 
   <div class="tabs">
-    <button class="tab active" data-tab="dist">按乘距对比</button>
-    <button class="tab" data-tab="s2s">站到站对比</button>
-  </div>
-
-  <!-- Tab 1: 按乘距 -->
-  <div class="panel active" id="panel-dist">
-    <section>
-      <div class="control">
-        <div class="slider-row">
-          <span class="km-label">乘距</span>
-          <input type="range" id="kmRange" min="1" max="130" value="16" step="1">
-          <div class="km-input">
-            <input type="number" id="kmNum" min="1" max="200" value="16">
-            <span class="unit">公里</span>
-          </div>
-        </div>
-        <div class="presets">
-          <button data-km="4">短途 4km</button>
-          <button data-km="16">平均乘距 16km</button>
-          <button data-km="30">中长 30km</button>
-          <button data-km="50">长 50km</button>
-          <button data-km="80">超长 80km</button>
-        </div>
-        <div class="avg-hint">2025 年全市平均乘距 <b>16.45</b> 公里 · 平均每人次票价 4.23 元</div>
-      </div>
-      <div class="cards" id="cards"></div>
-    </section>
-
-    <section>
-      <h2>全乘距票价曲线 <span class="tag">阶梯图</span></h2>
-      <div class="chartbox">
-        <div class="legend">
-          <span><i class="sw cur"></i>现状（2005 版）</span>
-          <span><i class="sw p1"></i>方案一</span>
-          <span><i class="sw p2"></i>方案二</span>
-        </div>
-        <svg id="chart" viewBox="0 0 920 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="票价阶梯图"></svg>
-      </div>
-    </section>
-
-    <section>
-      <h2>月度通勤成本估算 <span class="tag">含计次票</span></h2>
-      <div class="costbox">
-        <div class="cost-inputs">
-          <label for="rides">每月乘坐次数</label>
-          <input type="number" id="rides" min="1" max="200" value="44">
-          <span class="km-label">次/月（按上方乘距）</span>
-          <label class="toggle"><input type="checkbox" id="discount" checked> 计入满 100 元后 9 折</label>
-        </div>
-        <div id="costTable"></div>
-        <div class="hint">计次票为 30 天内固定次数（45/60/90 次），与单程票价互斥；满额优惠仅适用于刷码/刷卡的单程付费。</div>
-      </div>
-    </section>
+    <button class="tab active" data-tab="s2s">站到站对比</button>
+    <button class="tab" data-tab="dist">按乘距对比</button>
   </div>
 
   <!-- Tab 2: 站到站 -->
-  <div class="panel" id="panel-s2s">
+  <div class="panel active" id="panel-s2s">
     <section>
       <div class="s2s">
         <div class="s2s-grid">
@@ -278,6 +227,57 @@
     </section>
   </div>
 
+  <!-- Tab 1: 按乘距 -->
+  <div class="panel" id="panel-dist">
+    <section>
+      <div class="control">
+        <div class="slider-row">
+          <span class="km-label">乘距</span>
+          <input type="range" id="kmRange" min="1" max="130" value="16" step="1">
+          <div class="km-input">
+            <input type="number" id="kmNum" min="1" max="200" value="16">
+            <span class="unit">公里</span>
+          </div>
+        </div>
+        <div class="presets">
+          <button data-km="4">短途 4km</button>
+          <button data-km="16">平均乘距 16km</button>
+          <button data-km="30">中长 30km</button>
+          <button data-km="50">长 50km</button>
+          <button data-km="80">超长 80km</button>
+        </div>
+        <div class="avg-hint">2025 年全市平均乘距 <b>16.45</b> 公里 · 平均每人次票价 4.23 元</div>
+      </div>
+      <div class="cards" id="cards"></div>
+    </section>
+
+    <section>
+      <h2>全乘距票价曲线 <span class="tag">阶梯图</span></h2>
+      <div class="chartbox">
+        <div class="legend">
+          <span><i class="sw cur"></i>现状（2005 版）</span>
+          <span><i class="sw p1"></i>方案一</span>
+          <span><i class="sw p2"></i>方案二</span>
+        </div>
+        <svg id="chart" viewBox="0 0 920 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="票价阶梯图"></svg>
+      </div>
+    </section>
+
+    <section>
+      <h2>月度通勤成本估算 <span class="tag">含计次票</span></h2>
+      <div class="costbox">
+        <div class="cost-inputs">
+          <label for="rides">每月乘坐次数</label>
+          <input type="number" id="rides" min="1" max="200" value="44">
+          <span class="km-label">次/月（按上方乘距）</span>
+          <label class="toggle"><input type="checkbox" id="discount" checked> 计入满 100 元后 9 折</label>
+        </div>
+        <div id="costTable"></div>
+        <div class="hint">计次票为 30 天内固定次数（45/60/90 次），与单程票价互斥；满额优惠仅适用于刷码/刷卡的单程付费。</div>
+      </div>
+    </section>
+  </div>
+
   <div class="foot">
     <p class="formula"><b>票价公式（基准价）</b></p>
     <p class="formula">现状（2005 版）：0-6km 3 元，之后每 10km +1 元。</p>
@@ -327,7 +327,7 @@ function switchTab(name){
 document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click', function(){ switchTab(t.dataset.tab); });
 });
-if(location.hash === '#s2s'){ switchTab('s2s'); }
+if(location.hash === '#dist'){ switchTab('dist'); }
 
 /* ============ 共用：月成本表 ============ */
 function renderCostTable(container, km, rides, useDisc){
