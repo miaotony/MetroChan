@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>上海地铁票价对比 · 现状 vs 方案一 vs 方案二</title>
+<title>metrochan · 魔都地铁酱 — 票价对比</title>
 <style>
   :root{
     --bg:#faf9f6; --surface:#ffffff; --ink:#1b1b1b; --muted:#6d6a64;
@@ -20,6 +20,7 @@
   .wrap{max-width:960px;margin:0 auto;padding:36px 20px 80px}
 
   header h1{font-size:26px;font-weight:700;letter-spacing:-.01em}
+  header h1 .h1-cn{color:var(--red);margin-left:6px}
   header .sub{color:var(--muted);margin-top:6px;font-size:14px}
   header .src{color:var(--muted);font-size:12.5px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
 
@@ -157,8 +158,8 @@
 <div class="wrap">
 
   <header>
-    <h1>上海地铁票价对比</h1>
-    <div class="sub">现状（2005 年）vs 听证方案一 vs 听证方案二 · 支持按乘距或按站到站两种对比</div>
+    <h1>metrochan <span class="h1-cn">魔都地铁酱</span></h1>
+    <div class="sub">上海地铁票价对比 · 现状（2005 版）vs 听证方案一 vs 听证方案二</div>
     <div class="src">
       票价数据：<a href="https://fgw.sh.gov.cn/cmsres/24/2480505af8bb4b50bfa75092e12fe6af/535b6d58b1fd807bb0b9a2b92ecd078e.wps" target="_blank" rel="noopener">《优化上海市轨道交通票价机制听证方案》</a>（上海市发改委，2026-08-19）。
       站间距数据：中文维基百科各线路词条（官方设计/环评资料，米级）。
@@ -199,7 +200,7 @@
       <h2>全乘距票价曲线 <span class="tag">阶梯图</span></h2>
       <div class="chartbox">
         <div class="legend">
-          <span><i class="sw cur"></i>现状（2005）</span>
+          <span><i class="sw cur"></i>现状（2005 版）</span>
           <span><i class="sw p1"></i>方案一</span>
           <span><i class="sw p2"></i>方案二</span>
         </div>
@@ -278,7 +279,10 @@
   </div>
 
   <div class="foot">
-    <p>票价公式（基准价）：现状 0-6km 3 元，之后每 10km +1；方案一 0-4km 3 元，之后 4/4/4/7/7/7/10/10/10km，67km 以上每 15km +1；方案二 0-6km 4 元，之后 6/8/8/10/10/12/12km，72km 以上每 14km +1。</p>
+    <p class="formula"><b>票价公式（基准价）</b></p>
+    <p class="formula">现状（2005 版）：0-6km 3 元，之后每 10km +1 元。</p>
+    <p class="formula">方案一：0-4km 3 元，之后按 4/4/4/7/7/7/10/10/10km 每档 +1 元，67km 以上每 15km +1 元。</p>
+    <p class="formula">方案二：0-6km 4 元，之后按 6/8/8/10/10/12/12km 每档 +1 元，72km 以上每 14km +1 元。</p>
     <p>平均影响：方案一 +23.3%（4.23→5.22 元），方案二 +22.9%（4.23→5.20 元）。</p>
     <p>站到站里程按线网<b>最短路径里程</b>计价（换乘不计里程），站间距来自维基百科各线路词条，为官方设计/环评数据的米级精度。</p>
     <p class="disclaimer">⚠️ 本页面为个人自行整理的对比工具，<b>非官方页面</b>，数据仅供参考，以上海地铁官方计价为准。</p>
@@ -310,7 +314,7 @@ function farePlan2(d){
   return price + Math.ceil((d-72)/14);
 }
 const FARES = [
-  {key:'cur', name:'现状（2005）', fn:fareCurrent, color:'#7d7d7d'},
+  {key:'cur', name:'现状（2005 版）', fn:fareCurrent, color:'#7d7d7d'},
   {key:'p1',  name:'方案一',      fn:farePlan1,  color:'#c8102e'},
   {key:'p2',  name:'方案二',      fn:farePlan2,  color:'#1668a3'}
 ];
