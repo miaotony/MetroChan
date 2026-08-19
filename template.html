@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>上海地铁票价对比 · 现状 vs 方案一 vs 方案二</title>
+<style>
+  :root{
+    --bg:#faf9f6; --surface:#ffffff; --ink:#1b1b1b; --muted:#6d6a64;
+    --border:#e6e2da; --line:#efece5;
+    --red:#c8102e; --red-bg:#fdf1f2; --red-line:#e08a96;
+    --blue:#1668a3; --blue-bg:#eef5fb; --blue-line:#8fb7d6;
+    --gray:#7d7d7d; --gray-bg:#f2f1ee; --gray-line:#c4c2bd;
+    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.55;font-size:15px}
+  .wrap{max-width:960px;margin:0 auto;padding:36px 20px 80px}
+
+  header h1{font-size:26px;font-weight:700;letter-spacing:-.01em}
+  header .sub{color:var(--muted);margin-top:6px;font-size:14px}
+  header .src{color:var(--muted);font-size:12.5px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
+
+  .tabs{display:flex;gap:8px;margin-top:26px;border-bottom:2px solid var(--line)}
+  .tab{padding:10px 20px;font-size:15px;font-weight:600;color:var(--muted);cursor:pointer;
+    border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .15s}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--red);border-bottom-color:var(--red)}
+  .panel{display:none;margin-top:26px}
+  .panel.active{display:block}
+
+  h2{font-size:17px;font-weight:700;margin-bottom:14px;letter-spacing:-.01em}
+  h2 .tag{font-size:12px;font-weight:600;color:var(--muted);margin-left:8px;background:var(--gray-bg);padding:2px 8px;border-radius:10px;vertical-align:2px}
+
+  .control{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
+  .slider-row{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .km-label{font-size:14px;color:var(--muted);white-space:nowrap}
+  input[type=range]{flex:1;min-width:200px;accent-color:var(--red);height:26px}
+  .km-input{display:flex;align-items:center;gap:6px;font-weight:700}
+  .km-input input{width:64px;text-align:center;font-size:18px;font-weight:700;font-family:var(--mono);
+    border:1px solid var(--border);border-radius:8px;padding:6px 4px;background:#fff}
+  .km-input .unit{color:var(--muted);font-size:14px;font-weight:400}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .presets button{font:inherit;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--border);
+    border-radius:20px;padding:5px 14px;cursor:pointer;transition:background .15s,border-color .15s}
+  .presets button:hover{background:var(--red-bg);border-color:var(--red-line)}
+  .avg-hint{margin-top:12px;font-size:13px;color:var(--muted)}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 18px 16px;position:relative}
+  .card.cur{border-top:3px solid var(--gray-line)}
+  .card.p1{border-top:3px solid var(--red)}
+  .card.p2{border-top:3px solid var(--blue)}
+  .card .name{font-size:13px;color:var(--muted);font-weight:600}
+  .card .price{font-size:40px;font-weight:800;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
+  .card .price .u{font-size:18px;font-weight:600;color:var(--muted);margin-left:2px}
+  .card.cur .price{color:var(--gray)}
+  .card.p1 .price{color:var(--red)}
+  .card.p2 .price{color:var(--blue)}
+  .card .delta{margin-top:8px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+  .card .delta.up{color:var(--red)} .card .delta.eq{color:var(--muted)}
+  .card .note{font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+
+  .chartbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
+  .legend{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink);margin-bottom:14px}
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .legend .sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+  .sw.cur{background:var(--gray)} .sw.p1{background:var(--red)} .sw.p2{background:var(--blue)}
+  svg{width:100%;height:auto;display:block}
+  .grid line{stroke:var(--line);stroke-width:1}
+  .axis text{font-size:11px;fill:var(--muted)}
+  .crosshair{stroke:#bbb;stroke-dasharray:4 3;stroke-width:1}
+  .dot{stroke:#fff;stroke-width:2}
+
+  .costbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
+  .cost-inputs{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  .cost-inputs label{font-size:14px;color:var(--muted)}
+  .cost-inputs input[type=number]{width:72px;font-size:16px;font-weight:700;font-family:var(--mono);text-align:center;
+    border:1px solid var(--border);border-radius:8px;padding:6px 4px}
+  .toggle{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;user-select:none;color:var(--ink)}
+  .toggle input{accent-color:var(--red);width:16px;height:16px}
+  table.cost{width:100%;border-collapse:collapse;margin-top:18px;font-variant-numeric:tabular-nums}
+  table.cost th,table.cost td{padding:10px 12px;text-align:right;font-size:14px}
+  table.cost th{font-weight:600;color:var(--muted);border-bottom:2px solid var(--border);font-size:13px;white-space:nowrap}
+  table.cost td{border-bottom:1px solid var(--line)}
+  table.cost th:first-child,table.cost td:first-child{text-align:left}
+  table.cost tr.best td{background:var(--red-bg)}
+  table.cost tr.best td:first-child{font-weight:700}
+  .badge{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
+  .hint{font-size:12.5px;color:var(--muted);margin-top:12px}
+
+  .s2s{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
+  .s2s-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
+  .s2s-field{display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px}
+  .s2s-field label{font-size:13px;color:var(--muted);font-weight:600}
+  .s2s-field select{font:inherit;font-size:15px;padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--ink)}
+  .swap-btn{font:inherit;font-size:14px;font-weight:600;padding:9px 14px;border:1px solid var(--border);
+    border-radius:9px;background:#fff;cursor:pointer;color:var(--ink);white-space:nowrap}
+  .swap-btn:hover{background:var(--gray-bg)}
+  .s2s-presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+  .s2s-presets button{font:inherit;font-size:12.5px;color:var(--ink);background:#fff;border:1px solid var(--border);
+    border-radius:18px;padding:4px 12px;cursor:pointer}
+  .s2s-presets button:hover{background:var(--blue-bg);border-color:var(--blue-line)}
+
+  .route-result{margin-top:18px}
+  .route-summary{display:flex;gap:22px;flex-wrap:wrap;font-size:14px;padding:14px 16px;background:var(--gray-bg);border-radius:10px}
+  .route-summary .k{color:var(--muted);font-size:12.5px}
+  .route-summary .v{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+  .route-lines{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+  .route-seg{display:flex;align-items:center;gap:10px;font-size:14px}
+  .line-chip{color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:6px;white-space:nowrap}
+  .route-seg .path-txt{color:var(--muted);font-size:13.5px}
+  .route-stations{margin-top:14px;font-size:13px;color:var(--muted)}
+  .route-stations .st{display:inline-block;margin:2px 4px 2px 0}
+  .route-stations .st.hl{color:var(--red);font-weight:700}
+  .no-route{margin-top:16px;color:var(--red);font-weight:600}
+
+  .foot{margin-top:36px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+  .foot p{margin-bottom:4px}
+
+  @media(max-width:640px){
+    .cards{grid-template-columns:1fr}
+    .card .price{font-size:34px}
+    header h1{font-size:22px}
+    .s2s-field{min-width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>上海地铁票价对比</h1>
+    <div class="sub">现状（2005 年）vs 听证方案一 vs 听证方案二 · 支持按乘距或按站到站两种对比</div>
+    <div class="src">
+      票价数据：《优化上海市轨道交通票价机制听证方案》（上海市发改委，2026-08-19）。
+      站间距数据：中文维基百科各线路词条（官方设计/环评资料，米级）。
+      不含磁浮线、金山铁路、市域机场线。
+    </div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="dist">按乘距对比</button>
+    <button class="tab" data-tab="s2s">站到站对比</button>
+  </div>
+
+  <!-- Tab 1: 按乘距 -->
+  <div class="panel active" id="panel-dist">
+    <section>
+      <div class="control">
+        <div class="slider-row">
+          <span class="km-label">乘距</span>
+          <input type="range" id="kmRange" min="1" max="130" value="16" step="1">
+          <div class="km-input">
+            <input type="number" id="kmNum" min="1" max="200" value="16">
+            <span class="unit">公里</span>
+          </div>
+        </div>
+        <div class="presets">
+          <button data-km="4">短途 4km</button>
+          <button data-km="16">平均乘距 16km</button>
+          <button data-km="30">中长 30km</button>
+          <button data-km="50">长 50km</button>
+          <button data-km="80">超长 80km</button>
+        </div>
+        <div class="avg-hint">2025 年全市平均乘距 <b>16.45</b> 公里 · 平均每人次票价 4.23 元</div>
+      </div>
+      <div class="cards" id="cards"></div>
+    </section>
+
+    <section>
+      <h2>全乘距票价曲线 <span class="tag">阶梯图</span></h2>
+      <div class="chartbox">
+        <div class="legend">
+          <span><i class="sw cur"></i>现状（2005）</span>
+          <span><i class="sw p1"></i>方案一</span>
+          <span><i class="sw p2"></i>方案二</span>
+        </div>
+        <svg id="chart" viewBox="0 0 920 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="票价阶梯图"></svg>
+      </div>
+    </section>
+
+    <section>
+      <h2>月度通勤成本估算 <span class="tag">含计次票</span></h2>
+      <div class="costbox">
+        <div class="cost-inputs">
+          <label for="rides">每月乘坐次数</label>
+          <input type="number" id="rides" min="1" max="200" value="44">
+          <span class="km-label">次/月（按上方乘距）</span>
+          <label class="toggle"><input type="checkbox" id="discount" checked> 计入满 100 元后 9 折</label>
+        </div>
+        <div id="costTable"></div>
+        <div class="hint">计次票为 30 天内固定次数（45/60/90 次），与单程票价互斥；满额优惠仅适用于刷码/刷卡的单程付费。</div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Tab 2: 站到站 -->
+  <div class="panel" id="panel-s2s">
+    <section>
+      <div class="s2s">
+        <div class="s2s-row">
+          <div class="s2s-field">
+            <label for="fromSel">起点站</label>
+            <select id="fromSel"></select>
+          </div>
+          <button class="swap-btn" id="swapBtn" title="交换起终点">⇄ 交换</button>
+          <div class="s2s-field">
+            <label for="toSel">终点站</label>
+            <select id="toSel"></select>
+          </div>
+        </div>
+        <div class="s2s-presets" id="s2sPresets">
+          <button data-pair="人民广场,徐家汇">人民广场 → 徐家汇</button>
+          <button data-pair="上海南站,虹桥火车站">上海南站 → 虹桥火车站</button>
+          <button data-pair="人民广场,迪士尼">人民广场 → 迪士尼</button>
+          <button data-pair="徐家汇,陆家嘴">徐家汇 → 陆家嘴</button>
+          <button data-pair="莘庄,富锦路">莘庄 → 富锦路</button>
+        </div>
+        <div class="route-result" id="routeResult"></div>
+      </div>
+    </section>
+  </div>
+
+  <div class="foot">
+    <p>票价公式（基准价）：现状 0-6km 3 元，之后每 10km +1；方案一 0-4km 3 元，之后 4/4/4/7/7/7/10/10/10km，67km 以上每 15km +1；方案二 0-6km 4 元，之后 6/8/8/10/10/12/12km，72km 以上每 14km +1。</p>
+    <p>平均影响：方案一 +23.3%（4.23→5.22 元），方案二 +22.9%（4.23→5.20 元）。</p>
+    <p>站到站里程按线网<b>最短路径里程</b>计价（换乘不计里程），站间距来自维基百科各线路词条，为官方设计/环评数据的米级精度。本页为自行整理的对比工具，非官方页面。</p>
+  </div>
+
+</div>
+
+<script>
+/* ============ 地铁数据 ============ */
+const METRO_DATA = __METRO_DATA__;
+
+/* 线路颜色 */
+const LINE_COLORS = {'1号线':'#e6002b','2号线':'#00a8e0','3号线':'#f4d000','4号线':'#5b2c83','5号线':'#a066ba','6号线':'#d40068','7号线':'#f39200','8号线':'#00a0e9','9号线':'#7ac043','10号线':'#c9a0dc','11号线':'#841c21','12号线':'#007c69','13号线':'#ef82a0','14号线':'#8f6f47','15号线':'#b5a06a','16号线':'#2dd4bf','17号线':'#bc796c','18号线':'#c49857','浦江线':'#808080'};
+const LINE_ORDER = ['1号线','2号线','3号线','4号线','5号线','6号线','7号线','8号线','9号线','10号线','11号线','12号线','13号线','14号线','15号线','16号线','17号线','18号线','浦江线'];
+
+/* ============ 票价函数 ============ */
+function fareCurrent(d){ if(d<=6) return 3; return 3 + Math.ceil((d-6)/10); }
+function farePlan1(d){
+  var steps=[4,4,4,7,7,7,10,10,10], price=3, km=4;
+  for(var i=0;i<steps.length;i++){ if(d<=km) return price; km+=steps[i]; price+=1; }
+  if(d<=67) return price;
+  return price + Math.ceil((d-67)/15);
+}
+function farePlan2(d){
+  var steps=[6,8,8,10,10,12,12], price=4, km=6;
+  for(var i=0;i<steps.length;i++){ if(d<=km) return price; km+=steps[i]; price+=1; }
+  if(d<=72) return price;
+  return price + Math.ceil((d-72)/14);
+}
+const FARES = [
+  {key:'cur', name:'现状（2005）', fn:fareCurrent, color:'#7d7d7d'},
+  {key:'p1',  name:'方案一',      fn:farePlan1,  color:'#c8102e'},
+  {key:'p2',  name:'方案二',      fn:farePlan2,  color:'#1668a3'}
+];
+
+/* ============ Tab 切换 ============ */
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active', x.dataset.tab===name);});
+  document.querySelectorAll('.panel').forEach(function(x){x.classList.toggle('active', x.id==='panel-'+name);});
+}
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){ switchTab(t.dataset.tab); });
+});
+if(location.hash === '#s2s'){ switchTab('s2s'); }
+
+/* ============ Tab1: 按乘距 ============ */
+(function(){
+  var range = document.getElementById('kmRange');
+  var num = document.getElementById('kmNum');
+  var cards = document.getElementById('cards');
+  var svg = document.getElementById('chart');
+  var ridesInput = document.getElementById('rides');
+  var discInput = document.getElementById('discount');
+  var costTable = document.getElementById('costTable');
+
+  function getKm(){ var v = parseFloat(num.value); return (isNaN(v)||v<1)?1:Math.min(v,200); }
+
+  function renderCards(){
+    var d = getKm();
+    var cur = fareCurrent(d);
+    var html = '';
+    FARES.forEach(function(f){
+      var p = f.fn(d);
+      var cls = f.key==='cur'?'cur':(f.key==='p1'?'p1':'p2');
+      var deltaTxt, deltaCls, note;
+      if(f.key==='cur'){
+        deltaTxt = '基准'; deltaCls = 'eq'; note = '0-6km 起步 3 元，每 10km +1';
+      } else {
+        var diff = p - cur;
+        deltaTxt = diff===0 ? '与现状相同' : ('比现状 ' + (diff>0?'+':'') + diff + ' 元');
+        deltaCls = diff===0 ? 'eq' : 'up';
+        note = f.key==='p1' ? '起步 3 元不变，缩短起乘/中短距间距' : '起步 4 元，均摊涨幅';
+      }
+      html += '<div class="card '+cls+'">'
+            + '<div class="name">'+f.name+'</div>'
+            + '<div class="price">'+p+'<span class="u">元</span></div>'
+            + '<div class="delta '+deltaCls+'">'+deltaTxt+'</div>'
+            + '<div class="note">'+note+'</div>'
+            + '</div>';
+    });
+    cards.innerHTML = html;
+  }
+
+  function renderChart(){
+    var W=920, H=360, L=44, R=16, T=18, B=40;
+    var xMin=0, xMax=130, yMin=0, yMax=16;
+    function sx(x){ return L + (x-xMin)/(xMax-xMin)*(W-L-R); }
+    function sy(y){ return H-B - (y-yMin)/(yMax-yMin)*(H-T-B); }
+    var out = '';
+    [0,2,4,6,8,10,12,14,16].forEach(function(y){
+      out += '<line class="grid" x1="'+sx(xMin)+'" y1="'+sy(y)+'" x2="'+sx(xMax)+'" y2="'+sy(y)+'"/>';
+      out += '<text class="axis" x="'+(L-8)+'" y="'+(sy(y)+4)+'" text-anchor="end">'+y+'</text>';
+    });
+    [0,20,40,60,80,100,120].forEach(function(x){
+      out += '<line class="grid" x1="'+sx(x)+'" y1="'+sy(yMin)+'" x2="'+sx(x)+'" y2="'+sy(yMax)+'"/>';
+      out += '<text class="axis" x="'+sx(x)+'" y="'+(H-B+18)+'" text-anchor="middle">'+x+'</text>';
+    });
+    out += '<text class="axis" x="'+sx(xMax)+'" y="'+(H-B+18)+'" text-anchor="end">公里</text>';
+    out += '<text class="axis" x="'+(L-6)+'" y="'+(T-6)+'" text-anchor="end">元</text>';
+    FARES.forEach(function(f){
+      var pts=[];
+      for(var x=1; x<=xMax; x++){ pts.push([x, f.fn(x)]); }
+      var d='M '+sx(pts[0][0])+' '+sy(pts[0][1]);
+      for(var i=1;i<pts.length;i++){
+        d += ' L '+sx(pts[i][0])+' '+sy(pts[i-1][1]);
+        d += ' L '+sx(pts[i][0])+' '+sy(pts[i][1]);
+      }
+      out += '<path d="'+d+'" fill="none" stroke="'+f.color+'" stroke-width="2.2" stroke-linejoin="round"/>';
+    });
+    var km = getKm();
+    out += '<line class="crosshair" x1="'+sx(km)+'" y1="'+sy(yMin)+'" x2="'+sx(km)+'" y2="'+sy(yMax)+'"/>';
+    FARES.forEach(function(f){
+      var y=f.fn(km);
+      out += '<circle class="dot" cx="'+sx(km)+'" cy="'+sy(y)+'" r="4.5" fill="'+f.color+'"/>';
+    });
+    svg.innerHTML = out;
+  }
+
+  function renderCost(){
+    var d = getKm();
+    var rides = parseInt(ridesInput.value,10)||0;
+    if(rides<1) rides=1;
+    var useDisc = discInput.checked;
+    var rows = [];
+    FARES.forEach(function(f){
+      var per = f.fn(d);
+      var total = per * rides;
+      if(useDisc && total>100){ total = 100 + (total-100)*0.9; }
+      rows.push({label:f.name+'（单程）', detail:per+' 元/次', cost:total, key:f.key});
+    });
+    [{n:45,c:210},{n:60,c:270},{n:90,c:390}].forEach(function(t){
+      var cover = rides<=t.n;
+      rows.push({label:'计次票 '+t.n+' 次', detail:t.c+' 元/30天', cost: cover?t.c:null, key:'pass'});
+    });
+    // 最低标记：只在新方案（方案一/方案二）和计次票之间比，排除现状
+    var bestIdx = -1;
+    for(var i=1;i<rows.length;i++){
+      if(rows[i].cost===null) continue;
+      if(bestIdx<0 || rows[i].cost < rows[bestIdx].cost) bestIdx=i;
+    }
+    var html = '<table class="cost"><thead><tr>'
+      + '<th>方案</th><th>单价</th><th>月成本</th><th>对比最低</th></tr></thead><tbody>';
+    rows.forEach(function(r,i){
+      var bestCls = (i===bestIdx) ? ' class="best"' : '';
+      var costStr = r.cost===null ? '次数不足' : ('¥ '+r.cost.toFixed(1));
+      var diffStr = '';
+      if(r.cost!==null){
+        if(i===bestIdx){ diffStr = '最低'; }
+        else {
+          var diff = r.cost - rows[bestIdx].cost;
+          if(diff >= 0){ diffStr = '+¥ '+diff.toFixed(1); }
+          else { diffStr = '−¥ '+Math.abs(diff).toFixed(1); }
+          if(i===0){ diffStr += '（现状，不参与评比）'; }
+        }
+      }
+      html += '<tr'+bestCls+'><td>'+r.label+(i===bestIdx?'<span class="badge">最低</span>':'')+'</td>'
+        + '<td>'+r.detail+'</td><td>'+costStr+'</td><td>'+diffStr+'</td></tr>';
+    });
+    html += '</tbody></table>';
+    costTable.innerHTML = html;
+  }
+
+  function syncRange(){
+    var v = getKm();
+    range.value = Math.round(v);
+    num.value = Math.round(v);
+    renderCards(); renderChart(); renderCost();
+  }
+  range.addEventListener('input', function(){ num.value = range.value; syncRange(); });
+  num.addEventListener('input', function(){ if(parseFloat(num.value)>130) range.max=Math.ceil(Math.max(130,parseFloat(num.value))); syncRange(); });
+  document.querySelectorAll('.presets button').forEach(function(b){
+    b.addEventListener('click', function(){ num.value = b.getAttribute('data-km'); syncRange(); });
+  });
+  ridesInput.addEventListener('input', renderCost);
+  discInput.addEventListener('change', renderCost);
+  syncRange();
+})();
+
+/* ============ Tab2: 站到站 ============ */
+(function(){
+  // 构建图（里程权重）
+  var graph = {};
+  METRO_DATA.edges.forEach(function(e){
+    (graph[e.a] = graph[e.a]||{})[e.b] = {d:e.d, l:e.l};
+    (graph[e.b] = graph[e.b]||{})[e.a] = {d:e.d, l:e.l};
+  });
+
+  var fromSel = document.getElementById('fromSel');
+  var toSel = document.getElementById('toSel');
+
+  // 按线路分组填充下拉
+  function fillSelect(sel){
+    var html = '';
+    LINE_ORDER.forEach(function(ln){
+      var names = Object.keys(METRO_DATA.stations).filter(function(n){
+        return METRO_DATA.stations[n].indexOf(ln) >= 0;
+      });
+      if(!names.length) return;
+      html += '<optgroup label="'+ln+'">';
+      names.forEach(function(n){ html += '<option value="'+n+'">'+n+'</option>'; });
+      html += '</optgroup>';
+    });
+    sel.innerHTML = html;
+  }
+  fillSelect(fromSel);
+  fillSelect(toSel);
+  fromSel.value = '人民广场';
+  toSel.value = '徐家汇';
+
+  function dijkstra(src){
+    var dist = {}; dist[src] = 0;
+    var prev = {};
+    var pq = [[0, src]];
+    while(pq.length){
+      pq.sort(function(x,y){return x[0]-y[0];});
+      var top = pq.shift(); var d = top[0], u = top[1];
+      if(d > (dist[u]===undefined?Infinity:dist[u])) continue;
+      var nbrs = graph[u]||{};
+      for(var v in nbrs){
+        var nd = d + nbrs[v].d;
+        if(nd < (dist[v]===undefined?Infinity:dist[v])){
+          dist[v] = nd; prev[v] = u; pq.push([nd, v]);
+        }
+      }
+    }
+    return {dist:dist, prev:prev};
+  }
+
+  function renderRoute(){
+    var fromName = fromSel.value, toName = toSel.value;
+    var box = document.getElementById('routeResult');
+    if(!graph[fromName] || !graph[toName]){
+      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; return;
+    }
+    var r = dijkstra(fromName);
+    if(!(toName in r.dist)){
+      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; return;
+    }
+    // 重建路径
+    var path = []; var cur = toName;
+    while(cur){ path.push(cur); cur = r.prev[cur]; }
+    path.reverse();
+    var km = r.dist[toName] / 1000;
+
+    // 线路分段
+    var segs = [];
+    var curLine = null, segStart = path[0];
+    for(var i=0;i<path.length-1;i++){
+      var e = graph[path[i]][path[i+1]];
+      if(e.l !== curLine){
+        if(curLine) segs.push({line:curLine, from:segStart, to:path[i]});
+        curLine = e.l; segStart = path[i];
+      }
+    }
+    if(curLine) segs.push({line:curLine, from:segStart, to:path[path.length-1]});
+    var transfers = segs.length - 1;
+
+    var html = '<div class="route-summary">'
+      + '<div><div class="k">里程（最短路径）</div><div class="v">'+km.toFixed(2)+' 公里</div></div>'
+      + '<div><div class="k">途经</div><div class="v">'+(path.length)+' 站</div></div>'
+      + '<div><div class="k">换乘</div><div class="v">'+(transfers>0?transfers+' 次':'直达')+'</div></div>'
+      + '</div>';
+
+    html += '<div class="route-lines">';
+    segs.forEach(function(seg){
+      var color = LINE_COLORS[seg.line] || '#888';
+      html += '<div class="route-seg">'
+        + '<span class="line-chip" style="background:'+color+'">'+seg.line+'</span>'
+        + '<span class="path-txt">'+seg.from+' → '+seg.to+'</span>'
+        + '</div>';
+    });
+    html += '</div>';
+
+    // 沿途站
+    var compact = [];
+    path.forEach(function(n){
+      if(compact.length===0 || compact[compact.length-1] !== n) compact.push(n);
+    });
+    html += '<div class="route-stations">沿途：';
+    compact.forEach(function(n, idx){
+      var hl = (idx===0 || idx===compact.length-1) ? ' class="st hl"' : ' class="st"';
+      html += '<span'+hl+'>'+n+'</span>' + (idx<compact.length-1 ? '<span class="st">→</span>' : '');
+    });
+    html += '</div>';
+
+    // 三方案票价卡
+    var curFare = fareCurrent(km);
+    html += '<div class="cards" style="margin-top:18px">';
+    FARES.forEach(function(f){
+      var p = f.fn(km);
+      var cls = f.key==='cur'?'cur':(f.key==='p1'?'p1':'p2');
+      var deltaTxt, deltaCls;
+      if(f.key==='cur'){ deltaTxt='基准'; deltaCls='eq'; }
+      else {
+        var diff = p - curFare;
+        deltaTxt = diff===0 ? '与现状相同' : ('比现状 '+(diff>0?'+':'')+diff+' 元');
+        deltaCls = diff===0 ? 'eq' : 'up';
+      }
+      html += '<div class="card '+cls+'">'
+        + '<div class="name">'+f.name+'</div>'
+        + '<div class="price">'+p+'<span class="u">元</span></div>'
+        + '<div class="delta '+deltaCls+'">'+deltaTxt+'</div>'
+        + '</div>';
+    });
+    html += '</div>';
+
+    box.innerHTML = html;
+  }
+
+  fromSel.addEventListener('change', renderRoute);
+  toSel.addEventListener('change', renderRoute);
+  document.getElementById('swapBtn').addEventListener('click', function(){
+    var t = fromSel.value; fromSel.value = toSel.value; toSel.value = t;
+    renderRoute();
+  });
+  document.querySelectorAll('#s2sPresets button').forEach(function(b){
+    b.addEventListener('click', function(){
+      var pair = b.getAttribute('data-pair').split(',');
+      fromSel.value = pair[0]; toSel.value = pair[1];
+      renderRoute();
+    });
+  });
+
+  renderRoute();
+})();
+</script>
+</body>
+</html>
