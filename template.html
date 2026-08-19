@@ -92,12 +92,27 @@
   .hint{font-size:12.5px;color:var(--muted);margin-top:12px}
 
   .s2s{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
-  .s2s-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}
-  .s2s-field{display:flex;flex-direction:column;gap:6px;flex:1;min-width:220px}
-  .s2s-field label{font-size:13px;color:var(--muted);font-weight:600}
-  .s2s-field select{font:inherit;font-size:15px;padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--ink)}
-  .swap-btn{font:inherit;font-size:14px;font-weight:600;padding:9px 14px;border:1px solid var(--border);
-    border-radius:9px;background:#fff;cursor:pointer;color:var(--ink);white-space:nowrap}
+  .s2s-grid{display:flex;gap:14px;align-items:stretch;flex-wrap:wrap}
+  .s2s-endpoint{flex:1;min-width:260px;display:flex;flex-direction:column;gap:8px}
+  .ep-title{font-size:13px;color:var(--muted);font-weight:600}
+  .ep-search{position:relative}
+  .ep-search input{width:100%;font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--border);
+    border-radius:9px;background:#fff;color:var(--ink)}
+  .ep-search input:focus{outline:none;border-color:var(--red-line)}
+  .suggest{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);
+    border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.10);z-index:30;max-height:280px;overflow-y:auto;display:none}
+  .suggest.open{display:block}
+  .suggest .sg-item{padding:9px 13px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .suggest .sg-item:hover,.suggest .sg-item.hover{background:var(--red-bg)}
+  .suggest .sg-item .py{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+  .suggest .sg-item .ln-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .suggest .sg-empty{padding:10px 13px;font-size:13px;color:var(--muted)}
+  .ep-selects{display:flex;gap:8px}
+  .ep-selects select{font:inherit;font-size:14px;padding:8px 8px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--ink)}
+  .ep-selects select:first-child{width:108px;flex:none}
+  .ep-selects select:last-child{flex:1;min-width:0}
+  .swap-btn{font:inherit;font-size:17px;font-weight:600;padding:0 14px;border:1px solid var(--border);
+    border-radius:9px;background:#fff;cursor:pointer;color:var(--ink);align-self:center}
   .swap-btn:hover{background:var(--gray-bg)}
   .s2s-presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
   .s2s-presets button{font:inherit;font-size:12.5px;color:var(--ink);background:#fff;border:1px solid var(--border);
@@ -119,6 +134,11 @@
 
   .foot{margin-top:36px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
   .foot p{margin-bottom:4px}
+  .foot a{color:var(--muted)}
+  .foot .copyright{margin-top:12px;font-size:12.5px}
+  .foot .copyright a{color:var(--red);text-decoration:none;font-weight:600}
+  .foot .copyright a:hover{text-decoration:underline}
+  .src a{color:var(--red)}
 
   @media(max-width:640px){
     .cards{grid-template-columns:1fr}
@@ -135,7 +155,7 @@
     <h1>上海地铁票价对比</h1>
     <div class="sub">现状（2005 年）vs 听证方案一 vs 听证方案二 · 支持按乘距或按站到站两种对比</div>
     <div class="src">
-      票价数据：《优化上海市轨道交通票价机制听证方案》（上海市发改委，2026-08-19）。
+      票价数据：<a href="https://fgw.sh.gov.cn/cmsres/24/2480505af8bb4b50bfa75092e12fe6af/535b6d58b1fd807bb0b9a2b92ecd078e.wps" target="_blank" rel="noopener">《优化上海市轨道交通票价机制听证方案》</a>（上海市发改委，2026-08-19）。
       站间距数据：中文维基百科各线路词条（官方设计/环评资料，米级）。
       不含磁浮线、金山铁路、市域机场线。
     </div>
@@ -201,15 +221,29 @@
   <div class="panel" id="panel-s2s">
     <section>
       <div class="s2s">
-        <div class="s2s-row">
-          <div class="s2s-field">
-            <label for="fromSel">起点站</label>
-            <select id="fromSel"></select>
+        <div class="s2s-grid">
+          <div class="s2s-endpoint">
+            <div class="ep-title">起点站</div>
+            <div class="ep-search">
+              <input type="text" id="fromSearch" placeholder="搜索：汉字 / 拼音 / 首字母，如 xjh" autocomplete="off">
+              <div class="suggest" id="fromSuggest"></div>
+            </div>
+            <div class="ep-selects">
+              <select id="fromLine" aria-label="起点线路"></select>
+              <select id="fromSel" aria-label="起点站点"></select>
+            </div>
           </div>
-          <button class="swap-btn" id="swapBtn" title="交换起终点">⇄ 交换</button>
-          <div class="s2s-field">
-            <label for="toSel">终点站</label>
-            <select id="toSel"></select>
+          <button class="swap-btn" id="swapBtn" title="交换起终点">⇄</button>
+          <div class="s2s-endpoint">
+            <div class="ep-title">终点站</div>
+            <div class="ep-search">
+              <input type="text" id="toSearch" placeholder="搜索：汉字 / 拼音 / 首字母，如 rmgc" autocomplete="off">
+              <div class="suggest" id="toSuggest"></div>
+            </div>
+            <div class="ep-selects">
+              <select id="toLine" aria-label="终点线路"></select>
+              <select id="toSel" aria-label="终点站点"></select>
+            </div>
           </div>
         </div>
         <div class="s2s-presets" id="s2sPresets">
@@ -222,12 +256,27 @@
         <div class="route-result" id="routeResult"></div>
       </div>
     </section>
+
+    <section>
+      <h2>月度通勤成本估算 <span class="tag">按此站对</span></h2>
+      <div class="costbox">
+        <div class="cost-inputs">
+          <label for="ridesS2s">每月乘坐次数</label>
+          <input type="number" id="ridesS2s" min="1" max="200" value="44">
+          <span class="km-label">次/月</span>
+          <label class="toggle"><input type="checkbox" id="discountS2s" checked> 计入满 100 元后 9 折</label>
+        </div>
+        <div id="costTableS2s"></div>
+        <div class="hint">计次票为 30 天内固定次数（45/60/90 次），与单程票价互斥；满额优惠仅适用于刷码/刷卡的单程付费。「最低」在方案一/二与计次票中评比，现状仅作参照。</div>
+      </div>
+    </section>
   </div>
 
   <div class="foot">
     <p>票价公式（基准价）：现状 0-6km 3 元，之后每 10km +1；方案一 0-4km 3 元，之后 4/4/4/7/7/7/10/10/10km，67km 以上每 15km +1；方案二 0-6km 4 元，之后 6/8/8/10/10/12/12km，72km 以上每 14km +1。</p>
     <p>平均影响：方案一 +23.3%（4.23→5.22 元），方案二 +22.9%（4.23→5.20 元）。</p>
     <p>站到站里程按线网<b>最短路径里程</b>计价（换乘不计里程），站间距来自维基百科各线路词条，为官方设计/环评数据的米级精度。本页为自行整理的对比工具，非官方页面。</p>
+    <p class="copyright">© 2026 <a href="https://miaotony.xyz" target="_blank" rel="noopener">MiaoTony</a> · metrochan</p>
   </div>
 
 </div>
@@ -269,6 +318,47 @@ document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click', function(){ switchTab(t.dataset.tab); });
 });
 if(location.hash === '#s2s'){ switchTab('s2s'); }
+
+/* ============ 共用：月成本表 ============ */
+function renderCostTable(container, km, rides, useDisc){
+  var rows = [];
+  FARES.forEach(function(f){
+    var per = f.fn(km);
+    var total = per * rides;
+    if(useDisc && total>100){ total = 100 + (total-100)*0.9; }
+    rows.push({label:f.name+'（单程）', detail:per+' 元/次', cost:total});
+  });
+  [{n:45,c:210},{n:60,c:270},{n:90,c:390}].forEach(function(t){
+    var cover = rides<=t.n;
+    rows.push({label:'计次票 '+t.n+' 次', detail:t.c+' 元/30天', cost: cover?t.c:null});
+  });
+  // 最低：只在新方案（方案一/方案二）和计次票之间比，排除现状
+  var bestIdx = -1;
+  for(var i=1;i<rows.length;i++){
+    if(rows[i].cost===null) continue;
+    if(bestIdx<0 || rows[i].cost < rows[bestIdx].cost) bestIdx=i;
+  }
+  var html = '<table class="cost"><thead><tr>'
+    + '<th>方案</th><th>单价</th><th>月成本</th><th>对比最低</th></tr></thead><tbody>';
+  rows.forEach(function(r,i){
+    var bestCls = (i===bestIdx) ? ' class="best"' : '';
+    var costStr = r.cost===null ? '次数不足' : ('¥ '+r.cost.toFixed(1));
+    var diffStr = '';
+    if(r.cost!==null){
+      if(i===bestIdx){ diffStr = '最低'; }
+      else {
+        var diff = r.cost - rows[bestIdx].cost;
+        if(diff >= 0){ diffStr = '+¥ '+diff.toFixed(1); }
+        else { diffStr = '−¥ '+Math.abs(diff).toFixed(1); }
+        if(i===0){ diffStr += '（现状，不参与评比）'; }
+      }
+    }
+    html += '<tr'+bestCls+'><td>'+r.label+(i===bestIdx?'<span class="badge">最低</span>':'')+'</td>'
+      + '<td>'+r.detail+'</td><td>'+costStr+'</td><td>'+diffStr+'</td></tr>';
+  });
+  html += '</tbody></table>';
+  container.innerHTML = html;
+}
 
 /* ============ Tab1: 按乘距 ============ */
 (function(){
@@ -347,44 +437,7 @@ if(location.hash === '#s2s'){ switchTab('s2s'); }
     var d = getKm();
     var rides = parseInt(ridesInput.value,10)||0;
     if(rides<1) rides=1;
-    var useDisc = discInput.checked;
-    var rows = [];
-    FARES.forEach(function(f){
-      var per = f.fn(d);
-      var total = per * rides;
-      if(useDisc && total>100){ total = 100 + (total-100)*0.9; }
-      rows.push({label:f.name+'（单程）', detail:per+' 元/次', cost:total, key:f.key});
-    });
-    [{n:45,c:210},{n:60,c:270},{n:90,c:390}].forEach(function(t){
-      var cover = rides<=t.n;
-      rows.push({label:'计次票 '+t.n+' 次', detail:t.c+' 元/30天', cost: cover?t.c:null, key:'pass'});
-    });
-    // 最低标记：只在新方案（方案一/方案二）和计次票之间比，排除现状
-    var bestIdx = -1;
-    for(var i=1;i<rows.length;i++){
-      if(rows[i].cost===null) continue;
-      if(bestIdx<0 || rows[i].cost < rows[bestIdx].cost) bestIdx=i;
-    }
-    var html = '<table class="cost"><thead><tr>'
-      + '<th>方案</th><th>单价</th><th>月成本</th><th>对比最低</th></tr></thead><tbody>';
-    rows.forEach(function(r,i){
-      var bestCls = (i===bestIdx) ? ' class="best"' : '';
-      var costStr = r.cost===null ? '次数不足' : ('¥ '+r.cost.toFixed(1));
-      var diffStr = '';
-      if(r.cost!==null){
-        if(i===bestIdx){ diffStr = '最低'; }
-        else {
-          var diff = r.cost - rows[bestIdx].cost;
-          if(diff >= 0){ diffStr = '+¥ '+diff.toFixed(1); }
-          else { diffStr = '−¥ '+Math.abs(diff).toFixed(1); }
-          if(i===0){ diffStr += '（现状，不参与评比）'; }
-        }
-      }
-      html += '<tr'+bestCls+'><td>'+r.label+(i===bestIdx?'<span class="badge">最低</span>':'')+'</td>'
-        + '<td>'+r.detail+'</td><td>'+costStr+'</td><td>'+diffStr+'</td></tr>';
-    });
-    html += '</tbody></table>';
-    costTable.innerHTML = html;
+    renderCostTable(costTable, d, rides, discInput.checked);
   }
 
   function syncRange(){
@@ -411,28 +464,120 @@ if(location.hash === '#s2s'){ switchTab('s2s'); }
     (graph[e.a] = graph[e.a]||{})[e.b] = {d:e.d, l:e.l};
     (graph[e.b] = graph[e.b]||{})[e.a] = {d:e.d, l:e.l};
   });
+  var LINE_LIST = LINE_ORDER.filter(function(ln){ return METRO_DATA.lines[ln] && METRO_DATA.lines[ln].length; });
 
-  var fromSel = document.getElementById('fromSel');
-  var toSel = document.getElementById('toSel');
+  /* ---- 每端一个复合选择器：线路下拉 + 站点下拉（按线路站序）+ 拼音搜索 ---- */
+  function Endpoint(prefix, defLine, defStation){
+    var lineSel = document.getElementById(prefix+'Line');
+    var staSel = document.getElementById(prefix+'Sel');
+    var search = document.getElementById(prefix+'Search');
+    var suggest = document.getElementById(prefix+'Suggest');
+    var self = {onchange:null};
 
-  // 按线路分组填充下拉
-  function fillSelect(sel){
-    var html = '';
-    LINE_ORDER.forEach(function(ln){
-      var names = Object.keys(METRO_DATA.stations).filter(function(n){
-        return METRO_DATA.stations[n].indexOf(ln) >= 0;
-      });
-      if(!names.length) return;
-      html += '<optgroup label="'+ln+'">';
-      names.forEach(function(n){ html += '<option value="'+n+'">'+n+'</option>'; });
-      html += '</optgroup>';
+    lineSel.innerHTML = LINE_LIST.map(function(ln){
+      return '<option value="'+ln+'">'+ln+'</option>';
+    }).join('');
+
+    function fillStations(ln, keep){
+      var names = METRO_DATA.lines[ln] || [];
+      staSel.innerHTML = names.map(function(n){
+        return '<option value="'+n+'">'+n+'</option>';
+      }).join('');
+      if(keep && names.indexOf(keep)>=0) staSel.value = keep;
+    }
+
+    lineSel.addEventListener('change', function(){
+      fillStations(lineSel.value);
+      fire();
     });
-    sel.innerHTML = html;
+    staSel.addEventListener('change', fire);
+
+    function fire(){ if(self.onchange) self.onchange(); }
+
+    /* 拼音/汉字搜索 */
+    var hoverIdx = -1, items = [];
+    function doSearch(q){
+      q = q.trim().toLowerCase();
+      items = []; hoverIdx = -1;
+      if(!q){ suggest.classList.remove('open'); suggest.innerHTML=''; return; }
+      var res = [];
+      for(var name in METRO_DATA.stations){
+        var py = METRO_DATA.py[name] || ['',''];
+        var full = py[0], init = py[1];
+        var score = -1;
+        if(name.indexOf(q) >= 0){ score = name.indexOf(q)===0 ? 0 : 1; }
+        else if(init.indexOf(q) === 0){ score = 2; }
+        else if(full.indexOf(q) === 0){ score = 3; }
+        else if(init.indexOf(q) > 0){ score = 4; }
+        else if(full.indexOf(q) > 0){ score = 5; }
+        if(score >= 0) res.push({name:name, score:score, py:full});
+      }
+      res.sort(function(a,b){ return a.score-b.score || a.name.length-b.name.length || (a.name<b.name?-1:1); });
+      res = res.slice(0, 12);
+      items = res;
+      if(!res.length){
+        suggest.innerHTML = '<div class="sg-empty">没有匹配的车站</div>';
+        suggest.classList.add('open'); return;
+      }
+      suggest.innerHTML = res.map(function(r, i){
+        var dots = (METRO_DATA.stations[r.name]||[]).map(function(ln){
+          return '<span class="ln-dot" style="background:'+(LINE_COLORS[ln]||'#888')+'" title="'+ln+'"></span>';
+        }).join('');
+        return '<div class="sg-item" data-i="'+i+'">'+dots+'<span>'+r.name+'</span><span class="py">'+r.py+'</span></div>';
+      }).join('');
+      suggest.classList.add('open');
+      suggest.querySelectorAll('.sg-item').forEach(function(el){
+        el.addEventListener('mousedown', function(ev){
+          ev.preventDefault();
+          pick(items[parseInt(el.getAttribute('data-i'),10)].name);
+        });
+      });
+    }
+
+    function pick(name){
+      var lines = METRO_DATA.stations[name] || [];
+      // 若当前线路已含该站则不切线，否则切到该站第一条线
+      var ln = lines.indexOf(lineSel.value)>=0 ? lineSel.value : lines[0];
+      lineSel.value = ln;
+      fillStations(ln, name);
+      staSel.value = name;
+      search.value = '';
+      suggest.classList.remove('open');
+      fire();
+    }
+
+    search.addEventListener('input', function(){ doSearch(search.value); });
+    search.addEventListener('keydown', function(ev){
+      if(!suggest.classList.contains('open') || !items.length) return;
+      if(ev.key==='ArrowDown'){ ev.preventDefault(); hoverIdx = Math.min(hoverIdx+1, items.length-1); }
+      else if(ev.key==='ArrowUp'){ ev.preventDefault(); hoverIdx = Math.max(hoverIdx-1, 0); }
+      else if(ev.key==='Enter'){ ev.preventDefault(); pick(items[hoverIdx<0?0:hoverIdx].name); return; }
+      else if(ev.key==='Escape'){ suggest.classList.remove('open'); return; }
+      else return;
+      suggest.querySelectorAll('.sg-item').forEach(function(el,i){
+        el.classList.toggle('hover', i===hoverIdx);
+      });
+    });
+    search.addEventListener('blur', function(){
+      setTimeout(function(){ suggest.classList.remove('open'); }, 150);
+    });
+
+    self.get = function(){ return staSel.value; };
+    self.set = function(name){ pick(name); };
+    // init
+    lineSel.value = defLine;
+    fillStations(defLine, defStation);
+    staSel.value = defStation;
+    return self;
   }
-  fillSelect(fromSel);
-  fillSelect(toSel);
-  fromSel.value = '人民广场';
-  toSel.value = '徐家汇';
+
+  var epFrom = Endpoint('from', '1号线', '人民广场');
+  var epTo = Endpoint('to', '1号线', '徐家汇');
+
+  var ridesS2s = document.getElementById('ridesS2s');
+  var discS2s = document.getElementById('discountS2s');
+  var costTableS2s = document.getElementById('costTableS2s');
+  var lastKm = null;
 
   function dijkstra(src){
     var dist = {}; dist[src] = 0;
@@ -453,21 +598,32 @@ if(location.hash === '#s2s'){ switchTab('s2s'); }
     return {dist:dist, prev:prev};
   }
 
+  function renderCostS2s(){
+    if(lastKm===null){ costTableS2s.innerHTML=''; return; }
+    var rides = parseInt(ridesS2s.value,10)||0;
+    if(rides<1) rides=1;
+    renderCostTable(costTableS2s, lastKm, rides, discS2s.checked);
+  }
+
   function renderRoute(){
-    var fromName = fromSel.value, toName = toSel.value;
+    var fromName = epFrom.get(), toName = epTo.get();
     var box = document.getElementById('routeResult');
     if(!graph[fromName] || !graph[toName]){
-      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; return;
+      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; lastKm=null; renderCostS2s(); return;
+    }
+    if(fromName === toName){
+      box.innerHTML = '<div class="no-route">起点和终点相同。</div>'; lastKm=null; renderCostS2s(); return;
     }
     var r = dijkstra(fromName);
     if(!(toName in r.dist)){
-      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; return;
+      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; lastKm=null; renderCostS2s(); return;
     }
     // 重建路径
     var path = []; var cur = toName;
     while(cur){ path.push(cur); cur = r.prev[cur]; }
     path.reverse();
     var km = r.dist[toName] / 1000;
+    lastKm = km;
 
     // 线路分段
     var segs = [];
@@ -499,14 +655,10 @@ if(location.hash === '#s2s'){ switchTab('s2s'); }
     html += '</div>';
 
     // 沿途站
-    var compact = [];
-    path.forEach(function(n){
-      if(compact.length===0 || compact[compact.length-1] !== n) compact.push(n);
-    });
     html += '<div class="route-stations">沿途：';
-    compact.forEach(function(n, idx){
-      var hl = (idx===0 || idx===compact.length-1) ? ' class="st hl"' : ' class="st"';
-      html += '<span'+hl+'>'+n+'</span>' + (idx<compact.length-1 ? '<span class="st">→</span>' : '');
+    path.forEach(function(n, idx){
+      var hl = (idx===0 || idx===path.length-1) ? ' class="st hl"' : ' class="st"';
+      html += '<span'+hl+'>'+n+'</span>' + (idx<path.length-1 ? '<span class="st">→</span>' : '');
     });
     html += '</div>';
 
@@ -532,19 +684,21 @@ if(location.hash === '#s2s'){ switchTab('s2s'); }
     html += '</div>';
 
     box.innerHTML = html;
+    renderCostS2s();
   }
 
-  fromSel.addEventListener('change', renderRoute);
-  toSel.addEventListener('change', renderRoute);
+  epFrom.onchange = renderRoute;
+  epTo.onchange = renderRoute;
+  ridesS2s.addEventListener('input', renderCostS2s);
+  discS2s.addEventListener('change', renderCostS2s);
   document.getElementById('swapBtn').addEventListener('click', function(){
-    var t = fromSel.value; fromSel.value = toSel.value; toSel.value = t;
-    renderRoute();
+    var a = epFrom.get(), b = epTo.get();
+    epFrom.set(b); epTo.set(a);
   });
   document.querySelectorAll('#s2sPresets button').forEach(function(b){
     b.addEventListener('click', function(){
       var pair = b.getAttribute('data-pair').split(',');
-      fromSel.value = pair[0]; toSel.value = pair[1];
-      renderRoute();
+      epFrom.set(pair[0]); epTo.set(pair[1]);
     });
   });
 
