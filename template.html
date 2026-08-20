@@ -154,6 +154,9 @@
   .modal .modal-btn{display:block;width:100%;margin-top:14px;font:inherit;font-size:15px;font-weight:600;
     color:#fff;background:var(--red);border:none;border-radius:10px;padding:11px 0;cursor:pointer}
   .modal .modal-btn:hover{opacity:.92}
+  .modal .modal-check{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);
+    margin-top:14px;cursor:pointer;user-select:none}
+  .modal .modal-check input{accent-color:var(--red);width:15px;height:15px}
   .foot .copyright a{color:var(--red);text-decoration:none;font-weight:600}
   .foot .copyright a:hover{text-decoration:underline}
   .src a{color:var(--red)}
@@ -307,6 +310,7 @@
       <p>本页根据<b>公开站间距数据</b>估算两站间的最短里程并推算票价。上海地铁真实的计价里程算法并未完整公开（可以说是「沪国机密」），估算结果<b>可能与闸机实际扣费存在差异</b>。</p>
       <p>页面展示的路径是<b>计价用的最短里程路径</b>，不是乘车换乘建议。</p>
       <p class="small">一切以上海地铁官方实际计价为准。</p>
+      <label class="modal-check"><input type="checkbox" id="s2sModalDontShow"> 不再提示</label>
       <button class="modal-btn" id="s2sModalOk">我知道了</button>
     </div>
   </div>
@@ -342,18 +346,23 @@ const FARES = [
 ];
 
 /* ============ Tab 切换 ============ */
+var s2sModalWired = false;
 function maybeShowS2sModal(){
   var KEY = 'metrochan_s2s_notice_v1';
-  var seen = null;
-  try { seen = localStorage.getItem(KEY); } catch(e){}
-  if(seen) return;
+  var dismissed = null;
+  try { dismissed = localStorage.getItem(KEY); } catch(e){}
+  if(dismissed) return;
   var mask = document.getElementById('s2sModal');
   mask.classList.add('open');
+  if(s2sModalWired) return;
+  s2sModalWired = true;
   function close(){
     mask.classList.remove('open');
-    try { localStorage.setItem(KEY, '1'); } catch(e){}
+    if(document.getElementById('s2sModalDontShow').checked){
+      try { localStorage.setItem(KEY, '1'); } catch(e){}
+    }
   }
-  document.getElementById('s2sModalOk').addEventListener('click', close, {once:true});
+  document.getElementById('s2sModalOk').addEventListener('click', close);
   mask.addEventListener('click', function(ev){ if(ev.target===mask) close(); });
 }
 function switchTab(name){
