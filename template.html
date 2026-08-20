@@ -230,10 +230,10 @@
           <label for="rides">每月乘坐次数</label>
           <input type="number" id="rides" min="1" max="200" value="44">
           <span class="km-label">次/月（按上方乘距）</span>
-          <label class="toggle"><input type="checkbox" id="discount" checked> 计入满 100 元后 9 折</label>
+          <label class="toggle"><input type="checkbox" id="discount" checked> 计入满额后 9 折（现状满 70 元 / 新方案满 100 元）</label>
         </div>
         <div id="costTable"></div>
-        <div class="hint">计次票为 30 天内固定次数（45/60/90 次），与单程票价互斥；满额优惠仅适用于刷码/刷卡的单程付费。</div>
+        <div class="hint">计次票为 30 天内固定次数（45/60/90 次），与单程票价互斥；满额 9 折优惠仅适用于刷码/刷卡的单程付费：现状为月累计满 70 元后 9 折，新方案为满 100 元后 9 折。</div>
       </div>
     </section>
   </div>
@@ -286,10 +286,10 @@
           <label for="ridesS2s">每月乘坐次数</label>
           <input type="number" id="ridesS2s" min="1" max="200" value="44">
           <span class="km-label">次/月</span>
-          <label class="toggle"><input type="checkbox" id="discountS2s" checked> 计入满 100 元后 9 折</label>
+          <label class="toggle"><input type="checkbox" id="discountS2s" checked> 计入满额后 9 折（现状满 70 元 / 新方案满 100 元）</label>
         </div>
         <div id="costTableS2s"></div>
-        <div class="hint">计次票为 30 天内固定次数（45/60/90 次），与单程票价互斥；满额优惠仅适用于刷码/刷卡的单程付费。「最低」在方案一/二与计次票中评比，现状仅作参照。</div>
+        <div class="hint">计次票为 30 天内固定次数（45/60/90 次），与单程票价互斥；满额 9 折优惠仅适用于刷码/刷卡的单程付费：现状为月累计满 70 元后 9 折，新方案为满 100 元后 9 折。「最低」在方案一/二与计次票中评比，现状仅作参照。</div>
       </div>
     </section>
   </div>
@@ -383,7 +383,8 @@ function renderCostTable(container, km, rides, useDisc){
   FARES.forEach(function(f){
     var per = f.fn(km);
     var total = per * rides;
-    if(useDisc && total>100){ total = 100 + (total-100)*0.9; }
+    var th = f.key==='cur' ? 70 : 100;  // 现状满70打9折, 新方案满100
+    if(useDisc && total>th){ total = th + (total-th)*0.9; }
     rows.push({label:f.name+'（单程）', detail:per+' 元/次', cost:total});
   });
   [{n:45,c:210},{n:60,c:270},{n:90,c:390}].forEach(function(t){
