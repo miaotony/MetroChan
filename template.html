@@ -285,7 +285,7 @@
     <p class="formula">方案二：0-6km 4 元，之后按 6/8/8/10/10/12/12km 每档 +1 元，72km 以上每 14km +1 元。</p>
     <p>平均影响：方案一 +23.3%（4.23→5.22 元），方案二 +22.9%（4.23→5.20 元）。</p>
     <p>站到站里程按线网<b>最短路径里程</b>计价（换乘不计里程），站间距来自维基百科各线路词条，为官方设计/环评数据的米级精度。</p>
-    <p class="disclaimer">⚠️ 本页面为个人自行整理的对比工具，<b>非官方页面</b>，数据仅供参考，以上海地铁官方计价为准。</p>
+    <p class="disclaimer">⚠️ 本页面为个人自行整理的对比工具，<b>非官方页面</b>，数据仅供参考。上海地铁实际计价机制可以说是「沪国机密」，本页估算结果可能与实际存在差异，一切以官方实际计价为准。</p>
     <p class="copyright">© 2026 <a href="https://miaotony.xyz" target="_blank" rel="noopener">MiaoTony</a> · MetroChan · All rights reserved.</p>
   </div>
 
@@ -653,7 +653,7 @@ function renderCostTable(container, km, rides, useDisc){
       + '<div><div class="k">途经</div><div class="v">'+(path.length)+' 站</div></div>'
       + '<div><div class="k">路径分段</div><div class="v">'+(transfers>0?transfers+' 次跨线':'单线')+'</div></div>'
       + '</div>'
-      + '<div class="route-note">⚠️ 以下是<b>计价用的最短里程路径</b>（票价按此计算，与实际怎么坐无关），<b>不是乘车换乘建议</b>——实际乘坐可优先选直达或少换乘路线，票价不变。</div>';
+      + '<div class="route-note">⚠️ 以下是本页按公开站间距估算的<b>最短里程计价路径</b>（票价按里程计算，与实际怎么坐无关），<b>不是乘车换乘建议</b>——实际乘坐可优先选直达或少换乘路线。上海地铁真实的计价里程算法属于<b>沪国机密</b>（并未完整公开），本页结果可能与闸机实际扣费存在差异，一切以官方实际计价为准。</div>';
 
     html += '<div class="route-lines">';
     segs.forEach(function(seg){
