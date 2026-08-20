@@ -273,6 +273,7 @@
           <button data-pair="人民广场,迪士尼">人民广场 → 迪士尼</button>
           <button data-pair="徐家汇,陆家嘴">徐家汇 → 陆家嘴</button>
           <button data-pair="莘庄,富锦路">莘庄 → 富锦路</button>
+          <button data-pair="花桥,滴水湖">花桥 → 滴水湖</button>
         </div>
         <div class="route-result" id="routeResult"></div>
       </div>
@@ -322,7 +323,8 @@
 const METRO_DATA = __METRO_DATA__;
 
 /* 线路颜色 */
-const LINE_COLORS = {'1号线':'#e6002b','2号线':'#00a8e0','3号线':'#f4d000','4号线':'#5b2c83','5号线':'#a066ba','6号线':'#d40068','7号线':'#f39200','8号线':'#00a0e9','9号线':'#7ac043','10号线':'#c9a0dc','11号线':'#841c21','12号线':'#007c69','13号线':'#ef82a0','14号线':'#8f6f47','15号线':'#b5a06a','16号线':'#2dd4bf','17号线':'#bc796c','18号线':'#c49857','浦江线':'#808080'};
+const LINE_COLORS = {'1号线':'#E3002B','2号线':'#82BF25','3号线':'#FCD600','4号线':'#461D84','5号线':'#944D9A','6号线':'#D40068','7号线':'#ED6F00','8号线':'#0094D8','9号线':'#87CAED','10号线':'#C6AFD4','11号线':'#871C2B','12号线':'#007B61','13号线':'#E999C0','14号线':'#626020','15号线':'#BCA886','16号线':'#98D1C0','17号线':'#BC796F','18号线':'#C4984F','浦江线':'#B5B5B6'};
+const DARK_TEXT_LINES = ['2号线','3号线','9号线','10号线','13号线','15号线','16号线','浦江线'];
 const LINE_ORDER = ['1号线','2号线','3号线','4号线','5号线','6号线','7号线','8号线','9号线','10号线','11号线','12号线','13号线','14号线','15号线','16号线','17号线','18号线','浦江线'];
 
 /* ============ 票价函数 ============ */
@@ -704,8 +706,9 @@ function renderCostTable(container, km, rides, useDisc){
     html += '<div class="route-lines">';
     segs.forEach(function(seg){
       var color = LINE_COLORS[seg.line] || '#888';
+      var fg = DARK_TEXT_LINES.indexOf(seg.line)>=0 ? '#1b1b1b' : '#fff';
       html += '<div class="route-seg">'
-        + '<span class="line-chip" style="background:'+color+'">'+seg.line+'</span>'
+        + '<span class="line-chip" style="background:'+color+';color:'+fg+'">'+seg.line+'</span>'
         + '<span class="path-txt">'+seg.from+' → '+seg.to+'</span>'
         + '</div>';
     });
