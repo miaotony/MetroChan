@@ -160,6 +160,9 @@
   .foot .copyright a{color:var(--red);text-decoration:none;font-weight:600}
   .foot .copyright a:hover{text-decoration:underline}
   .src a{color:var(--red)}
+  .spoiler{filter:blur(5px);cursor:pointer;transition:filter .25s ease;border-radius:3px;
+    -webkit-user-select:none;user-select:none}
+  .spoiler:hover,.spoiler:focus,.spoiler.revealed{filter:blur(0)}
 
   @media(max-width:640px){
     .cards{grid-template-columns:1fr}
@@ -301,14 +304,14 @@
     <p class="formula">方案二：0-6km 4 元，之后按 6/8/8/10/10/12/12km 每档 +1 元，72km 以上每 14km +1 元。</p>
     <p>平均影响：方案一 +23.3%（4.23→5.22 元），方案二 +22.9%（4.23→5.20 元）。</p>
     <p>站到站里程按线网<b>最短路径里程</b>计价（换乘不计里程），站间距来自维基百科各线路词条，为官方设计/环评数据的米级精度。</p>
-    <p class="disclaimer">⚠️ 本页面为个人自行整理的对比工具，<b>非官方页面</b>，数据仅供参考。上海地铁实际计价机制可以说是「沪国机密」，本页估算结果可能与实际存在差异，一切以官方实际计价为准。</p>
+    <p class="disclaimer">⚠️ 本页面为个人自行整理的对比工具，<b>非官方页面</b>，数据仅供参考。上海地铁实际计价机制可以说是「<span class="spoiler" tabindex="0">沪国机密</span>」，本页估算结果可能与实际存在差异，一切以官方实际计价为准。</p>
     <p class="copyright">© 2026 <a href="https://miaotony.xyz" target="_blank" rel="noopener">MiaoTony</a> · <a href="https://github.com/miaotony/MetroChan" target="_blank" rel="noopener">MetroChan</a> · All rights reserved.</p>
   </div>
 
   <div class="modal-mask" id="s2sModal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="s2sModalTitle">
       <h3 id="s2sModalTitle">⚠️ 站到站票价为估算值</h3>
-      <p>本页根据<b>公开站间距数据</b>估算两站间的最短里程并推算票价。上海地铁真实的计价里程算法并未完整公开（可以说是「沪国机密」），估算结果<b>可能与闸机实际扣费存在差异</b>。</p>
+      <p>本页根据<b>公开站间距数据</b>估算两站间的最短里程并推算票价。上海地铁真实的计价里程算法并未完整公开（可以说是「<span class="spoiler" tabindex="0">沪国机密</span>」），估算结果<b>可能与闸机实际扣费存在差异</b>。</p>
       <p>页面展示的路径是<b>计价用的最短里程路径</b>，不是乘车换乘建议。</p>
       <p class="small">一切以上海地铁官方实际计价为准。</p>
       <label class="modal-check"><input type="checkbox" id="s2sModalDontShow"> 不再提示</label>
@@ -376,6 +379,12 @@ document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click', function(){ switchTab(t.dataset.tab); });
 });
 if(location.hash === '#s2s'){ switchTab('s2s'); }
+
+/* spoiler 点按显示（移动端） */
+document.addEventListener('click', function(ev){
+  var sp = ev.target.closest ? ev.target.closest('.spoiler') : null;
+  if(sp) sp.classList.toggle('revealed');
+});
 
 /* ============ 共用：月成本表 ============ */
 function renderCostTable(container, km, rides, useDisc){
@@ -702,7 +711,7 @@ function renderCostTable(container, km, rides, useDisc){
       + '<div><div class="k">途经</div><div class="v">'+(path.length)+' 站</div></div>'
       + '<div><div class="k">路径分段</div><div class="v">'+(transfers>0?transfers+' 次跨线':'单线')+'</div></div>'
       + '</div>'
-      + '<div class="route-note">⚠️ 以下是本页按公开站间距估算的<b>最短里程计价路径</b>（票价按里程计算，与实际怎么坐无关），<b>不是乘车换乘建议</b>——实际乘坐可优先选直达或少换乘路线。上海地铁真实的计价里程算法属于<b>沪国机密</b>（并未完整公开），本页结果可能与闸机实际扣费存在差异，一切以官方实际计价为准。</div>';
+      + '<div class="route-note">⚠️ 以下是本页按公开站间距估算的<b>最短里程计价路径</b>（票价按里程计算，与实际怎么坐无关），<b>不是乘车换乘建议</b>——实际乘坐可优先选直达或少换乘路线。上海地铁真实的计价里程算法属于「<span class=\'spoiler\' tabindex=\'0\'>沪国机密</span>」（并未完整公开），本页结果可能与闸机实际扣费存在差异，一切以官方实际计价为准。</div>';
 
     html += '<div class="route-lines">';
     segs.forEach(function(seg){
