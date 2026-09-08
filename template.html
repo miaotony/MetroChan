@@ -325,6 +325,12 @@
     </section>
 
     <section>
+      <h2>典型乘距票价对照 <span class="tag">单位：元</span></h2>
+      <div class="scrollx" id="cityDistTable"></div>
+      <div class="hint">绿色为该乘距下<b>最低票价</b>（可并列）。16km 取上海 2025 年平均乘距，113km 对应花桥 → 滴水湖。</div>
+    </section>
+
+    <section>
       <h2>各城市计价规则 <span class="tag">官方口径</span></h2>
       <div class="city-cards" id="cityCards"></div>
       <div class="hint">⚠️ 曲线与对照表<b>只比单程原价（单程票/扫码基准价），不计任何折扣优惠</b>；各城市优惠政策见卡片内说明，均为官方现行口径。规则如有调整，以各地官方最新公告为准。</div>
@@ -694,6 +700,23 @@ const CITY_CARDS = [
   }
   html += '</tbody></table>';
   document.getElementById('cityTable').innerHTML = html;
+
+  /* 典型乘距票价对照表 */
+  var DISTS = [5, 10, 16, 25, 40, 60, 80, 113];
+  var dhtml = '<table class="cost"><thead><tr><th>乘距</th>';
+  CITY_FARES.forEach(function(f){ dhtml += '<th>'+f.name+'</th>'; });
+  dhtml += '</tr></thead><tbody>';
+  DISTS.forEach(function(d){
+    var vals = CITY_FARES.map(function(f){ return f.fn(d); });
+    var min = Math.min.apply(null, vals);
+    dhtml += '<tr><td>'+d+' km</td>';
+    vals.forEach(function(v){
+      dhtml += '<td'+(v===min?' class="cheap"':'')+'>'+v+'</td>';
+    });
+    dhtml += '</tr>';
+  });
+  dhtml += '</tbody></table>';
+  document.getElementById('cityDistTable').innerHTML = dhtml;
 
   /* 规则卡片 */
   var cards = '';
