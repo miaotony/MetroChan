@@ -561,6 +561,7 @@ function renderCostTable(container, km, rides, useDisc){
     });
     var km = getKm();
     out += '<line class="crosshair" x1="'+sx(km)+'" y1="'+sy(yMin)+'" x2="'+sx(km)+'" y2="'+sy(yMax)+'"/>';
+    out += '<text class="axis" x="'+sx(km)+'" y="'+(T-8)+'" text-anchor="middle" font-weight="700">'+km+' km</text>';
     FARES.forEach(function(f){
       var y=f.fn(km);
       out += '<circle class="dot" cx="'+sx(km)+'" cy="'+sy(y)+'" r="4.5" fill="'+f.color+'"/>';
@@ -588,6 +589,25 @@ function renderCostTable(container, km, rides, useDisc){
   });
   ridesInput.addEventListener('input', renderCost);
   discInput.addEventListener('change', renderCost);
+
+  /* 点击/拖动图表直接选距离 */
+  svg.style.cursor = 'crosshair';
+  function svgKm(ev){
+    var W=920, L=44, R=16, xMin=0, xMax=130;
+    var rect = svg.getBoundingClientRect();
+    var cx = (ev.touches ? ev.touches[0].clientX : ev.clientX);
+    var px = (cx - rect.left) / rect.width * W;
+    var km = Math.round(xMin + (px - L)/(W-L-R)*(xMax-xMin));
+    return Math.max(1, Math.min(xMax, km));
+  }
+  var chartDragging = false;
+  svg.addEventListener('mousedown', function(ev){ chartDragging = true; num.value = svgKm(ev); syncRange(); });
+  window.addEventListener('mousemove', function(ev){ if(chartDragging){ num.value = svgKm(ev); syncRange(); } });
+  window.addEventListener('mouseup', function(){ chartDragging = false; });
+  svg.addEventListener('touchstart', function(ev){ chartDragging = true; num.value = svgKm(ev); syncRange(); ev.preventDefault(); }, {passive:false});
+  svg.addEventListener('touchmove', function(ev){ if(chartDragging){ num.value = svgKm(ev); syncRange(); ev.preventDefault(); } }, {passive:false});
+  window.addEventListener('touchend', function(){ chartDragging = false; });
+
   syncRange();
 })();
 
