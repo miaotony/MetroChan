@@ -319,15 +319,15 @@
     </section>
 
     <section>
-      <h2>典型乘距票价对照 <span class="tag">单位：元</span></h2>
+      <h2>票价里程区间对照 <span class="tag">几元能坐几公里</span></h2>
       <div class="scrollx" id="cityTable"></div>
-      <div class="hint">绿色为该乘距下最低票价（可并列）。16km 取上海 2025 年平均乘距，113km 对应花桥 → 滴水湖。</div>
+      <div class="hint">每格为该票价对应的乘距区间（左开右闭，恰好卡在边界按左侧较低价计）。绿色为同价位<b>可乘里程最远</b>的城市（可并列）；「&gt;N」表示超过 N 公里后仍按该市规则继续加价，「—」表示该市票价不经过此档。</div>
     </section>
 
     <section>
       <h2>各城市计价规则 <span class="tag">官方口径</span></h2>
       <div class="city-cards" id="cityCards"></div>
-      <div class="hint">⚠️ 各地另有折扣优惠，本页<b>只比单程原价、不计任何优惠</b>：北京月累计满 100 元后 8 折、满 150 元后 5 折；武汉刷武汉通 9 折；成都月满 15 次后 6 折；上海现状为月满 70 元后 9 折等。广州 2026 年内将举行票价机制优化听证，此处为现行规则。</div>
+      <div class="hint">⚠️ 曲线与对照表<b>只比单程原价（单程票/扫码基准价），不计任何折扣优惠</b>；各城市优惠政策见卡片内说明，均为官方现行口径。规则如有调整，以各地官方最新公告为准。</div>
     </section>
   </div>
 
@@ -502,7 +502,7 @@ function renderCostTable(container, km, rides, useDisc){
   }
 
   function renderChart(){
-    var W=920, H=360, L=44, R=16, T=18, B=40;
+    var W=920, H=360, L=44, R=16, T=34, B=40;
     var xMin=0, xMax=130, yMin=0, yMax=16;
     function sx(x){ return L + (x-xMin)/(xMax-xMin)*(W-L-R); }
     function sy(y){ return H-B - (y-yMin)/(yMax-yMin)*(H-T-B); }
@@ -516,7 +516,7 @@ function renderCostTable(container, km, rides, useDisc){
       out += '<text class="axis" x="'+sx(x)+'" y="'+(H-B+18)+'" text-anchor="middle">'+x+'</text>';
     });
     out += '<text class="axis" x="'+sx(xMax)+'" y="'+(H-B+18)+'" text-anchor="end">公里</text>';
-    out += '<text class="axis" x="'+(L-6)+'" y="'+(T-6)+'" text-anchor="end">元</text>';
+    out += '<text class="axis" x="'+(L-8)+'" y="14" text-anchor="end">元</text>';
     FARES.forEach(function(f){
       var pts=[];
       for(var x=1; x<=xMax; x++){ pts.push([x, f.fn(x)]); }
@@ -583,37 +583,37 @@ const CITY_FARES = [
 
 const CITY_CARDS = [
   {name:'上海（现状 2005 版）', color:'#7d7d7d',
-   rule:'起步 3 元可乘 6km；6km 以上每 10km +1 元。',
-   meta:'听证方案一/二见页面底部说明。月累计满 70 元后 9 折。',
-   src:'https://www.shanghai.gov.cn/nw4411/20260820/65c1be2474c345339c39a9ad9c724fdf.html', srcName:'上海市政府'},
+   rule:'计程票制：起步 3 元可乘 6 公里；6 公里以上部分，每 10 公里加 1 元。',
+   meta:'优惠：交通卡每自然月累计满 70 元后 9 折；轨交与地面公交 2 小时内换乘优惠 1 元。听证方案一/二见页面底部。',
+   src:'https://www.shanghai.gov.cn/nw4411/20260820/65c1be2474c345339c39a9ad9c724fdf.html', srcName:'上海市人民政府'},
   {name:'北京', color:'#e6a23c',
-   rule:'起步 3 元可乘 6km；6–12km 4 元；12–32km 每 10km +1 元；32km 以上每 20km +1 元。',
-   meta:'不封顶。月累计满 100 元后 8 折、满 150 元后 5 折、满 400 元后不再打折（机场线除外）。',
-   src:'https://www.mtr.bj.cn/page/instructions.html', srcName:'京港地铁'},
+   rule:'计程限时票制（首都机场线、大兴机场线除外）：起步 6 公里（含）内 3 元；6–12 公里（含）4 元；12–22 公里（含）5 元；22–32 公里（含）6 元；32 公里以上每增加 20 公里加 1 元，票价不封顶。',
+   meta:'优惠：一卡通每自然月累计满 100 元后 8 折、满 150 元后 5 折、满 400 元后不再打折（月底清零）；部分车站工作日 7 时前进站 5 折。',
+   src:'https://www.mtr.bj.cn/page/instructions.html', srcName:'京港地铁（票价方案原文）'},
   {name:'广州', color:'#2e7d32',
-   rule:'起步 2 元可乘 4km；4–12km 每 4km +1 元；12–24km 每 6km +1 元；24km 以上每 8km +1 元。',
-   meta:'APM 线单一票价 2 元。2026 年内将举行票价机制优化听证。',
-   src:'https://www.gz.gov.cn/zwfw/zxfw/jtfw/content/post_10395580.html', srcName:'广州市政府'},
+   rule:'里程分段计价、递远递减：起步 4 公里以内 2 元；4–12 公里每递增 4 公里加 1 元；12–24 公里每递增 6 公里加 1 元；24 公里以上每递增 8 公里加 1 元。APM 线单一票价 2 元。',
+   meta:'优惠：同一羊城通卡/乘车码每自然月累计实付满 80 元不满 200 元部分 8 折、超 200 元部分 5 折（2023 年 9 月起，与公交合并累计）。2026 年内将举行票价机制优化听证。',
+   src:'https://www.gz.gov.cn/zwfw/zxfw/jtfw/content/post_10395580.html', srcName:'广州市人民政府'},
   {name:'深圳', color:'#2e7d32',
-   rule:'同广州：起步 2 元/4km，4–12km 每 4km +1，12–24km 每 6km +1，24km 以上每 8km +1。',
-   meta:'同网同价。',
+   rule:'里程分段计价、同网同价：起步 4 公里以内 2 元；4–12 公里每 1 元可乘 4 公里；12–24 公里每 1 元可乘 6 公里；24 公里以上每 1 元可乘 8 公里（与广州、杭州公式一致）。',
+   meta:'优惠：深圳通卡（含虚拟卡）普通车厢 9.5 折；90 分钟内公交↔地铁换乘每人次优惠 0.4 元。',
    src:'https://www.sz.gov.cn/ztfw/jtly/wyc_184756/ggjtcx/csgdjtcx/content/post_7750833.html', srcName:'深圳政府在线'},
   {name:'杭州', color:'#2e7d32',
-   rule:'同广州：起步 2 元/4km，4–12km 每 4km +1，12–24km 每 6km +1，24km 以上每 8km +1。',
-   meta:'计程票制。',
-   src:'https://hznews.hangzhou.com.cn/chengshi/content/2025-10/10/content_9098605.htm', srcName:'杭州网'},
+   rule:'计程票制：起步价 2 元可乘 4 公里；4–12 公里每 1 元可乘 4 公里；12–24 公里每 1 元可乘 6 公里；24 公里以上每 1 元可乘 8 公里（与广州、深圳公式一致）。',
+   meta:'优惠：储值卡/交通码每自然月累计消费 50 元以内 9 折、50（含）–100 元 7 折、100 元（含）以上 5 折（地铁公交合并累计）。',
+   src:'https://hwyst.hangzhou.com.cn/mtld/content/2023-05/11/content_8531793.htm', srcName:'杭州网（官方解答）'},
   {name:'南京', color:'#7b1fa2',
-   rule:'起步 2 元可乘 4km；4km 以上每 +1 元的晋级里程依次为 5、5、7、7、9、11、13、15km（即 3 元至 9km、4 元至 14km……10 元至 76km）。',
-   meta:'76km 以上官方未明示，本页按每 15km +1 元外推。',
-   src:'https://www.njmetro.com.cn/njdtweb/portal/article-detail.do?rowId=4a8208ae7b6b11e9ac27000c2965e15a&columnId=40288e817180aad0017180ae38a40001&tag=infoopen3', srcName:'南京地铁'},
+   rule:'里程分段计价：起步价 2 元可乘 4 公里；4 公里以上部分，每 1 元晋级里程依次为 5、5、7、7、9、11、13、15 公里（即 3 元至 9km、4 元至 14km……10 元至 76km；76km 以上官方未明示，本页按每 15km 加 1 元外推）。',
+   meta:'优惠：储值卡月累计 150 元以下乘次 9.5 折；超 150 元后 9 折；超 200 元后 8 折；超 300 元后恢复 9.5 折。',
+   src:'https://www.njmetro.com.cn/njdtweb/portal/article-detail.do?rowId=4a8208ae7b6b11e9ac27000c2965e15a&columnId=40288e817180aad0017180ae38a40001&tag=infoopen3', srcName:'南京地铁（新闻发布会）'},
   {name:'成都', color:'#00838f',
-   rule:'起步 2 元可乘 4km；4–12km 每 4km +1 元；12–24km 每 6km +1 元；24–40km 每 8km +1 元；40–50km 每 10km +1 元；50km 以上每 20km +1 元。',
-   meta:'月乘坐满 15 次后 6 折。',
-   src:'https://sichuan.scol.com.cn/ggxw/202312/82437556.html', srcName:'四川在线（官方答复）'},
+   rule:'里程计价制：起步价 2 元可乘 4 公里；4–12 公里每递增 4 公里加 1 元；12–24 公里每递增 6 公里加 1 元；24–40 公里每递增 8 公里加 1 元；40–50 公里每递增 10 公里加 1 元；超过 50 公里每递增 20 公里加 1 元。',
+   meta:'优惠：天府通卡/电子支付基本票价 9 折；每自然月单平台累计满 200 元后，自下次乘车起 6 折（各平台独立累计）。',
+   src:'https://sichuan.scol.com.cn/ggxw/202312/82437556.html', srcName:'四川在线（官方问政答复）'},
   {name:'武汉', color:'#00838f',
-   rule:'同成都：起步 2 元/4km，之后 4/6/8/10km 递远递减，50km 以上每 20km +1 元（9 元可乘 50km）。',
-   meta:'刷武汉通 9 折。按里程限时计费（240 分钟）。',
-   src:'https://www.wuhan.gov.cn/hdjl/rdhy/202410/t20241027_2474108.shtml', srcName:'武汉市政府'}
+   rule:'里程限时计费：起步 2 元可乘 4 公里；4–12 公里每 1 元可乘 4 公里；12–24 公里每 1 元可乘 6 公里；24–40 公里每 1 元可乘 8 公里；40–50 公里每 1 元可乘 10 公里；50 公里以上每 1 元可乘 20 公里（与成都公式一致）。进出闸限时 240 分钟。',
+   meta:'优惠：武汉通卡 9 折；虚拟换乘车站 30 分钟内出站换乘连续计价。',
+   src:'https://www.wuhan.gov.cn/hdjl/rdhy/202410/t20241027_2474108.shtml', srcName:'武汉市人民政府'}
 ];
 
 (function(){
@@ -628,7 +628,7 @@ const CITY_CARDS = [
   document.getElementById('cityLegend').innerHTML = lg;
 
   /* 阶梯图 */
-  var W=920, H=400, L=44, R=16, T=18, B=40;
+  var W=920, H=400, L=44, R=16, T=34, B=40;
   var xMin=0, xMax=130, yMin=0, yMax=20;
   function sx(x){ return L + (x-xMin)/(xMax-xMin)*(W-L-R); }
   function sy(y){ return H-B - (y-yMin)/(yMax-yMin)*(H-T-B); }
@@ -642,7 +642,7 @@ const CITY_CARDS = [
     out += '<text class="axis" x="'+sx(x)+'" y="'+(H-B+18)+'" text-anchor="middle">'+x+'</text>';
   });
   out += '<text class="axis" x="'+sx(xMax)+'" y="'+(H-B+18)+'" text-anchor="end">公里</text>';
-  out += '<text class="axis" x="'+(L-6)+'" y="'+(T-6)+'" text-anchor="end">元</text>';
+  out += '<text class="axis" x="'+(L-8)+'" y="14" text-anchor="end">元</text>';
   CITY_FARES.forEach(function(f){
     var d='M '+sx(1)+' '+sy(f.fn(1));
     var prev=f.fn(1);
@@ -656,20 +656,42 @@ const CITY_CARDS = [
   });
   svg.innerHTML = out;
 
-  /* 典型乘距对照表 */
-  var DISTS=[5,10,16,25,40,60,80,113];
-  var html = '<table class="cost"><thead><tr><th>乘距</th>';
+  /* 票价里程区间对照表：每档票价各城市能坐几到几公里 */
+  var SCAN_MAX = 130;
+  var cityBrackets = CITY_FARES.map(function(f){
+    var m = {};
+    for(var d=1; d<=SCAN_MAX; d++){
+      var p = f.fn(d);
+      if(!m[p]) m[p] = {lo:d-1, hi:d};
+      else m[p].hi = d;
+    }
+    return m;
+  });
+  var maxPrice = 0;
+  cityBrackets.forEach(function(m){
+    Object.keys(m).forEach(function(k){ maxPrice = Math.max(maxPrice, +k); });
+  });
+  var html = '<table class="cost"><thead><tr><th>票价</th>';
   CITY_FARES.forEach(function(f){ html += '<th>'+f.name+'</th>'; });
   html += '</tr></thead><tbody>';
-  DISTS.forEach(function(d){
-    var vals = CITY_FARES.map(function(f){ return f.fn(d); });
-    var min = Math.min.apply(null, vals);
-    html += '<tr><td>'+d+' km</td>';
-    vals.forEach(function(v){
-      html += '<td'+(v===min?' class="cheap"':'')+'>'+v+'</td>';
+  for(var price=2; price<=maxPrice; price++){
+    var cells = cityBrackets.map(function(m){
+      var b = m[price];
+      if(!b) return null;
+      if(b.hi >= SCAN_MAX) return {txt:'&gt;'+b.lo+' km', hi:Infinity};
+      if(b.lo === 0) return {txt:'≤'+b.hi+' km', hi:b.hi};
+      return {txt:b.lo+'–'+b.hi+' km', hi:b.hi};
+    });
+    var maxHi = -1;
+    cells.forEach(function(c){ if(c && isFinite(c.hi)) maxHi = Math.max(maxHi, c.hi); });
+    html += '<tr><td>'+price+' 元</td>';
+    cells.forEach(function(c){
+      if(!c){ html += '<td>—</td>'; return; }
+      var best = isFinite(c.hi) && c.hi === maxHi && maxHi > 0;
+      html += '<td'+(best?' class="cheap"':'')+'>'+c.txt+'</td>';
     });
     html += '</tr>';
-  });
+  }
   html += '</tbody></table>';
   document.getElementById('cityTable').innerHTML = html;
 
