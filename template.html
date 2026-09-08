@@ -81,6 +81,8 @@
   .card .note{font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 
   .chartbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
+  .chartbox svg{-webkit-user-select:none;user-select:none;touch-action:none}
+  .chartbox svg text{pointer-events:none}
   .legend{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink);margin-bottom:14px}
   .legend span{display:inline-flex;align-items:center;gap:7px}
   .legend .sw{width:14px;height:3px;border-radius:2px;display:inline-block}
@@ -601,7 +603,7 @@ function renderCostTable(container, km, rides, useDisc){
     return Math.max(1, Math.min(xMax, km));
   }
   var chartDragging = false;
-  svg.addEventListener('mousedown', function(ev){ chartDragging = true; num.value = svgKm(ev); syncRange(); });
+  svg.addEventListener('mousedown', function(ev){ ev.preventDefault(); chartDragging = true; num.value = svgKm(ev); syncRange(); });
   window.addEventListener('mousemove', function(ev){ if(chartDragging){ num.value = svgKm(ev); syncRange(); } });
   window.addEventListener('mouseup', function(){ chartDragging = false; });
   svg.addEventListener('touchstart', function(ev){ chartDragging = true; num.value = svgKm(ev); syncRange(); ev.preventDefault(); }, {passive:false});
@@ -759,7 +761,7 @@ const CITY_CARDS = [
     return Math.max(1, Math.min(xMax, km));
   }
   var dragging = false;
-  svg.addEventListener('mousedown', function(ev){ dragging = true; num.value = svgKm(ev); sync(); });
+  svg.addEventListener('mousedown', function(ev){ ev.preventDefault(); dragging = true; num.value = svgKm(ev); sync(); });
   window.addEventListener('mousemove', function(ev){ if(dragging){ num.value = svgKm(ev); sync(); } });
   window.addEventListener('mouseup', function(){ dragging = false; });
   svg.addEventListener('touchstart', function(ev){ dragging = true; num.value = svgKm(ev); sync(); ev.preventDefault(); }, {passive:false});
