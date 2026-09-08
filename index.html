@@ -30,6 +30,15 @@
   .tab:hover{color:var(--ink)}
   .tab.active{color:var(--red);border-bottom-color:var(--red)}
   .panel{display:none;margin-top:26px}
+  .scrollx{overflow-x:auto}
+  table.cost td.cheap{background:#e8f5e9;font-weight:700;color:#2e7d32}
+  .city-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:16px}
+  .city-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+  .city-card h3{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:8px}
+  .city-card h3 .cdot{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
+  .city-card .rule{font-size:13.5px;color:var(--ink);line-height:1.7;margin:0 0 8px}
+  .city-card .meta{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0}
+  .city-card .meta a{color:var(--red)}
   .panel.active{display:block}
 
   h2{font-size:17px;font-weight:700;margin-bottom:14px;letter-spacing:-.01em}
@@ -188,6 +197,7 @@
   <div class="tabs">
     <button class="tab active" data-tab="dist">按乘距对比</button>
     <button class="tab" data-tab="s2s">站到站对比</button>
+    <button class="tab" data-tab="cities">城市对比</button>
   </div>
 
   <!-- Tab 1: 按乘距 -->
@@ -297,6 +307,30 @@
     </section>
   </div>
 
+  <!-- Tab 3: 城市对比 -->
+  <div class="panel" id="panel-cities">
+    <section>
+      <h2>七城票价曲线 <span class="tag">单程原价</span></h2>
+      <div class="chartbox">
+        <div class="legend" id="cityLegend"></div>
+        <svg id="cityChart" viewBox="0 0 920 400" preserveAspectRatio="xMidYMid meet" role="img" aria-label="各城市票价阶梯图"></svg>
+      </div>
+      <div class="hint">广州、深圳、杭州现行计价公式完全一致，合并为一条线；成都与武汉一致，合并为一条线。上海方案一/二为听证方案，其余城市均为现行票价。</div>
+    </section>
+
+    <section>
+      <h2>典型乘距票价对照 <span class="tag">单位：元</span></h2>
+      <div class="scrollx" id="cityTable"></div>
+      <div class="hint">绿色为该乘距下最低票价（可并列）。16km 取上海 2025 年平均乘距，113km 对应花桥 → 滴水湖。</div>
+    </section>
+
+    <section>
+      <h2>各城市计价规则 <span class="tag">官方口径</span></h2>
+      <div class="city-cards" id="cityCards"></div>
+      <div class="hint">⚠️ 各地另有折扣优惠，本页<b>只比单程原价、不计任何优惠</b>：北京月累计满 100 元后 8 折、满 150 元后 5 折；武汉刷武汉通 9 折；成都月满 15 次后 6 折；上海现状为月满 70 元后 9 折等。广州 2026 年内将举行票价机制优化听证，此处为现行规则。</div>
+    </section>
+  </div>
+
   <div class="foot">
     <p class="formula"><b>票价公式（基准价）</b></p>
     <p class="formula">现状（2005 版）：0-6km 3 元，之后每 10km +1 元。</p>
@@ -379,6 +413,7 @@ document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click', function(){ switchTab(t.dataset.tab); });
 });
 if(location.hash === '#s2s'){ switchTab('s2s'); }
+if(location.hash === '#cities'){ switchTab('cities'); }
 
 /* spoiler 点按显示（移动端） */
 document.addEventListener('click', function(ev){
@@ -522,6 +557,132 @@ function renderCostTable(container, km, rides, useDisc){
   ridesInput.addEventListener('input', renderCost);
   discInput.addEventListener('change', renderCost);
   syncRange();
+})();
+
+/* ============ Tab3: 城市对比 ============ */
+/* 各城市现行计价公式（单程原价，来源见规则卡片） */
+function fareBJ(d){ if(d<=6) return 3; if(d<=12) return 4; if(d<=32) return 4+Math.ceil((d-12)/10); return 6+Math.ceil((d-32)/20); }
+function fareGSH(d){ if(d<=4) return 2; if(d<=12) return 2+Math.ceil((d-4)/4); if(d<=24) return 4+Math.ceil((d-12)/6); return 6+Math.ceil((d-24)/8); }
+function fareNJ(d){
+  var steps=[5,5,7,7,9,11,13,15], price=2, km=4;
+  for(var i=0;i<steps.length;i++){ if(d<=km) return price; km+=steps[i]; price+=1; }
+  if(d<=km) return price;
+  return price + Math.ceil((d-km)/15); /* 76km 以上官方未明示，按每 15km +1 外推 */
+}
+function fareCDWH(d){ if(d<=4) return 2; if(d<=12) return 2+Math.ceil((d-4)/4); if(d<=24) return 4+Math.ceil((d-12)/6); if(d<=40) return 6+Math.ceil((d-24)/8); if(d<=50) return 8+Math.ceil((d-40)/10); return 9+Math.ceil((d-50)/20); }
+
+const CITY_FARES = [
+  {key:'sh',   name:'上海·现状',   fn:fareCurrent, color:'#7d7d7d'},
+  {key:'shp1', name:'上海·方案一', fn:farePlan1,   color:'#c8102e'},
+  {key:'shp2', name:'上海·方案二', fn:farePlan2,   color:'#1668a3'},
+  {key:'bj',   name:'北京',        fn:fareBJ,      color:'#e6a23c'},
+  {key:'gsh',  name:'广州 / 深圳 / 杭州', fn:fareGSH, color:'#2e7d32'},
+  {key:'nj',   name:'南京',        fn:fareNJ,      color:'#7b1fa2'},
+  {key:'cdwh', name:'成都 / 武汉', fn:fareCDWH,    color:'#00838f'}
+];
+
+const CITY_CARDS = [
+  {name:'上海（现状 2005 版）', color:'#7d7d7d',
+   rule:'起步 3 元可乘 6km；6km 以上每 10km +1 元。',
+   meta:'听证方案一/二见页面底部说明。月累计满 70 元后 9 折。',
+   src:'https://www.shanghai.gov.cn/nw4411/20260820/65c1be2474c345339c39a9ad9c724fdf.html', srcName:'上海市政府'},
+  {name:'北京', color:'#e6a23c',
+   rule:'起步 3 元可乘 6km；6–12km 4 元；12–32km 每 10km +1 元；32km 以上每 20km +1 元。',
+   meta:'不封顶。月累计满 100 元后 8 折、满 150 元后 5 折、满 400 元后不再打折（机场线除外）。',
+   src:'https://www.mtr.bj.cn/page/instructions.html', srcName:'京港地铁'},
+  {name:'广州', color:'#2e7d32',
+   rule:'起步 2 元可乘 4km；4–12km 每 4km +1 元；12–24km 每 6km +1 元；24km 以上每 8km +1 元。',
+   meta:'APM 线单一票价 2 元。2026 年内将举行票价机制优化听证。',
+   src:'https://www.gz.gov.cn/zwfw/zxfw/jtfw/content/post_10395580.html', srcName:'广州市政府'},
+  {name:'深圳', color:'#2e7d32',
+   rule:'同广州：起步 2 元/4km，4–12km 每 4km +1，12–24km 每 6km +1，24km 以上每 8km +1。',
+   meta:'同网同价。',
+   src:'https://www.sz.gov.cn/ztfw/jtly/wyc_184756/ggjtcx/csgdjtcx/content/post_7750833.html', srcName:'深圳政府在线'},
+  {name:'杭州', color:'#2e7d32',
+   rule:'同广州：起步 2 元/4km，4–12km 每 4km +1，12–24km 每 6km +1，24km 以上每 8km +1。',
+   meta:'计程票制。',
+   src:'https://hznews.hangzhou.com.cn/chengshi/content/2025-10/10/content_9098605.htm', srcName:'杭州网'},
+  {name:'南京', color:'#7b1fa2',
+   rule:'起步 2 元可乘 4km；4km 以上每 +1 元的晋级里程依次为 5、5、7、7、9、11、13、15km（即 3 元至 9km、4 元至 14km……10 元至 76km）。',
+   meta:'76km 以上官方未明示，本页按每 15km +1 元外推。',
+   src:'https://www.njmetro.com.cn/njdtweb/portal/article-detail.do?rowId=4a8208ae7b6b11e9ac27000c2965e15a&columnId=40288e817180aad0017180ae38a40001&tag=infoopen3', srcName:'南京地铁'},
+  {name:'成都', color:'#00838f',
+   rule:'起步 2 元可乘 4km；4–12km 每 4km +1 元；12–24km 每 6km +1 元；24–40km 每 8km +1 元；40–50km 每 10km +1 元；50km 以上每 20km +1 元。',
+   meta:'月乘坐满 15 次后 6 折。',
+   src:'https://sichuan.scol.com.cn/ggxw/202312/82437556.html', srcName:'四川在线（官方答复）'},
+  {name:'武汉', color:'#00838f',
+   rule:'同成都：起步 2 元/4km，之后 4/6/8/10km 递远递减，50km 以上每 20km +1 元（9 元可乘 50km）。',
+   meta:'刷武汉通 9 折。按里程限时计费（240 分钟）。',
+   src:'https://www.wuhan.gov.cn/hdjl/rdhy/202410/t20241027_2474108.shtml', srcName:'武汉市政府'}
+];
+
+(function(){
+  var svg = document.getElementById('cityChart');
+  if(!svg) return;
+
+  /* 图例 */
+  var lg = '';
+  CITY_FARES.forEach(function(f){
+    lg += '<span><i class="sw" style="background:'+f.color+'"></i>'+f.name+'</span>';
+  });
+  document.getElementById('cityLegend').innerHTML = lg;
+
+  /* 阶梯图 */
+  var W=920, H=400, L=44, R=16, T=18, B=40;
+  var xMin=0, xMax=130, yMin=0, yMax=20;
+  function sx(x){ return L + (x-xMin)/(xMax-xMin)*(W-L-R); }
+  function sy(y){ return H-B - (y-yMin)/(yMax-yMin)*(H-T-B); }
+  var out = '';
+  for(var y=0;y<=yMax;y+=2){
+    out += '<line class="grid" x1="'+sx(xMin)+'" y1="'+sy(y)+'" x2="'+sx(xMax)+'" y2="'+sy(y)+'"/>';
+    out += '<text class="axis" x="'+(L-8)+'" y="'+(sy(y)+4)+'" text-anchor="end">'+y+'</text>';
+  }
+  [0,20,40,60,80,100,120].forEach(function(x){
+    out += '<line class="grid" x1="'+sx(x)+'" y1="'+sy(yMin)+'" x2="'+sx(x)+'" y2="'+sy(yMax)+'"/>';
+    out += '<text class="axis" x="'+sx(x)+'" y="'+(H-B+18)+'" text-anchor="middle">'+x+'</text>';
+  });
+  out += '<text class="axis" x="'+sx(xMax)+'" y="'+(H-B+18)+'" text-anchor="end">公里</text>';
+  out += '<text class="axis" x="'+(L-6)+'" y="'+(T-6)+'" text-anchor="end">元</text>';
+  CITY_FARES.forEach(function(f){
+    var d='M '+sx(1)+' '+sy(f.fn(1));
+    var prev=f.fn(1);
+    for(var x=2;x<=xMax;x++){
+      var v=f.fn(x);
+      d += ' L '+sx(x)+' '+sy(prev);
+      d += ' L '+sx(x)+' '+sy(v);
+      prev=v;
+    }
+    out += '<path d="'+d+'" fill="none" stroke="'+f.color+'" stroke-width="2.2" stroke-linejoin="round" opacity="0.9"/>';
+  });
+  svg.innerHTML = out;
+
+  /* 典型乘距对照表 */
+  var DISTS=[5,10,16,25,40,60,80,113];
+  var html = '<table class="cost"><thead><tr><th>乘距</th>';
+  CITY_FARES.forEach(function(f){ html += '<th>'+f.name+'</th>'; });
+  html += '</tr></thead><tbody>';
+  DISTS.forEach(function(d){
+    var vals = CITY_FARES.map(function(f){ return f.fn(d); });
+    var min = Math.min.apply(null, vals);
+    html += '<tr><td>'+d+' km</td>';
+    vals.forEach(function(v){
+      html += '<td'+(v===min?' class="cheap"':'')+'>'+v+'</td>';
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('cityTable').innerHTML = html;
+
+  /* 规则卡片 */
+  var cards = '';
+  CITY_CARDS.forEach(function(c){
+    cards += '<div class="city-card">'
+      + '<h3><span class="cdot" style="background:'+c.color+'"></span>'+c.name+'</h3>'
+      + '<p class="rule">'+c.rule+'</p>'
+      + '<p class="meta">'+c.meta+' 来源：<a href="'+c.src+'" target="_blank" rel="noopener">'+c.srcName+'</a></p>'
+      + '</div>';
+  });
+  document.getElementById('cityCards').innerHTML = cards;
 })();
 
 /* ============ Tab2: 站到站 ============ */
