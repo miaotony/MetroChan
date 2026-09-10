@@ -31,6 +31,9 @@
   .tab.active{color:var(--red);border-bottom-color:var(--red)}
   .panel{display:none;margin-top:26px}
   .scrollx{overflow-x:auto}
+  .th-short{display:none}
+  table.cost td:first-child,table.cost th:first-child{position:sticky;left:0;z-index:1;background:var(--surface)}
+  table.cost tr.best td:first-child{background:var(--red-bg)}
   table.cost td.cheap{background:#e8f5e9;font-weight:700;color:#2e7d32}
   .city-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:16px}
   .city-prices{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
@@ -187,6 +190,10 @@
     .card .price{font-size:34px}
     header h1{font-size:26px}
     .s2s-field{min-width:100%}
+    .th-full{display:none}
+    .th-short{display:inline}
+    table.cost th,table.cost td{padding:7px 6px;font-size:12px}
+    table.cost th{font-size:11.5px}
   }
 </style>
 </head>
@@ -626,13 +633,13 @@ function fareNJ(d){
 function fareCDWH(d){ if(d<=4) return 2; if(d<=12) return 2+Math.ceil((d-4)/4); if(d<=24) return 4+Math.ceil((d-12)/6); if(d<=40) return 6+Math.ceil((d-24)/8); if(d<=50) return 8+Math.ceil((d-40)/10); return 9+Math.ceil((d-50)/20); }
 
 const CITY_FARES = [
-  {key:'sh',   name:'上海·现状',   fn:fareCurrent, color:'#7d7d7d'},
-  {key:'shp1', name:'上海·方案一', fn:farePlan1,   color:'#c8102e'},
-  {key:'shp2', name:'上海·方案二', fn:farePlan2,   color:'#1668a3'},
-  {key:'bj',   name:'北京',        fn:fareBJ,      color:'#e6a23c'},
-  {key:'gsh',  name:'广州 / 深圳 / 杭州', fn:fareGSH, color:'#2e7d32'},
-  {key:'nj',   name:'南京',        fn:fareNJ,      color:'#7b1fa2'},
-  {key:'cdwh', name:'成都 / 武汉', fn:fareCDWH,    color:'#00838f'}
+  {key:'sh',   name:'上海·现状',   short:'沪现状', fn:fareCurrent, color:'#7d7d7d'},
+  {key:'shp1', name:'上海·方案一', short:'沪方案一', fn:farePlan1,   color:'#c8102e'},
+  {key:'shp2', name:'上海·方案二', short:'沪方案二', fn:farePlan2,   color:'#1668a3'},
+  {key:'bj',   name:'北京',        short:'北京',   fn:fareBJ,      color:'#e6a23c'},
+  {key:'gsh',  name:'广州 / 深圳 / 杭州', short:'穗深杭', fn:fareGSH, color:'#2e7d32'},
+  {key:'nj',   name:'南京',        short:'南京',   fn:fareNJ,      color:'#7b1fa2'},
+  {key:'cdwh', name:'成都 / 武汉', short:'蓉汉',   fn:fareCDWH,    color:'#00838f'}
 ];
 
 const CITY_CARDS = [
@@ -786,7 +793,7 @@ const CITY_CARDS = [
     Object.keys(m).forEach(function(k){ maxPrice = Math.max(maxPrice, +k); });
   });
   var html = '<table class="cost"><thead><tr><th>票价</th>';
-  CITY_FARES.forEach(function(f){ html += '<th>'+f.name+'</th>'; });
+  CITY_FARES.forEach(function(f){ html += '<th title="'+f.name+'"><span class="th-full">'+f.name+'</span><span class="th-short">'+f.short+'</span></th>'; });
   html += '</tr></thead><tbody>';
   for(var price=2; price<=maxPrice; price++){
     var cells = cityBrackets.map(function(m){
@@ -812,7 +819,7 @@ const CITY_CARDS = [
   /* 典型乘距票价对照表 */
   var DISTS = [5, 10, 16, 25, 40, 60, 80, 113];
   var dhtml = '<table class="cost"><thead><tr><th>乘距</th>';
-  CITY_FARES.forEach(function(f){ dhtml += '<th>'+f.name+'</th>'; });
+  CITY_FARES.forEach(function(f){ dhtml += '<th title="'+f.name+'"><span class="th-full">'+f.name+'</span><span class="th-short">'+f.short+'</span></th>'; });
   dhtml += '</tr></thead><tbody>';
   DISTS.forEach(function(d){
     var vals = CITY_FARES.map(function(f){ return f.fn(d); });
