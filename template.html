@@ -108,6 +108,10 @@
   .chartbox svg text{pointer-events:none}
   .legend{display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink);margin-bottom:14px}
   .legend span{display:inline-flex;align-items:center;gap:7px}
+  #cityLegend span{cursor:pointer;user-select:none;padding:3px 8px;border-radius:7px;border:1px solid transparent;transition:opacity .15s,background .15s}
+  #cityLegend span:hover{background:#f3f1ec}
+  #cityLegend span.off{opacity:.32}
+  #cityLegend span.off .sw{background:#bbb !important}
   .legend .sw{width:14px;height:3px;border-radius:2px;display:inline-block}
   .sw.cur{background:var(--gray)} .sw.p1{background:var(--red)} .sw.p2{background:var(--blue)}
   svg{width:100%;height:auto;display:block}
@@ -718,11 +722,26 @@ const CITY_CARDS = [
   function getKm(){ var v = parseFloat(num.value); return (isNaN(v)||v<1)?1:Math.min(v,130); }
 
   /* 图例 */
-  var lg = '';
-  CITY_FARES.forEach(function(f){
-    lg += '<span><i class="sw" style="background:'+f.color+'"></i>'+f.name+'</span>';
+  var hidden = {};
+  var legendEl = document.getElementById('cityLegend');
+  function renderLegend(){
+    var lg = '';
+    CITY_FARES.forEach(function(f){
+      lg += '<span data-key="'+f.key+'" class="'+(hidden[f.key]?'off':'')+'" title="点击显示/隐藏该曲线">'
+          + '<i class="sw" style="background:'+f.color+'"></i>'+f.name+'</span>';
+    });
+    legendEl.innerHTML = lg;
+  }
+  renderLegend();
+  legendEl.addEventListener('click', function(ev){
+    var sp = ev.target.closest ? ev.target.closest('span[data-key]') : null;
+    if(!sp) return;
+    var k = sp.getAttribute('data-key');
+    var shown = CITY_FARES.filter(function(f){ return !hidden[f.key]; });
+    if(!hidden[k] && shown.length <= 1) return;  /* 至少保留一条 */
+    hidden[k] = !hidden[k];
+    renderLegend(); renderChart(); renderPrices();
   });
-  document.getElementById('cityLegend').innerHTML = lg;
 
   /* 阶梯图 */
   var W=920, H=400, L=44, R=16, T=34, B=40;
@@ -744,6 +763,7 @@ const CITY_CARDS = [
     out += '<text class="axis" x="'+sx(xMax)+'" y="'+(H-B+18)+'" text-anchor="end">公里</text>';
     out += '<text class="axis" x="'+(L-8)+'" y="14" text-anchor="end">元</text>';
     CITY_FARES.forEach(function(f){
+      if(hidden[f.key]) return;
       var d='M '+sx(1)+' '+sy(f.fn(1));
       var prev=f.fn(1);
       for(var x=2;x<=xMax;x++){
@@ -757,6 +777,7 @@ const CITY_CARDS = [
     out += '<line class="crosshair" x1="'+sx(km)+'" y1="'+sy(yMin)+'" x2="'+sx(km)+'" y2="'+sy(yMax)+'"/>';
     out += '<text class="axis" x="'+sx(km)+'" y="'+(T-8)+'" text-anchor="middle" font-weight="700">'+km+' km</text>';
     CITY_FARES.forEach(function(f){
+      if(hidden[f.key]) return;
       var y=f.fn(km);
       out += '<circle class="dot" cx="'+sx(km)+'" cy="'+sy(y)+'" r="4.5" fill="'+f.color+'"/>';
     });
@@ -766,9 +787,11 @@ const CITY_CARDS = [
   function renderPrices(){
     var km = getKm();
     var vals = CITY_FARES.map(function(f){ return f.fn(km); });
-    var min = Math.min.apply(null, vals);
+    var shownVals = CITY_FARES.filter(function(f){ return !hidden[f.key]; }).map(function(f){ return f.fn(km); });
+    var min = Math.min.apply(null, shownVals);
     var html = '';
     CITY_FARES.forEach(function(f, i){
+      if(hidden[f.key]) return;
       html += '<div class="cp-chip'+(vals[i]===min?' low':'')+'">'
         + '<span class="cdot" style="background:'+f.color+'"></span>'
         + '<span class="cp-name">'+f.name+'</span>'
