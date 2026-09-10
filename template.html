@@ -52,6 +52,11 @@
   .panel{display:none;margin-top:26px}
   .scrollx{overflow-x:auto}
   .th-short{display:none}
+  .share-bar{display:flex;justify-content:flex-end;margin-top:14px}
+  .share-btn{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);color:var(--muted);
+    border-radius:9px;padding:7px 14px;font-size:13px;font-family:inherit;cursor:pointer;transition:all .15s}
+  .share-btn:hover{border-color:var(--red-line);color:var(--red);background:var(--red-bg)}
+  .share-btn.done{border-color:#a5d6a7;background:#f1f8f1;color:#2e7d32}
   table.cost td:first-child,table.cost th:first-child{position:sticky;left:0;z-index:1;background:var(--surface)}
   table.cost tr.best td:first-child{background:var(--red-bg)}
   table.cost td.cheap{background:#e8f5e9;font-weight:700;color:#2e7d32}
@@ -396,6 +401,12 @@
     </section>
   </div>
 
+  <div class="share-bar">
+    <button type="button" class="share-btn" id="shareBtn" title="复制包含当前标签页与乘距的链接">
+      <span id="shareBtnText">🔗 复制当前视图链接</span>
+    </button>
+  </div>
+
   <div class="foot">
     <p class="formula"><b>票价公式（基准价）</b></p>
     <p class="formula">现状（2005 版）：0-6km 3 元，之后每 10km +1 元。</p>
@@ -485,6 +496,58 @@ document.querySelectorAll('.tab').forEach(function(t){
 });
 if(location.hash === '#s2s'){ switchTab('s2s', false); }
 if(location.hash === '#cities'){ switchTab('cities', false); }
+
+/* 从 ?km= 还原乘距 */
+window.addEventListener('load', function(){
+  try {
+    var km = new URLSearchParams(location.search).get('km');
+    if(!km) return;
+    var v = parseFloat(km);
+    if(isNaN(v) || v < 1) return;
+    v = Math.min(v, 130);
+    var active = document.querySelector('.tab.active');
+    var tab = active ? active.dataset.tab : 'dist';
+    var num = document.getElementById(tab === 'cities' ? 'cityKmNum' : 'kmNum');
+    if(num){ num.value = Math.round(v); num.dispatchEvent(new Event('input')); }
+  } catch(e){}
+});
+
+/* 复制当前视图链接 */
+(function(){
+  var btn = document.getElementById('shareBtn');
+  var txt = document.getElementById('shareBtnText');
+  if(!btn) return;
+  var LABEL = '🔗 复制当前视图链接';
+  function buildUrl(){
+    var active = document.querySelector('.tab.active');
+    var tab = active ? active.dataset.tab : 'dist';
+    var url = location.origin + location.pathname;
+    var num = document.getElementById(tab === 'cities' ? 'cityKmNum' : 'kmNum');
+    if(tab !== 's2s' && num && num.value) url += '?km=' + encodeURIComponent(num.value);
+    if(tab !== 'dist') url += '#' + tab;
+    return url;
+  }
+  function flash(msg, ok){
+    txt.textContent = msg;
+    btn.classList.toggle('done', !!ok);
+    setTimeout(function(){ txt.textContent = LABEL; btn.classList.remove('done'); }, 2000);
+  }
+  btn.addEventListener('click', function(){
+    var url = buildUrl();
+    function fallback(){
+      var ta = document.createElement('textarea');
+      ta.value = url; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select();
+      var ok = false;
+      try { ok = document.execCommand('copy'); } catch(e){}
+      document.body.removeChild(ta);
+      flash(ok ? '✅ 已复制链接' : '复制失败，请手动复制', ok);
+    }
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(function(){ flash('✅ 已复制链接', true); }, fallback);
+    } else fallback();
+  });
+})();
 /* 浏览器前进/后退时同步 tab */
 window.addEventListener('hashchange', function(){
   var h = location.hash.replace('#','');
