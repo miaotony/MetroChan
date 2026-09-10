@@ -465,16 +465,27 @@ function maybeShowS2sModal(){
   document.getElementById('s2sModalOk').addEventListener('click', close);
   mask.addEventListener('click', function(ev){ if(ev.target===mask) close(); });
 }
-function switchTab(name){
+function switchTab(name, updateHash){
   document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active', x.dataset.tab===name);});
   document.querySelectorAll('.panel').forEach(function(x){x.classList.toggle('active', x.id==='panel-'+name);});
   if(name === 's2s') maybeShowS2sModal();
+  if(updateHash !== false){
+    try {
+      if(name === 'dist') history.replaceState(null, '', location.pathname + location.search);
+      else history.replaceState(null, '', '#' + name);
+    } catch(e){ location.hash = (name === 'dist') ? '' : name; }
+  }
 }
 document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click', function(){ switchTab(t.dataset.tab); });
 });
-if(location.hash === '#s2s'){ switchTab('s2s'); }
-if(location.hash === '#cities'){ switchTab('cities'); }
+if(location.hash === '#s2s'){ switchTab('s2s', false); }
+if(location.hash === '#cities'){ switchTab('cities', false); }
+/* 浏览器前进/后退时同步 tab */
+window.addEventListener('hashchange', function(){
+  var h = location.hash.replace('#','');
+  switchTab((h === 's2s' || h === 'cities') ? h : 'dist', false);
+});
 
 /* spoiler 点按显示（移动端） */
 document.addEventListener('click', function(ev){
