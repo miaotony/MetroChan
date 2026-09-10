@@ -251,7 +251,7 @@
       <div class="control">
         <div class="slider-row">
           <span class="km-label">乘距</span>
-          <input type="range" id="kmRange" min="1" max="130" value="16" step="1">
+          <input type="range" id="kmRange" min="1" max="135" value="16" step="1">
           <div class="km-input">
             <input type="number" id="kmNum" min="1" max="200" value="16">
             <span class="unit">公里</span>
@@ -332,6 +332,7 @@
           <button data-pair="徐家汇,陆家嘴">徐家汇 → 陆家嘴</button>
           <button data-pair="莘庄,富锦路">莘庄 → 富锦路</button>
           <button data-pair="花桥,滴水湖">花桥 → 滴水湖</button>
+          <button data-pair="滴水湖,西岑">滴水湖 → 西岑（全网最远）</button>
         </div>
         <div class="route-result" id="routeResult"></div>
       </div>
@@ -359,9 +360,9 @@
       <div class="control">
         <div class="slider-row">
           <span class="km-label">乘距</span>
-          <input type="range" id="cityKmRange" min="1" max="130" value="16" step="1">
+          <input type="range" id="cityKmRange" min="1" max="135" value="16" step="1">
           <div class="km-input">
-            <input type="number" id="cityKmNum" min="1" max="130" value="16">
+            <input type="number" id="cityKmNum" min="1" max="135" value="16">
             <span class="unit">公里</span>
           </div>
         </div>
@@ -371,7 +372,7 @@
           <button data-km="30">中长 30km</button>
           <button data-km="50">长 50km</button>
           <button data-km="80">超长 80km</button>
-          <button data-km="113">花桥→滴水湖 113km</button>
+          <button data-km="124">滴水湖→西岑 124km</button>
         </div>
         <div class="city-prices" id="cityPrices"></div>
       </div>
@@ -391,7 +392,7 @@
     <section>
       <h2>典型乘距票价对照 <span class="tag">单位：元</span></h2>
       <div class="scrollx" id="cityDistTable"></div>
-      <div class="hint">绿色为该乘距下<b>最低票价</b>（可并列）。16km 取上海 2025 年平均乘距，113km 对应花桥 → 滴水湖。</div>
+      <div class="hint">绿色为该乘距下<b>最低票价</b>（可并列）。16km 取上海 2025 年平均乘距，124km 对应全网最远站对滴水湖 → 西岑（123.52km）。</div>
     </section>
 
     <section>
@@ -504,7 +505,7 @@ window.addEventListener('load', function(){
     if(!km) return;
     var v = parseFloat(km);
     if(isNaN(v) || v < 1) return;
-    v = Math.min(v, 130);
+    v = Math.min(v, 135);
     var active = document.querySelector('.tab.active');
     var tab = active ? active.dataset.tab : 'dist';
     var num = document.getElementById(tab === 'cities' ? 'cityKmNum' : 'kmNum');
@@ -642,7 +643,7 @@ function renderCostTable(container, km, rides, useDisc){
 
   function renderChart(){
     var W=920, H=360, L=44, R=16, T=34, B=40;
-    var xMin=0, xMax=130, yMin=0, yMax=16;
+    var xMin=0, xMax=135, yMin=0, yMax=16;
     function sx(x){ return L + (x-xMin)/(xMax-xMin)*(W-L-R); }
     function sy(y){ return H-B - (y-yMin)/(yMax-yMin)*(H-T-B); }
     var out = '';
@@ -667,7 +668,7 @@ function renderCostTable(container, km, rides, useDisc){
       out += '<path d="'+d+'" fill="none" stroke="'+f.color+'" stroke-width="2.2" stroke-linejoin="round"/>';
     });
     var km = getKm();
-    var desc1 = '横轴为乘距 0 至 130 公里，纵轴为票价 0 至 16 元。三条阶梯曲线分别为：'
+    var desc1 = '横轴为乘距 0 至 135 公里，纵轴为票价 0 至 16 元。三条阶梯曲线分别为：'
       + FARES.map(function(f){ return f.name + ' 在 ' + km + ' 公里时 ' + f.fn(km) + ' 元'; }).join('；') + '。';
     out = '<title>上海地铁三方案全乘距票价阶梯图</title><desc>' + desc1 + '</desc>' + out;
     out += '<line class="crosshair" x1="'+sx(km)+'" y1="'+sy(yMin)+'" x2="'+sx(km)+'" y2="'+sy(yMax)+'"/>';
@@ -693,7 +694,7 @@ function renderCostTable(container, km, rides, useDisc){
     renderCards(); renderChart(); renderCost();
   }
   range.addEventListener('input', function(){ num.value = range.value; syncRange(); });
-  num.addEventListener('input', function(){ if(parseFloat(num.value)>130) range.max=Math.ceil(Math.max(130,parseFloat(num.value))); syncRange(); });
+  num.addEventListener('input', function(){ if(parseFloat(num.value)>135) range.max=Math.ceil(Math.max(135,parseFloat(num.value))); syncRange(); });
   document.querySelectorAll('.presets button').forEach(function(b){
     b.addEventListener('click', function(){ num.value = b.getAttribute('data-km'); syncRange(); });
   });
@@ -703,7 +704,7 @@ function renderCostTable(container, km, rides, useDisc){
   /* 点击/拖动图表直接选距离 */
   svg.style.cursor = 'crosshair';
   function svgKm(ev){
-    var W=920, L=44, R=16, xMin=0, xMax=130;
+    var W=920, L=44, R=16, xMin=0, xMax=135;
     var rect = svg.getBoundingClientRect();
     var cx = (ev.touches ? ev.touches[0].clientX : ev.clientX);
     var px = (cx - rect.left) / rect.width * W;
@@ -785,7 +786,7 @@ const CITY_CARDS = [
   var num = document.getElementById('cityKmNum');
   var pricesBox = document.getElementById('cityPrices');
 
-  function getKm(){ var v = parseFloat(num.value); return (isNaN(v)||v<1)?1:Math.min(v,130); }
+  function getKm(){ var v = parseFloat(num.value); return (isNaN(v)||v<1)?1:Math.min(v,135); }
 
   /* 图例 */
   var hidden = {};
@@ -819,7 +820,7 @@ const CITY_CARDS = [
 
   /* 阶梯图 */
   var W=920, H=400, L=44, R=16, T=34, B=40;
-  var xMin=0, xMax=130, yMin=0, yMax=20;
+  var xMin=0, xMax=135, yMin=0, yMax=20;
   function sx(x){ return L + (x-xMin)/(xMax-xMin)*(W-L-R); }
   function sy(y){ return H-B - (y-yMin)/(yMax-yMin)*(H-T-B); }
 
@@ -849,7 +850,7 @@ const CITY_CARDS = [
       out += '<path d="'+d+'" fill="none" stroke="'+f.color+'" stroke-width="2.2" stroke-linejoin="round" opacity="0.9"/>';
     });
     var shownF = CITY_FARES.filter(function(f){ return !hidden[f.key]; });
-    var desc3 = '横轴为乘距 0 至 130 公里，纵轴为票价 0 至 20 元。当前显示 ' + shownF.length + ' 条曲线，'
+    var desc3 = '横轴为乘距 0 至 135 公里，纵轴为票价 0 至 20 元。当前显示 ' + shownF.length + ' 条曲线，'
       + shownF.map(function(f){ return f.name + ' 在 ' + km + ' 公里时 ' + f.fn(km) + ' 元'; }).join('；') + '。';
     out = '<title>各城市地铁票价阶梯对比图</title><desc>' + desc3 + '</desc>' + out;
     out += '<line class="crosshair" x1="'+sx(km)+'" y1="'+sy(yMin)+'" x2="'+sx(km)+'" y2="'+sy(yMax)+'"/>';
@@ -910,7 +911,7 @@ const CITY_CARDS = [
   sync();
 
   /* 票价里程区间对照表：每档票价各城市能坐几到几公里 */
-  var SCAN_MAX = 130;
+  var SCAN_MAX = 135;
   var cityBrackets = CITY_FARES.map(function(f){
     var m = {};
     for(var d=1; d<=SCAN_MAX; d++){
@@ -949,7 +950,7 @@ const CITY_CARDS = [
   document.getElementById('cityTable').innerHTML = html;
 
   /* 典型乘距票价对照表 */
-  var DISTS = [5, 10, 16, 25, 40, 60, 80, 113];
+  var DISTS = [5, 10, 16, 25, 40, 60, 80, 124];
   var dhtml = '<table class="cost"><thead><tr><th>乘距</th>';
   CITY_FARES.forEach(function(f){ dhtml += '<th title="'+f.name+'"><span class="th-full">'+f.name+'</span><span class="th-short">'+f.short+'</span></th>'; });
   dhtml += '</tr></thead><tbody>';
