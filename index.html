@@ -315,6 +315,30 @@
   .metromap .mstop.end{stroke:#2b2b2b;stroke-width:2.6}
   .metromap .mstop.flag{stroke:var(--red);stroke-width:3;fill:#fff}
   .metromap circle:hover{stroke-width:4;cursor:pointer}
+
+  /* ---- 改版详情：一页纸对比 ---- */
+  .kv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin:4px 0 26px}
+  .kv{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+  .kv-k{font-size:12.5px;color:var(--muted);font-weight:600}
+  .kv-v{font-size:30px;font-weight:800;margin-top:6px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+  .kv-v small{font-size:13px;font-weight:600;color:var(--muted);margin-left:3px}
+  .kv-sub{font-size:12px;color:var(--muted);margin-top:7px}
+  .kv-sub.down{color:#b3261e}
+  .kv-sub.up{color:#2e7d32}
+  table.cmp{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  table.cmp th{font-size:12.5px;color:var(--muted);font-weight:600;text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);background:#faf8f5}
+  table.cmp td{padding:10px 14px;border-bottom:1px solid #f0ece6;font-variant-numeric:tabular-nums}
+  table.cmp tr:last-child td{border-bottom:0}
+  table.cmp td:first-child{font-weight:700}
+  .cmp .dneg{color:#b3261e;font-weight:600}
+  .cmp .dzero{color:var(--muted)}
+  .chg-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+  .chg-col{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+  .chg-col h3{margin:0 0 10px}
+  .chg-col ul{list-style:none;padding:0;margin:0}
+  .chg-col li{font-size:13.5px;line-height:1.75;padding-left:14px;position:relative;color:var(--ink)}
+  .chg-col li:before{content:'';position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:#c9c4bb}
+  @media(max-width:720px){ .chg-cols{grid-template-columns:1fr} table.cmp{font-size:13px} table.cmp th,table.cmp td{padding:9px 10px} }
 </style>
 </head>
 <body>
@@ -504,37 +528,65 @@
   <!-- Tab 5: 改版详情 -->
   <div class="panel" id="panel-change">
     <section>
-      <h2>2026 新票价机制 <span class="tag">12 月 1 日生效</span></h2>
-      <div class="card">
-        <table>
-          <thead><tr><th>项目</th><th>老方案（2005）</th><th>新方案</th></tr></thead>
-          <tbody>
-            <tr><td>起步价</td><td>3 元 / 6 公里</td><td class="up">3 元 / 4 公里</td></tr>
-            <tr><td>加价间距</td><td>之后每 10 公里 +1 元</td><td class="up">4/4/4/7/7/10/10 公里，50 公里后每 15 公里 +1 元</td></tr>
-            <tr><td>满额优惠</td><td>月满 70 元后 9 折</td><td class="up">月满 90 元后 9 折</td></tr>
-            <tr><td>计次票</td><td>无</td><td class="up">35 / 45 / 60 / 90 次四档</td></tr>
-            <tr><td>一日票</td><td>18 元</td><td class="up">24 元</td></tr>
-            <tr><td>三日票</td><td>45 元</td><td class="up">60 元</td></tr>
-            <tr><td>适用范围</td><td>全网</td><td>全网，不含磁浮、金山铁路、市域机场线及以后市域线</td></tr>
-            <tr><td>动态调整</td><td>无</td><td class="up">建立，挂钩人工、电价、物价、负荷</td></tr>
-          </tbody>
-        </table>
+      <h2>2026 新票价：一页看完 <span class="tag">12 月 1 日起执行</span></h2>
+
+      <div class="kv-grid">
+        <div class="kv">
+          <div class="kv-k">起步价</div>
+          <div class="kv-v">3<small>元</small></div>
+          <div class="kv-sub">与老方案相同</div>
+        </div>
+        <div class="kv">
+          <div class="kv-k">起步可乘</div>
+          <div class="kv-v">4<small>公里</small></div>
+          <div class="kv-sub down">老方案 6 公里</div>
+        </div>
+        <div class="kv">
+          <div class="kv-k">满额 9 折门槛</div>
+          <div class="kv-v">90<small>元</small></div>
+          <div class="kv-sub down">老方案 70 元</div>
+        </div>
+        <div class="kv">
+          <div class="kv-k">计次票</div>
+          <div class="kv-v">4<small>档</small></div>
+          <div class="kv-sub up">35 / 45 / 60 / 90 次</div>
+        </div>
       </div>
-    </section>
-    <section>
-      <h2>新票价档位</h2>
-      <div class="card">
-        <table id="tierTable">
-          <thead><tr><th>最长乘距</th><th>票价</th><th>较老方案</th></tr></thead>
-          <tbody></tbody>
-        </table>
-        <div class="hint">「较老方案」按 2005 版规则在同一档位上限折算；50 公里以上按每 15 公里加 1 元。</div>
+
+      <h3>同样票价，最远能坐多远</h3>
+      <table class="cmp" id="cmpTable">
+        <thead><tr><th>票价</th><th>老方案</th><th>新方案</th><th>变化</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="hint">按基准票价规则推算的里程上限，不含满额优惠和计次票；超过 50 公里后新方案每 15 公里加 1 元。</p>
+
+      <div class="chg-cols">
+        <div class="chg-col">
+          <h3>变了什么</h3>
+          <ul>
+            <li>起步可乘里程 6 → 4 公里，短途更早进入 4 元档</li>
+            <li>加价间距加密：4/4/4/7/7/10/10 公里，50 公里后每 15 公里加 1 元</li>
+            <li>满额 9 折门槛 70 → 90 元，但覆盖全支付方式，市域线也纳入</li>
+            <li>新增计次票 35 / 45 / 60 / 90 次，190 / 210 / 270 / 390 元</li>
+            <li>一日票 18 → 24 元，三日票 45 → 60 元</li>
+            <li>建立票价动态调整机制，与人工、电价、物价、线网负荷挂钩</li>
+          </ul>
+        </div>
+        <div class="chg-col">
+          <h3>没变什么</h3>
+          <ul>
+            <li>起步价仍是 3 元</li>
+            <li>仍按里程计价，换乘不计里程</li>
+            <li>4 公里以内的短途票价不变</li>
+            <li>公交与地铁 2 小时内换乘优惠继续保留</li>
+            <li>磁浮线、金山铁路、市域机场线不适用新规</li>
+          </ul>
+        </div>
       </div>
-    </section>
-    <section>
-      <h2>票种与优惠</h2>
+
+      <h3 style="margin-top:26px">票种与优惠</h3>
       <div class="ticket-grid" id="ticketGrid"></div>
-      <div class="hint">计次票 30 个自然日内有效、限本人实名使用，不与满额优惠、公交换乘优惠同享；满额优惠按月累计算，当月满额后超出部分 9 折。</div>
+      <p class="hint">计次票 30 个自然日内有效、限本人实名使用，不与满额优惠、公交换乘优惠同享；满额优惠按自然月累计，当月满额后超出部分 9 折。</p>
     </section>
   </div>
 
@@ -1742,15 +1794,24 @@ const CITY_CARDS = [
 
 (function(){
   var TIERS = [[4,3],[8,4],[12,5],[16,6],[23,7],[30,8],[40,9],[50,10],[65,11],[80,12],[95,13],[110,14],[125,15]];
-  var tb = document.querySelector('#tierTable tbody');
-  if (tb) {
-    tb.innerHTML = TIERS.map(function(t){
-      var km = t[0], p = t[1], old = fareCurrent(km), d = p - old;
-      var cls = d > 0 ? 'up' : (d === 0 ? 'eq' : 'down');
-      var txt = d === 0 ? '持平' : (d > 0 ? '+' + d + ' 元' : d + ' 元');
-      return '<tr><td>≤ ' + km + ' 公里</td><td>' + p + ' 元</td><td class="' + cls + '">' + txt + '</td></tr>';
-    }).join('');
+  var cmp = document.querySelector('#cmpTable tbody');
+  if (cmp) {
+    function maxKm(fn, price){
+      var best = 0;
+      for (var d = 1; d <= 220; d++) if (fn(d) <= price) best = d;
+      return best;
+    }
+    var rows = '';
+    for (var p = 3; p <= 15; p++){
+      var ko = maxKm(fareCurrent, p), kn = maxKm(fareFinal, p), diff = kn - ko;
+      var cls = diff === 0 ? 'dzero' : (diff < 0 ? 'dneg' : '');
+      var txt = diff === 0 ? '不变' : (diff > 0 ? '+' + diff + ' 公里' : diff + ' 公里');
+      rows += '<tr><td>' + p + ' 元</td><td>≤ ' + ko + ' 公里</td><td>≤ ' + kn + ' 公里</td>'
+            + '<td class="' + cls + '">' + txt + '</td></tr>';
+    }
+    cmp.innerHTML = rows;
   }
+
   var g = document.querySelector('#ticketGrid');
   if (g) {
     var html = [{n:35,p:190},{n:45,p:210},{n:60,p:270},{n:90,p:390}].map(function(t){
