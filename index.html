@@ -162,7 +162,7 @@
   .suggest .sg-item .py{font-size:11.5px;color:var(--muted);font-family:var(--mono)}
   .suggest .sg-item .ln-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
   .suggest .sg-empty{padding:10px 13px;font-size:13px;color:var(--muted)}
-  .ep-selects{display:grid;grid-template-columns:1fr 1.6fr;gap:8px}
+  .ep-selects{display:grid;grid-template-columns:104px minmax(0,1fr);gap:8px}
   .ep-selects select{font:inherit;font-size:14px;padding:8px 8px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--ink)}
   .ep-selects select:first-child{width:108px;flex:none}
   .ep-selects select:last-child{flex:1;min-width:0}
@@ -243,6 +243,7 @@
   .jny-dot.end{background:var(--surface);border:3px solid var(--c,#888);width:11px;height:11px;box-shadow:none}
   .jny-name{font-size:15px;font-weight:650}
   .jny-badge{font-size:11px;padding:1px 7px;border:1px solid var(--border);border-radius:3px;color:var(--muted);background:var(--bg)}
+  .jny-badge.walk{background:#fff4e6;color:#b06500;border:1px solid rgba(176,101,0,.25)}
   .jny-tagline{font-size:11px;color:#a8a49c}
   .jny-leg{display:grid;grid-template-columns:13px 1fr;gap:0 9px;cursor:pointer;padding:1px 0}
   .jny-leg:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:4px}
@@ -289,7 +290,7 @@
 
   /* ---- 自定义下拉（线路 / 站点） ---- */
   .picker{position:relative;min-width:0}
-  .pick-btn{width:100%;display:flex;align-items:center;gap:7px;font:inherit;font-size:14px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;text-align:left;color:var(--ink);box-sizing:border-box}
+  .pick-btn{width:100%;display:flex;align-items:center;gap:6px;font:inherit;font-size:14px;padding:10px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;text-align:left;color:var(--ink);box-sizing:border-box}
   .pick-btn:hover{border-color:#c9c4bb}
   .pick-btn:focus-visible{outline:2px solid var(--red);outline-offset:1px}
   .pick-chip{width:10px;height:10px;border-radius:2px;flex:none}
@@ -306,7 +307,7 @@
   .pick-item.on{background:#f1ede6;font-weight:600}
   .pick-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
   .pick-dots{display:inline-flex;gap:3px;width:32px;flex:none;align-items:center}
-  .pick-sub{flex:none;width:78px;text-align:right;font-size:11px;color:#b0aca6;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pick-sub{flex:none;margin-left:auto;max-width:48%;text-align:right;font-size:11px;color:#b0aca6;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pick-empty{padding:10px 8px;font-size:12.5px;color:#999}
 
   /* ---- 线路图 ---- */
@@ -354,7 +355,7 @@
     section + section{margin-top:26px;padding-top:22px}
     .tabs{gap:4px;margin-top:18px}
     .tab{flex:1 1 0;min-width:0;padding:9px 2px;font-size:12.5px;white-space:nowrap;letter-spacing:-.02em}
-    .ep-selects{grid-template-columns:1fr 1.35fr;gap:7px}
+    .ep-selects{grid-template-columns:96px minmax(0,1fr);gap:7px}
     .pick-btn{font-size:13.5px;padding:9px 10px}
     .pick-panel{width:min(88vw,320px);min-width:min(88vw,320px)}
     .s2s-grid{gap:10px}
@@ -1400,6 +1401,7 @@ const CITY_CARDS = [
     api.get = function(){ return value; };
     api.set = function(v){ value = v; renderBtn(); };
     api.refresh = renderBtn;
+    api.rebuild = function(){ if (panel.classList.contains('open')) renderList(input.value.trim()); };
     return api;
   }
 
@@ -1437,6 +1439,7 @@ const CITY_CARDS = [
         var names = METRO_DATA.lines[ln] || [];
         if (names.indexOf(curSta) < 0) curSta = names[0];
         staPick.set(curSta);
+        if (staPick.rebuild) staPick.rebuild();
         fire();
       }
     });
@@ -1754,12 +1757,14 @@ const CITY_CARDS = [
   function parseOfficialPath(desc){
     var segs = [], prevTo = null;
     String(desc || '').replace(/[。\s]+$/,'').split(/[，,]/).forEach(function(raw){
-      var t = raw.trim().replace(/^换乘/,'');
+      var t = raw.trim();
+      var walk = /^出站换乘/.test(t);            /* 出站换乘：仍按后续线路着色 */
+      t = t.replace(/^(出站)?换乘/, '');
       var m = t.match(/^(.+?线)(.*?)至(.+)$/);
       if (!m) return;
       var from = (m[2] || prevTo || '').trim(), to = m[3].trim();
       if (!to) return;
-      segs.push({ line: m[1].trim(), from: from, to: to });
+      segs.push({ line: m[1].trim(), from: from, to: to, walk: walk });
       prevTo = to;
     });
     return segs;
@@ -1826,7 +1831,8 @@ const CITY_CARDS = [
       var hops = sts.length > 1 ? sts.length - 1 : null;
       html += '<div class="jny-stop"><span class="jny-dot" style="--c:' + color + '"></span>'
             + '<span class="jny-name">' + seg.from + '</span>'
-            + (i === 0 ? '<span class="jny-tagline">起点</span>' : '<span class="jny-badge">换乘</span>')
+            + (i === 0 ? '<span class="jny-tagline">起点</span>'
+                       : '<span class="jny-badge' + (seg.walk ? ' walk' : '') + '">' + (seg.walk ? '出站换乘' : '换乘') + '</span>')
             + '</div>';
       html += '<div class="jny-leg" data-leg="' + i + '" tabindex="0" role="button" aria-expanded="false">'
             + '<span class="jny-line" style="--c:' + color + '"></span>'
