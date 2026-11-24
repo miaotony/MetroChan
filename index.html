@@ -282,6 +282,26 @@
   body.show-hearing .legend .lg-hearing{display:inline-flex;align-items:center}
   .rides-range{width:170px;height:20px;accent-color:var(--red);vertical-align:middle;cursor:pointer}
   @media (max-width:560px){ .rides-range{width:130px} }
+
+  /* ---- 自定义下拉（线路 / 站点） ---- */
+  .picker{position:relative;min-width:0}
+  .pick-btn{width:100%;display:flex;align-items:center;gap:7px;font:inherit;font-size:13.5px;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;text-align:left;color:var(--ink);box-sizing:border-box}
+  .pick-btn:hover{border-color:#c9c4bb}
+  .pick-btn:focus-visible{outline:2px solid var(--red);outline-offset:1px}
+  .pick-chip{width:10px;height:10px;border-radius:2px;flex:none}
+  .pick-text{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pick-ph{flex:1;color:#a9a5a0}
+  .pick-caret{margin-left:auto;color:#b3aea8;font-size:9px;font-style:normal;flex:none}
+  .pick-caret:before{content:'▼'}
+  .pick-panel{display:none;position:absolute;z-index:60;left:0;right:0;top:calc(100% + 5px);background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.13);padding:8px}
+  .pick-panel.open{display:block}
+  .pick-search{width:100%;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--border);border-radius:7px;margin-bottom:6px;box-sizing:border-box}
+  .pick-list{max-height:262px;overflow:auto}
+  .pick-item{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:6px;font-size:13.5px;cursor:pointer}
+  .pick-item:hover{background:#f4f1ec}
+  .pick-item.on{background:#f1ede6;font-weight:600}
+  .pick-sub{margin-left:auto;font-size:11px;color:#b0aca6;font-weight:400;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pick-empty{padding:10px 8px;font-size:12.5px;color:#999}
 </style>
 </head>
 <body>
@@ -372,8 +392,8 @@
               <div class="suggest" id="fromSuggest"></div>
             </div>
             <div class="ep-selects">
-              <select id="fromLine" aria-label="起点线路"></select>
-              <select id="fromSel" aria-label="起点站点"></select>
+              <div class="picker" id="fromLinePick"></div>
+              <div class="picker" id="fromSelPick"></div>
             </div>
           </div>
           <button class="swap-btn" id="swapBtn" title="交换起终点">⇄</button>
@@ -384,8 +404,8 @@
               <div class="suggest" id="toSuggest"></div>
             </div>
             <div class="ep-selects">
-              <select id="toLine" aria-label="终点线路"></select>
-              <select id="toSel" aria-label="终点站点"></select>
+              <div class="picker" id="toLinePick"></div>
+              <div class="picker" id="toSelPick"></div>
             </div>
           </div>
         </div>
@@ -1124,56 +1144,160 @@ const CITY_CARDS = [
   });
   var LINE_LIST = LINE_ORDER.filter(function(ln){ return METRO_DATA.lines[ln] && METRO_DATA.lines[ln].length; });
 
-  /* ---- 每端一个复合选择器：线路下拉 + 站点下拉（按线路站序）+ 拼音搜索 ---- */
+  /* ---- 轻量下拉组件（线路 / 站点，可搜索） ---- */
+  function mkPicker(root, opt){
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'pick-btn';
+    btn.setAttribute('aria-label', opt.label);
+    var panel = document.createElement('div'); panel.className = 'pick-panel';
+    var input = document.createElement('input');
+    input.type = 'text'; input.className = 'pick-search';
+    input.placeholder = opt.searchPh || '搜索'; input.autocomplete = 'off';
+    var list = document.createElement('div'); list.className = 'pick-list';
+    panel.appendChild(input); panel.appendChild(list);
+    root.appendChild(btn); root.appendChild(panel);
+
+    var value = null, src = [], api = {};
+
+    function renderBtn(){
+      var all = opt.items('') || [], hit = null;
+      for (var i = 0; i < all.length; i++) if (all[i].value === value) { hit = all[i]; break; }
+      btn.innerHTML = hit
+        ? (opt.glyph ? opt.glyph(hit) : '') + '<span class="pick-text">' + hit.label + '</span><i class="pick-caret"></i>'
+        : '<span class="pick-ph">' + opt.label + '</span><i class="pick-caret"></i>';
+    }
+    function renderList(q){
+      src = opt.items(q) || [];
+      list.innerHTML = src.length ? src.map(function(it, i){
+        return '<div class="pick-item' + (it.value === value ? ' on' : '') + '" data-i="' + i + '">'
+          + (opt.glyph ? opt.glyph(it) : '') + '<span>' + it.label + '</span>'
+          + (it.sub ? '<span class="pick-sub">' + it.sub + '</span>' : '') + '</div>';
+      }).join('') : '<div class="pick-empty">没有匹配</div>';
+      list.querySelectorAll('.pick-item').forEach(function(el){
+        el.addEventListener('mousedown', function(ev){
+          ev.preventDefault();
+          var it = src[+el.getAttribute('data-i')];
+          var changed = it.value !== value;
+          value = it.value; renderBtn(); close();
+          if (opt.onpick) opt.onpick(it.value, changed);
+        });
+      });
+    }
+    function open(){ panel.classList.add('open'); input.value = ''; renderList(''); input.focus(); }
+    function close(){ panel.classList.remove('open'); }
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      panel.classList.contains('open') ? close() : open();
+    });
+    input.addEventListener('input', function(){ renderList(input.value.trim()); });
+    input.addEventListener('keydown', function(e){
+      if (e.key === 'Enter'){ var f = list.querySelector('.pick-item'); if (f) f.dispatchEvent(new MouseEvent('mousedown', {bubbles:true})); }
+      if (e.key === 'Escape'){ close(); btn.focus(); }
+    });
+    document.addEventListener('click', function(e){ if (!root.contains(e.target)) close(); });
+
+    api.get = function(){ return value; };
+    api.set = function(v){ value = v; renderBtn(); };
+    api.refresh = renderBtn;
+    return api;
+  }
+
+  /* ---- 每端一个复合选择器：线路 + 站点，均可搜索 ---- */
   function Endpoint(prefix, defLine, defStation){
-    var lineSel = document.getElementById(prefix+'Line');
-    var staSel = document.getElementById(prefix+'Sel');
     var search = document.getElementById(prefix+'Search');
     var suggest = document.getElementById(prefix+'Suggest');
     var self = {onchange:null};
+    var curLine = defLine, curSta = defStation;
 
-    lineSel.innerHTML = LINE_LIST.map(function(ln){
-      return '<option value="'+ln+'">'+ln+'</option>';
-    }).join('');
-
-    function fillStations(ln, keep){
-      var names = METRO_DATA.lines[ln] || [];
-      staSel.innerHTML = names.map(function(n){
-        return '<option value="'+n+'">'+n+'</option>';
+    function dotsOf(name){
+      return (METRO_DATA.stations[name]||[]).map(function(ln){
+        return '<span class="ln-dot" style="background:'+(LINE_COLORS[ln]||'#888')+'" title="'+ln+'"></span>';
       }).join('');
-      if(keep && names.indexOf(keep)>=0) staSel.value = keep;
+    }
+    function chipOf(ln){
+      return '<span class="pick-chip" style="background:'+(LINE_COLORS[ln]||'#888')+'"></span>';
     }
 
-    lineSel.addEventListener('change', function(){
-      fillStations(lineSel.value);
-      fire();
+    var linePick = mkPicker(document.getElementById(prefix+'LinePick'), {
+      label: '线路', searchPh: '搜索线路',
+      items: function(q){
+        var out = [];
+        for (var i = 0; i < LINE_LIST.length; i++){
+          var ln = LINE_LIST[i];
+          if (q && ln.indexOf(q) < 0) continue;
+          out.push({value: ln, label: ln, glyph: chipOf(ln)});
+        }
+        return out;
+      },
+      glyph: function(it){ return it.glyph; },
+      onpick: function(ln){
+        curLine = ln;
+        var names = METRO_DATA.lines[ln] || [];
+        if (names.indexOf(curSta) < 0) curSta = names[0];
+        staPick.set(curSta);
+        fire();
+      }
     });
-    staSel.addEventListener('change', fire);
 
-    function fire(){ if(self.onchange) self.onchange(); }
+    var staPick = mkPicker(document.getElementById(prefix+'SelPick'), {
+      label: '站点', searchPh: '搜索站名 / 拼音',
+      items: function(q){
+        q = (q||'').trim().toLowerCase();
+        var pool = q ? Object.keys(METRO_DATA.stations) : (METRO_DATA.lines[curLine] || []);
+        var out = [];
+        for (var i = 0; i < pool.length; i++){
+          var n = pool[i], py = METRO_DATA.py[n] || ['',''];
+          if (q && n.indexOf(q) < 0 && py[0].indexOf(q) < 0 && py[1].indexOf(q) < 0) continue;
+          out.push({value: n, label: n, sub: py[0] || '', glyph: dotsOf(n)});
+          if (q && out.length >= 40) break;
+        }
+        return out;
+      },
+      glyph: function(it){ return it.glyph; },
+      onpick: function(name){
+        curSta = name;
+        var lines = METRO_DATA.stations[name] || [];
+        if (lines.indexOf(curLine) < 0 && lines.length){ curLine = lines[0]; linePick.set(curLine); }
+        staPick.refresh();
+        fire();
+      }
+    });
 
-    /* 拼音/汉字搜索 */
+    function fire(){ if (self.onchange) self.onchange(); }
+
+    function pick(name){
+      if (!METRO_DATA.stations[name]) return;
+      var lines = METRO_DATA.stations[name] || [];
+      curLine = lines.indexOf(curLine) >= 0 ? curLine : lines[0];
+      curSta = name;
+      linePick.set(curLine);
+      staPick.set(name);
+      if (search) search.value = '';
+      if (suggest) suggest.classList.remove('open');
+      fire();
+    }
+
+    /* 拼音 / 汉字搜索 */
     var hoverIdx = -1, items = [];
     function doSearch(q){
       q = q.trim().toLowerCase();
       items = []; hoverIdx = -1;
-      if(!q){ suggest.classList.remove('open'); suggest.innerHTML=''; return; }
+      if (!q){ suggest.classList.remove('open'); suggest.innerHTML = ''; return; }
       var res = [];
-      for(var name in METRO_DATA.stations){
+      for (var name in METRO_DATA.stations){
         var py = METRO_DATA.py[name] || ['',''];
-        var full = py[0], init = py[1];
-        var score = -1;
-        if(name.indexOf(q) >= 0){ score = name.indexOf(q)===0 ? 0 : 1; }
-        else if(init.indexOf(q) === 0){ score = 2; }
-        else if(full.indexOf(q) === 0){ score = 3; }
-        else if(init.indexOf(q) > 0){ score = 4; }
-        else if(full.indexOf(q) > 0){ score = 5; }
-        if(score >= 0) res.push({name:name, score:score, py:full});
+        var full = py[0], init = py[1], score = -1;
+        if (name.indexOf(q) >= 0){ score = name.indexOf(q) === 0 ? 0 : 1; }
+        else if (init.indexOf(q) === 0){ score = 2; }
+        else if (full.indexOf(q) === 0){ score = 3; }
+        else if (init.indexOf(q) > 0){ score = 4; }
+        else if (full.indexOf(q) > 0){ score = 5; }
+        if (score >= 0) res.push({name: name, score: score, py: full});
       }
-      res.sort(function(a,b){ return a.score-b.score || a.name.length-b.name.length || (a.name<b.name?-1:1); });
+      res.sort(function(a,b){ return a.score - b.score || a.name.length - b.name.length || (a.name < b.name ? -1 : 1); });
       res = res.slice(0, 12);
       items = res;
-      if(!res.length){
+      if (!res.length){
         suggest.innerHTML = '<div class="sg-empty">没有匹配的车站</div>';
         suggest.classList.add('open'); return;
       }
@@ -1187,45 +1311,28 @@ const CITY_CARDS = [
       suggest.querySelectorAll('.sg-item').forEach(function(el){
         el.addEventListener('mousedown', function(ev){
           ev.preventDefault();
-          pick(items[parseInt(el.getAttribute('data-i'),10)].name);
+          pick(items[+el.getAttribute('data-i')].name);
         });
       });
     }
-
-    function pick(name){
-      var lines = METRO_DATA.stations[name] || [];
-      // 若当前线路已含该站则不切线，否则切到该站第一条线
-      var ln = lines.indexOf(lineSel.value)>=0 ? lineSel.value : lines[0];
-      lineSel.value = ln;
-      fillStations(ln, name);
-      staSel.value = name;
-      search.value = '';
-      suggest.classList.remove('open');
-      fire();
-    }
-
-    search.addEventListener('input', function(){ doSearch(search.value); });
-    search.addEventListener('keydown', function(ev){
-      if(!suggest.classList.contains('open') || !items.length) return;
-      if(ev.key==='ArrowDown'){ ev.preventDefault(); hoverIdx = Math.min(hoverIdx+1, items.length-1); }
-      else if(ev.key==='ArrowUp'){ ev.preventDefault(); hoverIdx = Math.max(hoverIdx-1, 0); }
-      else if(ev.key==='Enter'){ ev.preventDefault(); pick(items[hoverIdx<0?0:hoverIdx].name); return; }
-      else if(ev.key==='Escape'){ suggest.classList.remove('open'); return; }
+    if (search) search.addEventListener('input', function(){ doSearch(search.value); });
+    if (search) search.addEventListener('blur', function(){ setTimeout(function(){ suggest.classList.remove('open'); }, 150); });
+    if (search) search.addEventListener('keydown', function(e){
+      if (!items.length) return;
+      if (e.key === 'ArrowDown'){ hoverIdx = Math.min(items.length-1, hoverIdx+1); e.preventDefault(); }
+      else if (e.key === 'ArrowUp'){ hoverIdx = Math.max(0, hoverIdx-1); e.preventDefault(); }
+      else if (e.key === 'Enter'){ if (hoverIdx >= 0) pick(items[hoverIdx].name); return; }
       else return;
-      suggest.querySelectorAll('.sg-item').forEach(function(el,i){
-        el.classList.toggle('hover', i===hoverIdx);
-      });
-    });
-    search.addEventListener('blur', function(){
-      setTimeout(function(){ suggest.classList.remove('open'); }, 150);
+      suggest.querySelectorAll('.sg-item').forEach(function(el, i){ el.classList.toggle('on', i === hoverIdx); });
     });
 
-    self.get = function(){ return staSel.value; };
+    self.get = function(){ return curSta; };
     self.set = function(name){ pick(name); };
-    // init
-    lineSel.value = defLine;
-    fillStations(defLine, defStation);
-    staSel.value = defStation;
+    self.line = function(){ return curLine; };
+    var _names0 = METRO_DATA.lines[defLine] || [];
+    curSta = _names0.indexOf(defStation) >= 0 ? defStation : _names0[0];
+    linePick.set(defLine);
+    staPick.set(curSta);
     return self;
   }
 
