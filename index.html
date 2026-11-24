@@ -593,7 +593,7 @@
 
       <h3 style="margin-top:26px">票种与优惠</h3>
       <div class="ticket-grid" id="ticketGrid"></div>
-      <p class="hint">计次票 30 个自然日内有效、限本人实名使用，不与满额优惠、公交换乘优惠同享；满额优惠按自然月累计，当月满额后超出部分 9 折。</p>
+      <p class="hint">计次票 30 个自然日内有效、限本人实名使用，不与满额优惠、公交换乘优惠同享；满额优惠按自然月累计，当月满额后超出部分 9 折。联程日票在「随申行」平台购买，一张票可通乘地铁、公交、轮渡，为同行人购买时同步启用。</p>
     </section>
   </div>
 
@@ -1834,6 +1834,9 @@ const CITY_CARDS = [
     }).join('');
     html += '<div class="ticket"><div class="tk-name">一日票</div><div class="tk-price">24<small>元</small></div><div class="tk-per">首次进站起 24 小时不限次</div></div>';
     html += '<div class="ticket"><div class="tk-name">三日票</div><div class="tk-price">60<small>元</small></div><div class="tk-per">72 小时内不限次</div></div>';
+    html += '<div class="ticket"><div class="tk-name">联程日票（随申行）</div><div class="tk-price">19.8<small>元</small></div><div class="tk-per">24 小时地铁 + 公交 + 轮渡</div></div>';
+    html += '<div class="ticket"><div class="tk-name">联程三日票（随申行）</div><div class="tk-price">47.8<small>元</small></div><div class="tk-per">72 小时地铁 + 公交 + 轮渡</div></div>';
+    html += '<div class="ticket"><div class="tk-name">联程七日票（随申行）</div><div class="tk-price">85.8<small>元</small></div><div class="tk-per">168 小时地铁 + 公交 + 轮渡</div></div>';
     g.innerHTML = html;
   }
 })();
