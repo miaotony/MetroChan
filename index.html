@@ -126,7 +126,8 @@
   .crosshair{stroke:#bbb;stroke-dasharray:4 3;stroke-width:1}
   .dot{stroke:#fff;stroke-width:2}
 
-  .costbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
+  .costbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-top:2px}
+  section:has(.costbox){padding-top:6px}
   .cost-inputs{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
   .cost-inputs label{font-size:14px;color:var(--muted)}
   .cost-inputs input[type=number]{width:72px;font-size:16px;font-weight:700;font-family:var(--mono);text-align:center;
@@ -140,6 +141,7 @@
   table.cost th:first-child,table.cost td:first-child{text-align:left}
   table.cost tr.best td{background:var(--red-bg)}
   table.cost tr.best td:first-child{font-weight:700}
+  .badge.combo{background:#eef1f3;color:#5b6570}
   .badge{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:4px;padding:1px 6px;margin-left:6px;vertical-align:1px}
   .hint{font-size:12.5px;color:var(--muted);margin-top:12px}
 
@@ -370,7 +372,7 @@
       <div class="costbox">
         <div class="cost-inputs">
           <label for="rides">每月乘坐次数</label>
-          <input type="range" id="ridesRange" min="1" max="90" value="44" class="rides-range" aria-label="每月乘坐次数滑块">
+          <input type="range" id="ridesRange" min="1" max="120" value="44" class="rides-range" aria-label="每月乘坐次数滑块">
           <input type="number" id="rides" min="1" max="200" value="44">
           <span class="km-label">次/月（按上方乘距）</span>
           <label class="toggle"><input type="checkbox" id="discount" checked> 计入满额后 9 折（老方案满 70 / 新方案满 90 / 听证方案满 100 元）</label>
@@ -429,7 +431,7 @@
       <div class="costbox">
         <div class="cost-inputs">
           <label for="ridesS2s">每月乘坐次数</label>
-          <input type="range" id="ridesS2sRange" min="1" max="90" value="44" class="rides-range" aria-label="每月乘坐次数滑块">
+          <input type="range" id="ridesS2sRange" min="1" max="120" value="44" class="rides-range" aria-label="每月乘坐次数滑块">
           <input type="number" id="ridesS2s" min="1" max="200" value="44">
           <span class="km-label">次/月</span>
           <label class="toggle"><input type="checkbox" id="discountS2s" checked> 计入满额后 9 折（老方案满 70 / 新方案满 90 / 听证方案满 100 元）</label>
@@ -711,9 +713,15 @@ function renderCostTable(container, km, rides, useDisc){
     if(useDisc && total>th){ total = th + (total-th)*0.9; }
     rows.push({label:f.name+'（单程）', detail:per+' 元/次', cost:total});
   });
+  var perFinal = fareFinal(km);
   [{n:35,c:190},{n:45,c:210},{n:60,c:270},{n:90,c:390}].forEach(function(t){
-    var cover = rides<=t.n;
-    rows.push({label:'计次票 '+t.n+' 次', detail:t.c+' 元/30天', cost: cover?t.c:null});
+    var over = rides - t.n;
+    if (over > 0) {
+      /* 超出次数用单程票补齐：计次票 + 单程票组合 */
+      rows.push({label:'计次票 '+t.n+' 次', detail:t.c+' 元 + '+over+' 次单程', cost: t.c + over*perFinal, combo:true});
+    } else {
+      rows.push({label:'计次票 '+t.n+' 次', detail:t.c+' 元/30天', cost: t.c});
+    }
   });
   // 最低：只在新方案（方案一/方案二）和计次票之间比，排除老方案
   var bestIdx = -1;
@@ -736,7 +744,7 @@ function renderCostTable(container, km, rides, useDisc){
         if(i===0){ diffStr += '（老方案，不参与评比）'; }
       }
     }
-    html += '<tr'+bestCls+'><td>'+r.label+(i===bestIdx?'<span class="badge">最低</span>':'')+'</td>'
+    html += '<tr'+bestCls+'><td>'+r.label+(i===bestIdx?'<span class="badge">最低</span>':'')+(r.combo?'<span class="badge combo">组合</span>':'')+'</td>'
       + '<td>'+r.detail+'</td><td>'+costStr+'</td><td>'+diffStr+'</td></tr>';
   });
   html += '</tbody></table>';
