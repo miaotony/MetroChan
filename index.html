@@ -1685,12 +1685,52 @@ const CITY_CARDS = [
     return segs;
   }
 
+  var LA_CACHE = {}, LOOP_LINES = { '4号线': true };
+  /* 线内邻接：官方边为主，再用站序补共线段（边被记到别的线），环线首尾闭合 */
+  function lineAdj(ln){
+    if (LA_CACHE[ln]) return LA_CACHE[ln];
+    var seq = METRO_DATA.lines[ln] || [], adj = {};
+    function add(a, b){
+      if (!a || !b || a === b) return;
+      (adj[a] = adj[a] || []).push(b);
+      (adj[b] = adj[b] || []).push(a);
+    }
+    (METRO_DATA.edges || []).forEach(function(e){ if (e.l === ln) add(e.a, e.b); });
+    for (var i = 0; i < seq.length - 1; i++){
+      if (graph[seq[i]] && graph[seq[i]][seq[i+1]]) add(seq[i], seq[i+1]);
+    }
+    if (LOOP_LINES[ln] && seq.length > 2) add(seq[0], seq[seq.length-1]);
+    return (LA_CACHE[ln] = adj);
+  }
+
+  /* 单条线路内的最短站序：环线走短弧、分叉走对应支线 */
   function lineSlice(line, from, to){
+    if (!from || !to) return [];
+    if (from === to) return [from];
+    var adj = lineAdj(line);
+    if (adj[from] && adj[to]) {
+      var prev = {}, seen = {}, q = [from];
+      seen[from] = 1;
+      while (q.length){
+        var u = q.shift();
+        if (u === to) break;
+        var ns = adj[u] || [];
+        for (var i = 0; i < ns.length; i++){
+          if (!seen[ns[i]]){ seen[ns[i]] = 1; prev[ns[i]] = u; q.push(ns[i]); }
+        }
+      }
+      if (seen[to]) {
+        var path = [to], c = to;
+        while (c !== from){ c = prev[c]; path.push(c); }
+        return path.reverse();
+      }
+    }
+    /* 站不在该线（出站换乘接续段）：退回线性序列 */
     var arr = METRO_DATA.lines[line];
-    if (!arr || !from || !to) return [];
-    var i = arr.indexOf(from), j = arr.indexOf(to);
-    if (i < 0 || j < 0) return [];
-    return i <= j ? arr.slice(i, j+1) : arr.slice(j, i+1).reverse();
+    if (!arr) return [];
+    var i2 = arr.indexOf(from), j2 = arr.indexOf(to);
+    if (i2 < 0 || j2 < 0) return [];
+    return i2 <= j2 ? arr.slice(i2, j2+1) : arr.slice(j2, i2+1).reverse();
   }
 
   function lineColor(line){
