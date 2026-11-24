@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MetroChan · 魔都地铁酱 — 上海地铁票价对比与站到站实测</title>
-<meta name="description" content="上海地铁票价对比工具：现状（2005 版）vs 2026 年 12 月 1 日生效的最终方案，附听证方案一、二。支持任意乘距、418 站站到站官方实测票价与换乘路径查询，并与北京、广州、深圳、杭州、南京、成都、武汉七城横向对比。">
+<meta name="description" content="上海地铁票价对比工具：老方案（2005 版）vs 2026 年 12 月 1 日生效的新方案，附听证方案一、二。支持任意乘距、418 站站到站官方实测票价与换乘路径查询，并与北京、广州、深圳、杭州、南京、成都、武汉七城横向对比。">
 <meta name="keywords" content="上海地铁,地铁票价,票价听证,轨道交通票价,地铁涨价,票价计算器,MetroChan">
 <meta name="author" content="MiaoTony">
 <meta name="theme-color" content="#c8102e">
@@ -12,7 +12,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MetroChan · 魔都地铁酱">
 <meta property="og:title" content="MetroChan · 魔都地铁酱 — 上海地铁票价对比工具">
-<meta property="og:description" content="现状 vs 听证方案一/二，任意乘距与站到站票价对比，并横向对比北上广深杭宁蓉汉七城地铁票价。">
+<meta property="og:description" content="老方案 vs 听证方案一/二，任意乘距与站到站票价对比，并横向对比北上广深杭宁蓉汉七城地铁票价。">
 <meta property="og:url" content="https://metrochan.miaotony.xyz/">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://metrochan.miaotony.xyz/og.png">
@@ -20,7 +20,7 @@
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="MetroChan · 魔都地铁酱 — 上海地铁票价对比工具">
-<meta name="twitter:description" content="现状 vs 听证方案一/二，任意乘距与站到站票价对比，并横向对比北上广深杭宁蓉汉七城地铁票价。">
+<meta name="twitter:description" content="老方案 vs 听证方案一/二，任意乘距与站到站票价对比，并横向对比北上广深杭宁蓉汉七城地铁票价。">
 <meta name="twitter:image" content="https://metrochan.miaotony.xyz/og.png">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="favicon.svg">
@@ -289,9 +289,9 @@
 
   <header>
     <h1>MetroChan<span class="h1-cn">魔都地铁酱</span></h1>
-    <div class="sub">上海地铁票价对比 · 现状（2005 版）vs 最终方案（2026-12-01 生效）· 附听证方案一、二</div>
+    <div class="sub">上海地铁票价对比 · 老方案（2005 版）vs 新方案（2026-12-01 生效）· 附听证方案一、二</div>
     <div class="src">
-      票价数据：2026-11-24 官方票价查询系统全量抓取的站到站票价与换乘路径（418 站、87153 对）。最终方案依据<a href="https://fgw.sh.gov.cn/fgw_jjjctk/20261123/f57b63885c514c829ee269ed589ab2b9.html" target="_blank" rel="noopener">《关于优化上海市轨道交通票价机制的复函》</a>（沪发改价调〔2026〕58号，2026-12-01 起执行）；听证方案见<a href="https://fgw.sh.gov.cn/cmsres/24/2480505af8bb4b50bfa75092e12fe6af/535b6d58b1fd807bb0b9a2b92ecd078e.wps" target="_blank" rel="noopener">《优化上海市轨道交通票价机制听证方案》</a>（2026-08-19）。
+      票价数据：2026-11-24 官方票价查询系统全量抓取的站到站票价与换乘路径（418 站、87153 对）。新方案依据<a href="https://fgw.sh.gov.cn/fgw_jjjctk/20261123/f57b63885c514c829ee269ed589ab2b9.html" target="_blank" rel="noopener">《关于优化上海市轨道交通票价机制的复函》</a>（沪发改价调〔2026〕58号，2026-12-01 起执行）；听证方案见<a href="https://fgw.sh.gov.cn/cmsres/24/2480505af8bb4b50bfa75092e12fe6af/535b6d58b1fd807bb0b9a2b92ecd078e.wps" target="_blank" rel="noopener">《优化上海市轨道交通票价机制听证方案》</a>（2026-08-19）。
       站间距数据：中文维基百科各线路词条（官方设计/环评资料，米级）。
       不含磁浮线、金山铁路、市域机场线。
     </div>
@@ -332,8 +332,8 @@
       <h2>全乘距票价曲线 <span class="tag">阶梯图</span></h2>
       <div class="chartbox">
         <div class="legend">
-          <span><i class="sw cur"></i>现状（2005 版）</span>
-          <span><i class="sw final"></i>最终方案（2026-12）</span>
+          <span><i class="sw cur"></i>老方案（2005 版）</span>
+          <span><i class="sw final"></i>新方案（2026-12）</span>
           <span class="lg-hearing"><i class="sw p1"></i>方案一</span>
           <span class="lg-hearing"><i class="sw p2"></i>方案二</span>
           <label class="toggle hearing-toggle"><input type="checkbox" id="showHearing"> 显示听证方案一、二（未采纳）</label>
@@ -350,10 +350,10 @@
           <input type="range" id="ridesRange" min="1" max="90" value="44" class="rides-range" aria-label="每月乘坐次数滑块">
           <input type="number" id="rides" min="1" max="200" value="44">
           <span class="km-label">次/月（按上方乘距）</span>
-          <label class="toggle"><input type="checkbox" id="discount" checked> 计入满额后 9 折（现状满 70 / 最终方案满 90 / 听证方案满 100 元）</label>
+          <label class="toggle"><input type="checkbox" id="discount" checked> 计入满额后 9 折（老方案满 70 / 新方案满 90 / 听证方案满 100 元）</label>
         </div>
         <div id="costTable"></div>
-        <div class="hint">计次票为 30 天内固定次数（35/45/60/90 次），与单程票价互斥；满额 9 折优惠仅适用于刷码/刷卡的单程付费：现状为月累计满 70 元后 9 折，最终方案为满 90 元，听证方案为满 100 元。</div>
+        <div class="hint">计次票为 30 天内固定次数（35/45/60/90 次），与单程票价互斥；满额 9 折优惠仅适用于刷码/刷卡的单程付费：老方案为月累计满 70 元后 9 折，新方案为满 90 元，听证方案为满 100 元。</div>
       </div>
     </section>
   </div>
@@ -409,10 +409,10 @@
           <input type="range" id="ridesS2sRange" min="1" max="90" value="44" class="rides-range" aria-label="每月乘坐次数滑块">
           <input type="number" id="ridesS2s" min="1" max="200" value="44">
           <span class="km-label">次/月</span>
-          <label class="toggle"><input type="checkbox" id="discountS2s" checked> 计入满额后 9 折（现状满 70 / 最终方案满 90 / 听证方案满 100 元）</label>
+          <label class="toggle"><input type="checkbox" id="discountS2s" checked> 计入满额后 9 折（老方案满 70 / 新方案满 90 / 听证方案满 100 元）</label>
         </div>
         <div id="costTableS2s"></div>
-        <div class="hint">计次票为 30 天内固定次数（35/45/60/90 次），与单程票价互斥；满额 9 折优惠仅适用于刷码/刷卡的单程付费：现状为月累计满 70 元后 9 折，最终方案为满 90 元，听证方案为满 100 元。「最低」在最终方案、听证方案与计次票中评比，现状仅作参照。</div>
+        <div class="hint">计次票为 30 天内固定次数（35/45/60/90 次），与单程票价互斥；满额 9 折优惠仅适用于刷码/刷卡的单程付费：老方案为月累计满 70 元后 9 折，新方案为满 90 元，听证方案为满 100 元。「最低」在新方案、听证方案与计次票中评比，老方案仅作参照。</div>
       </div>
     </section>
   </div>
@@ -472,7 +472,7 @@
       <h2>2026 新票价机制 <span class="tag">12 月 1 日生效</span></h2>
       <div class="card">
         <table>
-          <thead><tr><th>项目</th><th>现状（2005）</th><th>最终方案</th></tr></thead>
+          <thead><tr><th>项目</th><th>老方案（2005）</th><th>新方案</th></tr></thead>
           <tbody>
             <tr><td>起步价</td><td>3 元 / 6 公里</td><td class="up">3 元 / 4 公里</td></tr>
             <tr><td>加价间距</td><td>之后每 10 公里 +1 元</td><td class="up">4/4/4/7/7/10/10 公里，50 公里后每 15 公里 +1 元</td></tr>
@@ -490,10 +490,10 @@
       <h2>新票价档位</h2>
       <div class="card">
         <table id="tierTable">
-          <thead><tr><th>最长乘距</th><th>票价</th><th>较现状</th></tr></thead>
+          <thead><tr><th>最长乘距</th><th>票价</th><th>较老方案</th></tr></thead>
           <tbody></tbody>
         </table>
-        <div class="hint">「较现状」按 2005 版规则在同一档位上限折算；125 公里以上按每 20 公里 +1 元推算。</div>
+        <div class="hint">「较老方案」按 2005 版规则在同一档位上限折算；50 公里以上按每 15 公里加 1 元。</div>
       </div>
     </section>
     <section>
@@ -511,24 +511,24 @@
 
   <div class="foot">
     <p class="formula"><b>票价公式（基准价）</b></p>
-    <p class="formula">现状（2005 版）：0-6km 3 元，之后每 10km +1 元。</p>
-    <p class="formula">方案一：0-4km 3 元，之后按 4/4/4/7/7/7/10/10/10km 每档 +1 元，67km 以上每 15km +1 元。</p>
-    <p class="formula">方案二：0-6km 4 元，之后按 6/8/8/10/10/12/12km 每档 +1 元，72km 以上每 14km +1 元。</p>
-    <p class="formula">最终方案：0-4km 3 元，4-16km 每 4km +1 元，16-30km 每 7km +1 元，30-50km 每 10km +1 元，50-125km 每 15km +1 元，125km 以上每 20km +1 元（推算）。</p>
-    <p>平均影响：最终方案口径下，据官方公布平均每人次多支出约 0.9 元；听证方案一 +23.3%（4.23→5.22 元），听证方案二 +22.9%（4.23→5.20 元）。</p>
+    <p class="formula"><b>老方案</b>（2005 版）：起乘价 3 元可乘 6 公里，之后每 10 公里加 1 元。</p>
+    <p class="formula"><b>新方案</b>（2026-12-01 起执行）：起乘价 3 元，起乘间距 0—4 公里；后续每 4、4、4、7、7、10、10 公里加 1 元，50 公里以上每 15 公里加 1 元。</p>
+    <p class="formula"><b>听证方案一</b>（未采纳）：起乘价 3 元、0—4 公里，之后按 4/4/4/7/7/7/10/10/10 公里每档加 1 元，67 公里以上每 15 公里加 1 元。</p>
+    <p class="formula"><b>听证方案二</b>（未采纳）：起乘价 4 元、0—6 公里，之后按 6/8/8/10/10/12/12 公里每档加 1 元，72 公里以上每 14 公里加 1 元。</p>
+    <p>平均影响：新方案口径下，据官方公布平均每人次多支出约 0.9 元；听证方案一 +23.3%（4.23→5.22 元），听证方案二 +22.9%（4.23→5.20 元）。</p>
     <p>站到站里程按线网<b>最短路径里程</b>计价（换乘不计里程），站间距来自维基百科各线路词条，为官方设计/环评数据的米级精度。</p>
     <p>官方资料：<a href="https://fgw.sh.gov.cn/fgw_jjjctk/20261123/f57b63885c514c829ee269ed589ab2b9.html" target="_blank" rel="noopener">《关于优化上海市轨道交通票价机制的复函》</a>（沪发改价调〔2026〕58号，2026-11-23）·<a href="https://fgw.sh.gov.cn/fgw_gsgg/20261123/78e253eb2682475381bc60ce10f0b303.html" target="_blank" rel="noopener">《优化上海市轨道交通票价机制主要意见建议采纳情况》</a>（2026-11-23）</p>
     <p>站到站票价与换乘路径取自 2026-11-24 官方票价查询系统的全量抓取（418 站、87153 个站对），供参考，实际以车站公示与官方查询为准。</p>
-    <p class="disclaimer">⚠️ 本页面为个人自行整理的对比工具，<b>非官方页面</b>，数据仅供参考。上海地铁实际计价机制可以说是「<span class="spoiler" tabindex="0">沪国机密</span>」，本页估算结果可能与实际存在差异，一切以官方实际计价为准。</p>
+    <p class="disclaimer">⚠️ 本页面为个人自行整理的对比工具，<b>非官方页面</b>。站到站票价与换乘路径取自官方票价查询系统的全量数据，供参考；与官方查询结果存在差异时，以官方为准。</p>
     <p class="copyright">© 2026 <a href="https://miaotony.xyz" target="_blank" rel="noopener">MiaoTony</a> · <a href="https://github.com/miaotony/MetroChan" target="_blank" rel="noopener">MetroChan (GitHub)</a> · All rights reserved.</p>
   </div>
 
   <div class="modal-mask" id="s2sModal">
     <div class="modal" role="dialog" aria-modal="true" aria-labelledby="s2sModalTitle">
-      <h3 id="s2sModalTitle">⚠️ 站到站票价为估算值</h3>
-      <p>本页根据<b>公开站间距数据</b>估算两站间的最短里程并推算票价。上海地铁真实的计价里程算法并未完整公开（可以说是「<span class="spoiler" tabindex="0">沪国机密</span>」），估算结果<b>可能与闸机实际扣费存在差异</b>。</p>
+      <h3 id="s2sModalTitle">这一站对不在官方票价库中</h3>
+      <p>站到站票价与换乘路径取自<b>官方票价查询系统 2026-11-24 的全量数据</b>，覆盖的站对显示的是官方实测值；只有官方库未收录的站对，才按公开站间距推算里程和规则票价，此时为估算参考。</p>
       <p>页面展示的路径是<b>计价用的最短里程路径</b>，不是乘车换乘建议。</p>
-      <p class="small">一切以上海地铁官方实际计价为准。</p>
+      <p class="small">与官方查询结果存在差异时，以官方为准。</p>
       <label class="modal-check"><input type="checkbox" id="s2sModalDontShow"> 不再提示</label>
       <button class="modal-btn" id="s2sModalOk">我知道了</button>
     </div>
@@ -559,16 +559,17 @@ function farePlan2(d){
   if(d<=72) return price;
   return price + Math.ceil((d-72)/14);
 }
-/* 2026-12-01 生效的最终方案：起步 3 元 / 4 km，16 km 内每 4 km 加 1 元，
+/* 2026-12-01 生效的新方案：起步 3 元 / 4 km，16 km 内每 4 km 加 1 元，
    16 元后每 7 km 加 1 元，30 km 后每 10 km 加 1 元，125 km 后每 20 km 加 1 元 */
 function fareFinal(d){
-  var tiers=[[4,3],[8,4],[12,5],[16,6],[23,7],[30,8],[40,9],[50,10],[65,11],[80,12],[95,13],[110,14],[125,15]];
+  if (d <= 4) return 3;
+  var tiers=[[8,4],[12,5],[16,6],[23,7],[30,8],[40,9],[50,10]];
   for(var i=0;i<tiers.length;i++){ if(d<=tiers[i][0]) return tiers[i][1]; }
-  return 15 + Math.ceil((d-125)/20);
+  return 10 + Math.ceil((d-50)/15);   /* 50 公里以上每 15 公里加 1 元 */
 }
 const FARES = [
-  {key:'cur',   name:'现状（2005 版）',      fn:fareCurrent, color:'#8a8a8a'},
-  {key:'final', name:'最终方案（2026-12）',  fn:fareFinal,   color:'#c8102e'},
+  {key:'cur',   name:'老方案（2005 版）',      fn:fareCurrent, color:'#8a8a8a'},
+  {key:'final', name:'新方案（2026-12）',  fn:fareFinal,   color:'#c8102e'},
   {key:'p1',    name:'听证方案一（未采纳）', fn:farePlan1,   color:'#1668a3', hearing:true},
   {key:'p2',    name:'听证方案二（未采纳）', fn:farePlan2,   color:'#2f8f6b', hearing:true}
 ];
@@ -683,7 +684,7 @@ function renderCostTable(container, km, rides, useDisc){
   activeFares().forEach(function(f){
     var per = f.fn(km);
     var total = per * rides;
-    var th = f.key==='cur' ? 70 : (f.key==='final' ? 90 : 100);  // 现状满70、最终方案满90、听证方案满100 打 9 折
+    var th = f.key==='cur' ? 70 : (f.key==='final' ? 90 : 100);  // 老方案满70、新方案满90、听证方案满100 打 9 折
     if(useDisc && total>th){ total = th + (total-th)*0.9; }
     rows.push({label:f.name+'（单程）', detail:per+' 元/次', cost:total});
   });
@@ -691,7 +692,7 @@ function renderCostTable(container, km, rides, useDisc){
     var cover = rides<=t.n;
     rows.push({label:'计次票 '+t.n+' 次', detail:t.c+' 元/30天', cost: cover?t.c:null});
   });
-  // 最低：只在新方案（方案一/方案二）和计次票之间比，排除现状
+  // 最低：只在新方案（方案一/方案二）和计次票之间比，排除老方案
   var bestIdx = -1;
   for(var i=1;i<rows.length;i++){
     if(rows[i].cost===null) continue;
@@ -709,7 +710,7 @@ function renderCostTable(container, km, rides, useDisc){
         var diff = r.cost - rows[bestIdx].cost;
         if(diff >= 0){ diffStr = '+¥ '+diff.toFixed(1); }
         else { diffStr = '−¥ '+Math.abs(diff).toFixed(1); }
-        if(i===0){ diffStr += '（现状，不参与评比）'; }
+        if(i===0){ diffStr += '（老方案，不参与评比）'; }
       }
     }
     html += '<tr'+bestCls+'><td>'+r.label+(i===bestIdx?'<span class="badge">最低</span>':'')+'</td>'
@@ -743,7 +744,7 @@ function renderCostTable(container, km, rides, useDisc){
         deltaTxt = '基准'; deltaCls = 'eq'; note = '0-6km 起步 3 元，每 10km +1';
       } else {
         var diff = p - cur;
-        deltaTxt = diff===0 ? '与现状相同' : ('比现状 ' + (diff>0?'+':'') + diff + ' 元');
+        deltaTxt = diff===0 ? '与老方案相同' : ('比老方案 ' + (diff>0?'+':'') + diff + ' 元');
         deltaCls = diff===0 ? 'eq' : 'up';
         note = f.key==='p1' ? '起步 3 元不变，缩短起乘/中短距间距'
              : (f.key==='p2' ? '起步 4 元，均摊涨幅' : '起步 3 元/4km，16km 内每 4km +1');
@@ -869,8 +870,8 @@ function fareNJ(d){
 function fareCDWH(d){ if(d<=4) return 2; if(d<=12) return 2+Math.ceil((d-4)/4); if(d<=24) return 4+Math.ceil((d-12)/6); if(d<=40) return 6+Math.ceil((d-24)/8); if(d<=50) return 8+Math.ceil((d-40)/10); return 9+Math.ceil((d-50)/20); }
 
 const CITY_FARES = [
-  {key:'sh',   name:'上海·现状',     short:'沪现状', fn:fareCurrent, color:'#8a8a8a'},
-  {key:'shf',  name:'上海·最终方案', short:'沪新价', fn:fareFinal,   color:'#c8102e'},
+  {key:'sh',   name:'上海·老方案',     short:'沪老方案', fn:fareCurrent, color:'#8a8a8a'},
+  {key:'shf',  name:'上海·新方案', short:'沪新价', fn:fareFinal,   color:'#c8102e'},
   {key:'bj',   name:'北京',        short:'北京',   fn:fareBJ,      color:'#e6a23c'},
   {key:'gsh',  name:'广州 / 深圳 / 杭州', short:'穗深杭', fn:fareGSH, color:'#2e7d32'},
   {key:'nj',   name:'南京',        short:'南京',   fn:fareNJ,      color:'#7b1fa2'},
@@ -878,9 +879,9 @@ const CITY_FARES = [
 ];
 
 const CITY_CARDS = [
-  {name:'上海（2026 最终方案）', color:'#c8102e',
+  {name:'上海（2026 新方案）', color:'#c8102e',
    rule:'计程票制：起步 3 元可乘 4 公里；4–16 公里每 4 公里加 1 元，16–30 公里每 7 公里加 1 元，30–50 公里每 10 公里加 1 元，50–125 公里每 15 公里加 1 元。',
-   meta:'优惠：月累计满 90 元后 9 折；计次票 35/45/60/90 次；一日票 24 元、三日票 60 元。2026-12-01 起执行；现状（2005 版）与听证方案见「按乘距」页。',
+   meta:'优惠：月累计满 90 元后 9 折；计次票 35/45/60/90 次；一日票 24 元、三日票 60 元。2026-12-01 起执行；老方案（2005 版）与听证方案见「按乘距」页。',
    src:'https://www.shanghai.gov.cn/nw4411/20260820/65c1be2474c345339c39a9ad9c724fdf.html', srcName:'上海市人民政府'},
   {name:'北京', color:'#e6a23c',
    rule:'计程限时票制（首都机场线、大兴机场线除外）：起步 6 公里（含）内 3 元；6–12 公里（含）4 元；12–22 公里（含）5 元；22–32 公里（含）6 元；32 公里以上每增加 20 公里加 1 元，票价不封顶。',
@@ -1485,7 +1486,7 @@ const CITY_CARDS = [
     FARES.forEach(function(f){
       var p = f.fn(km);
       var diff = p - curFare;
-      var deltaTxt = f.key==='cur' ? '基准' : (diff===0 ? '与现状相同' : '比现状 ' + (diff>0?'+':'') + diff + ' 元');
+      var deltaTxt = f.key==='cur' ? '基准' : (diff===0 ? '与老方案相同' : '比老方案 ' + (diff>0?'+':'') + diff + ' 元');
       html += '<div class="card ' + f.key + '"><div class="name">' + f.name + '</div>'
         + '<div class="price">' + p + '<span class="u">元</span></div>'
         + '<div class="delta ' + (f.key==='cur'?'eq':(diff>0?'up':(diff===0?'eq':'down'))) + '">' + deltaTxt + '</div></div>';
