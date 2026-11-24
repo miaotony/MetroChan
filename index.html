@@ -1261,8 +1261,8 @@ const CITY_CARDS = [
           + (it.sub ? '<span class="pick-sub">' + it.sub + '</span>' : '') + '</div>';
       }).join('') : '<div class="pick-empty">没有匹配</div>';
       list.querySelectorAll('.pick-item').forEach(function(el){
-        el.addEventListener('pointerdown', function(ev){
-          ev.preventDefault();
+        el.addEventListener('click', function(ev){
+          ev.preventDefault(); ev.stopPropagation();
           var it = src[+el.getAttribute('data-i')];
           var changed = it.value !== value;
           value = it.value; renderBtn(); close();
@@ -1278,7 +1278,7 @@ const CITY_CARDS = [
     });
     input.addEventListener('input', function(){ renderList(input.value.trim()); });
     input.addEventListener('keydown', function(e){
-      if (e.key === 'Enter'){ var f = list.querySelector('.pick-item'); if (f) f.dispatchEvent(new PointerEvent('pointerdown', {bubbles:true, cancelable:true})); }
+      if (e.key === 'Enter'){ var f = list.querySelector('.pick-item'); if (f) f.click(); }
       if (e.key === 'Escape'){ close(); btn.focus(); }
     });
     document.addEventListener('click', function(e){ if (!root.contains(e.target)) close(); });
@@ -1396,8 +1396,8 @@ const CITY_CARDS = [
       }).join('');
       suggest.classList.add('open');
       suggest.querySelectorAll('.sg-item').forEach(function(el){
-        el.addEventListener('pointerdown', function(ev){
-          ev.preventDefault();
+        el.addEventListener('click', function(ev){
+          ev.preventDefault(); ev.stopPropagation();
           pick(items[+el.getAttribute('data-i')].name);
         });
       });
