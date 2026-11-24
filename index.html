@@ -391,6 +391,29 @@
   .share-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:30px}
   .share-opt{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none}
   .share-opt input{width:14px;height:14px;accent-color:var(--red);cursor:pointer}
+
+  /* ---- 支持作者 / 浮动提示 ---- */
+  .support{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:34px 0 8px}
+  .sp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px}
+  .sp-h{font-size:14.5px;font-weight:700;margin-bottom:6px}
+  .sp-card p{font-size:13px;color:var(--muted);line-height:1.7;margin:0 0 12px}
+  .sp-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#fff;background:#24292f;border-radius:8px;padding:8px 14px;text-decoration:none}
+  .sp-btn:hover{background:#3a4149}
+  .sp-pay{text-align:center}
+  .sp-pay img{width:148px;height:148px;border-radius:10px;border:1px solid var(--border);background:#fff;padding:6px}
+  .tip-float{position:fixed;right:18px;top:96px;width:236px;background:#fffdfa;border:1px solid #e8e2d9;border-radius:14px;box-shadow:0 12px 32px rgba(60,45,30,.13);padding:16px 18px 14px;z-index:80;font-size:12.5px;color:#4a443d;display:none}
+  .tip-float.on{display:block}
+  .tip-float .tip-h{font-size:13.5px;font-weight:700;color:#2e2b27;margin-bottom:8px}
+  .tip-float p{margin:0 0 8px;line-height:1.65;color:#6b635a}
+  .tip-float a{color:var(--red);text-decoration:none;border-bottom:1px dotted rgba(200,16,46,.4)}
+  .tip-float img{display:block;width:132px;height:132px;margin:8px auto 0;border-radius:8px;border:1px solid #eee6db;background:#fff;padding:4px}
+  .tip-close{position:absolute;right:8px;top:6px;border:0;background:none;font-size:18px;line-height:1;color:#b3a99c;cursor:pointer;padding:4px}
+  .tip-fab{position:fixed;right:16px;bottom:22px;width:46px;height:46px;border-radius:50%;border:1px solid #e8e2d9;background:#fffdfa;box-shadow:0 6px 18px rgba(60,45,30,.15);font-size:20px;cursor:pointer;z-index:80;display:none}
+  @media (max-width:900px){
+    .tip-float{right:12px;top:auto;bottom:78px;width:min(84vw,250px)}
+    .tip-fab{display:block}
+    .support{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
@@ -646,6 +669,15 @@
     </button>
   </div>
 
+  <div class="tip-float" id="tipFloat">
+  <button type="button" class="tip-close" id="tipClose" aria-label="关闭">×</button>
+  <div class="tip-h">喜欢这个页面？</div>
+  <p>欢迎分享给身边坐地铁的朋友。</p>
+  <p>制作不易，如果对你有帮助，<a href="https://github.com/miaotony/MetroChan" target="_blank" rel="noopener">Star 一下</a>或扫码打赏 🙏</p>
+  <img src="assets/wechat-reward.png" alt="微信打赏二维码" loading="lazy">
+</div>
+<button type="button" class="tip-fab" id="tipFab" aria-label="打赏与分享">💰</button>
+
   <div class="foot">
     <p class="formula"><b>票价公式（基准价）</b></p>
     <p class="formula"><b>老方案</b>（2005 版）：起乘价 3 元、0—6 公里，之后每 10 公里加 1 元。</p>
@@ -663,6 +695,19 @@
     <p class="disclaimer">⚠️ 本站是个人整理的对比工具，非上海地铁官方页面。<br>
     站到站票价与换乘路径取自官方票价查询系统 2026-11-24 的数据，覆盖 418 站、87153 个站对；站间距来自公开资料推算。<br>
     与官方查询结果存在差异时，以官方为准。发现问题或有建议，欢迎<a class="lnk" href="https://github.com/miaotony/MetroChan/issues" target="_blank" rel="noopener">提 Issue</a>告诉我。</p>
+    <div class="support">
+      <div class="sp-card">
+        <div class="sp-h">项目开源在 GitHub</div>
+        <p>欢迎 Star、提 Issue，或者一起来完善数据。</p>
+        <a class="sp-btn" href="https://github.com/miaotony/MetroChan" target="_blank" rel="noopener">⭐ Star miaotony/MetroChan</a>
+      </div>
+      <div class="sp-card sp-pay">
+        <div class="sp-h">制作不易，如果这页面对你有帮助</div>
+        <p>欢迎打赏，非常感谢 🙏</p>
+        <img src="assets/wechat-reward.png" alt="微信打赏二维码" loading="lazy" width="148" height="148">
+      </div>
+    </div>
+
     <p class="copyright">© 2026 <a href="https://miaotony.xyz" target="_blank" rel="noopener">MiaoTony</a> · <a href="https://github.com/miaotony/MetroChan" target="_blank" rel="noopener">MetroChan (GitHub)</a> · All rights reserved.</p>
   </div>
 
@@ -2021,6 +2066,25 @@ const CITY_CARDS = [
     html += '<div class="ticket"><div class="tk-name">联程七日票（随申行）</div><div class="tk-price">112<small>元</small></div><div class="tk-per">168 小时地铁 + 公交 + 轮渡</div></div>';
     g.innerHTML = html;
   }
+})();
+
+/* 打赏浮窗 */
+(function(){
+  var box = document.getElementById('tipFloat');
+  var fab = document.getElementById('tipFab');
+  var close = document.getElementById('tipClose');
+  if(!box) return;
+  var KEY = 'mc_tip_hidden';
+  var hidden = false;
+  try { hidden = localStorage.getItem(KEY) === '1'; } catch(e){}
+  var wide = window.matchMedia('(min-width: 901px)').matches;
+  if(!hidden && wide) box.classList.add('on');
+  if(fab) fab.addEventListener('click', function(){ box.classList.toggle('on'); });
+  if(close) close.addEventListener('click', function(e){
+    e.stopPropagation();
+    box.classList.remove('on');
+    try { localStorage.setItem(KEY, '1'); } catch(err){}
+  });
 })();
 </script>
 </body>
