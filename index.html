@@ -77,6 +77,7 @@
   .panel.active{display:block}
 
   h2{font-size:17px;font-weight:700;margin-bottom:14px;letter-spacing:-.01em}
+  section + section{margin-top:34px;padding-top:30px;border-top:1px solid var(--line)}
   h2 .tag{font-size:12px;font-weight:600;color:var(--muted);margin-left:8px;background:var(--gray-bg);padding:2px 8px;border-radius:10px;vertical-align:2px}
 
   .control{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
@@ -350,6 +351,7 @@
 
   /* ---- 移动端：标签一行、下拉更宽 ---- */
   @media (max-width:600px){
+    section + section{margin-top:26px;padding-top:22px}
     .tabs{gap:4px;margin-top:18px}
     .tab{flex:1 1 0;min-width:0;padding:9px 2px;font-size:12.5px;white-space:nowrap;letter-spacing:-.02em}
     .ep-selects{grid-template-columns:1fr 1.35fr;gap:7px}
@@ -378,6 +380,14 @@
     .cards.mini .card .price{font-size:19px}
     .cards.mini .card .delta{font-size:9.5px}
   }
+
+  /* ---- 改版详情强调 ---- */
+  .ticket .tk-per b{color:var(--red);font-size:14.5px;font-weight:800;margin:0 1px}
+  table.cmp td:first-child{color:var(--red);font-weight:800;font-size:15px}
+  table.cmp td:nth-child(3){font-weight:700}
+  table.cmp .dneg{font-weight:800;font-size:14.5px}
+  #panel-change h3{margin-top:26px}
+  #panel-change h3:first-child{margin-top:0}
 </style>
 </head>
 <body>
@@ -563,7 +573,7 @@
   <!-- Tab 5: 改版详情 -->
   <div class="panel" id="panel-change">
     <section>
-      <h2>2026 新票价：一页看完 <span class="tag">12 月 1 日起执行</span></h2>
+      <h2>2026.12 新票价：一页看完 <span class="tag">12 月 1 日起执行</span></h2>
 
       <div class="kv-grid">
         <div class="kv">
@@ -587,13 +597,6 @@
           <div class="kv-sub up">35 / 45 / 60 / 90 次</div>
         </div>
       </div>
-
-      <h3>同样票价，最远能坐多远</h3>
-      <table class="cmp" id="cmpTable">
-        <thead><tr><th>票价</th><th>老方案</th><th>新方案</th><th>变化</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <p class="hint">按基准票价规则推算的里程上限，不含满额优惠和计次票；超过 50 公里后新方案每 15 公里加 1 元。</p>
 
       <div class="chg-cols">
         <div class="chg-col">
@@ -622,6 +625,14 @@
       <h3 style="margin-top:26px">票种与优惠</h3>
       <div class="ticket-grid" id="ticketGrid"></div>
       <p class="hint">计次票 30 个自然日内有效、限本人实名使用，不与满额优惠、公交换乘优惠同享；满额优惠按自然月累计，当月满额后超出部分 9 折。联程日票在「随申行」平台购买，一张票可通乘地铁、公交、轮渡，为同行人购买时同步启用。</p>
+
+      <h3>同样票价，最远能坐多远</h3>
+      <table class="cmp" id="cmpTable">
+        <thead><tr><th>票价</th><th>老方案</th><th>新方案</th><th>变化</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="hint">按基准票价规则推算的里程上限，不含满额优惠和计次票；超过 50 公里后新方案每 15 公里加 1 元。</p>
+
     </section>
   </div>
 
@@ -1927,13 +1938,13 @@ const CITY_CARDS = [
     var html = [{n:35,p:190},{n:45,p:210},{n:60,p:270},{n:90,p:390}].map(function(t){
       return '<div class="ticket"><div class="tk-name">计次票 ' + t.n + ' 次</div>'
         + '<div class="tk-price">' + t.p + '<small>元</small></div>'
-        + '<div class="tk-per">折合 ' + (t.p / t.n).toFixed(2) + ' 元/次</div></div>';
+        + '<div class="tk-per">折合 <b>' + (t.p / t.n).toFixed(2) + '</b> 元/次</div></div>';
     }).join('');
     html += '<div class="ticket"><div class="tk-name">一日票</div><div class="tk-price">24<small>元</small></div><div class="tk-per">首次进站起 24 小时不限次</div></div>';
     html += '<div class="ticket"><div class="tk-name">三日票</div><div class="tk-price">60<small>元</small></div><div class="tk-per">72 小时内不限次</div></div>';
-    html += '<div class="ticket"><div class="tk-name">联程日票（随申行）</div><div class="tk-price">19.8<small>元</small></div><div class="tk-per">24 小时地铁 + 公交 + 轮渡</div></div>';
-    html += '<div class="ticket"><div class="tk-name">联程三日票（随申行）</div><div class="tk-price">47.8<small>元</small></div><div class="tk-per">72 小时地铁 + 公交 + 轮渡</div></div>';
-    html += '<div class="ticket"><div class="tk-name">联程七日票（随申行）</div><div class="tk-price">85.8<small>元</small></div><div class="tk-per">168 小时地铁 + 公交 + 轮渡</div></div>';
+    html += '<div class="ticket"><div class="tk-name">联程日票（随申行）</div><div class="tk-price">26<small>元</small></div><div class="tk-per">24 小时地铁 + 公交 + 轮渡</div></div>';
+    html += '<div class="ticket"><div class="tk-name">联程三日票（随申行）</div><div class="tk-price">62<small>元</small></div><div class="tk-per">72 小时地铁 + 公交 + 轮渡</div></div>';
+    html += '<div class="ticket"><div class="tk-name">联程七日票（随申行）</div><div class="tk-price">112<small>元</small></div><div class="tk-per">168 小时地铁 + 公交 + 轮渡</div></div>';
     g.innerHTML = html;
   }
 })();
