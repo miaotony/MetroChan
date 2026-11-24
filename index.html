@@ -31,14 +31,55 @@
     --red:#c8102e; --red-bg:#fdf1f2; --red-line:#e08a96;
     --blue:#1668a3; --blue-bg:#eef5fb; --blue-line:#8fb7d6;
     --gray:#7d7d7d; --gray-bg:#f2f1ee; --gray-line:#c4c2bd;
+    --map-bg:#fbfaf8; --th-bg:#faf8f5; --hover-bg:#f4f1ec; --sel-bg:#f1ede6;
+    --note-bg:#fdf6e8; --note-line:#e8cf9a; --ok-bg:#f1f8f1; --ok-line:#a5d6a7; --ok-ink:#2e7d32;
     --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  }
+
+  /* ---- 暗色主题：默认跟随系统，可手动切换 ---- */
+  @media (prefers-color-scheme: dark){
+    html:not([data-theme="light"]){
+      --bg:#14161a; --surface:#1c1f24; --ink:#e8e5df; --muted:#9c968c;
+      --border:#2f343b; --line:#262b31;
+      --red:#ff6b7e; --red-bg:#2a1a1f; --red-line:#7a3744;
+      --blue:#6aa9d8; --blue-bg:#16242f; --blue-line:#2f556d;
+      --gray:#9a9a9a; --gray-bg:#22262c; --gray-line:#3a3f46;
+      --map-bg:#181b20; --th-bg:#20242a; --hover-bg:#242a31; --sel-bg:#2b323a;
+      --note-bg:#2a2418; --note-line:#5c4a26; --ok-bg:#17261c; --ok-line:#2f5c3c; --ok-ink:#7fd39a;
+    }
+  }
+  html[data-theme="dark"]{
+    --bg:#14161a; --surface:#1c1f24; --ink:#e8e5df; --muted:#9c968c;
+    --border:#2f343b; --line:#262b31;
+    --red:#ff6b7e; --red-bg:#2a1a1f; --red-line:#7a3744;
+    --blue:#6aa9d8; --blue-bg:#16242f; --blue-line:#2f556d;
+    --gray:#9a9a9a; --gray-bg:#22262c; --gray-line:#3a3f46;
+    --map-bg:#181b20; --th-bg:#20242a; --hover-bg:#242a31; --sel-bg:#2b323a;
+    --note-bg:#2a2418; --note-line:#5c4a26; --ok-bg:#17261c; --ok-line:#2f5c3c; --ok-ink:#7fd39a;
+  }
+  html[data-theme="dark"] .tip-float,
+  html[data-theme="dark"] .tip-fab{background:var(--surface);border-color:var(--border);color:var(--ink)}
+  html[data-theme="dark"] .tip-float .tip-h,
+  html[data-theme="dark"] .tip-float p{color:var(--ink)}
+  html[data-theme="dark"] .tip-close{color:var(--muted)}
+  html[data-theme="dark"] .sp-btn{background:#e8e5df;color:#14161a}
+  @media (prefers-color-scheme: dark){
+    html:not([data-theme="light"]) .tip-float,
+    html:not([data-theme="light"]) .tip-fab{background:var(--surface);border-color:var(--border);color:var(--ink)}
+    html:not([data-theme="light"]) .tip-float .tip-h,
+    html:not([data-theme="light"]) .tip-float p{color:var(--ink)}
+    html:not([data-theme="light"]) .sp-btn{background:#e8e5df;color:#14161a}
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html{-webkit-text-size-adjust:100%}
   body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.55;font-size:15px}
   .wrap{max-width:960px;margin:0 auto;padding:36px 20px 80px}
 
+  header{position:relative}
+  .theme-btn{position:absolute;right:0;top:2px;width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--ink);font-size:16px;line-height:1;cursor:pointer;transition:background .15s}
+  .theme-btn:hover{background:var(--hover-bg)}
+  @media(max-width:640px){.theme-btn{width:34px;height:34px;font-size:15px}}
   header h1{font-size:34px;font-weight:800;letter-spacing:-.01em}
   header h1 .h1-cn{font-size:inherit;font-weight:inherit;color:inherit;margin-left:12px}
   header .sub{color:var(--muted);margin-top:6px;font-size:14px}
@@ -56,19 +97,19 @@
   .share-btn{display:inline-flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);color:var(--muted);
     border-radius:9px;padding:7px 14px;font-size:13px;font-family:inherit;cursor:pointer;transition:all .15s}
   .share-btn:hover{border-color:var(--red-line);color:var(--red);background:var(--red-bg)}
-  .share-btn.done{border-color:#a5d6a7;background:#f1f8f1;color:#2e7d32}
+  .share-btn.done{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok-ink)}
   table.cost td:first-child,table.cost th:first-child{position:sticky;left:0;z-index:1;background:var(--surface)}
   table.cost tr.best td:first-child{background:var(--red-bg)}
   table.cost td.cheap{background:#e8f5e9;font-weight:700;color:#2e7d32}
   .city-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:16px}
   .city-prices{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .cp-chip{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:13.5px}
+  .cp-chip{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:13.5px}
   .cp-chip .cdot{width:10px;height:10px;border-radius:3px;flex:none}
   .cp-chip .cp-name{color:var(--muted);font-weight:600}
   .cp-chip .cp-fare{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
-  .cp-chip.low{border-color:#a5d6a7;background:#f1f8f1}
-  .cp-chip.low .cp-fare{color:#2e7d32}
-  .city-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+  .cp-chip.low{border-color:var(--ok-line);background:var(--ok-bg)}
+  .cp-chip.low .cp-fare{color:var(--ok-ink)}
+  .city-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
   .city-card h3{margin:0 0 8px;font-size:16px;display:flex;align-items:center;gap:8px}
   .city-card h3 .cdot{width:12px;height:12px;border-radius:3px;display:inline-block;flex:none}
   .city-card .rule{font-size:13.5px;color:var(--ink);line-height:1.7;margin:0 0 8px}
@@ -86,10 +127,10 @@
   input[type=range]{flex:1;min-width:200px;accent-color:var(--red);height:26px}
   .km-input{display:flex;align-items:center;gap:6px;font-weight:700}
   .km-input input{width:64px;text-align:center;font-size:18px;font-weight:700;font-family:var(--mono);
-    border:1px solid var(--border);border-radius:8px;padding:6px 4px;background:#fff}
+    border:1px solid var(--border);border-radius:8px;padding:6px 4px;background:var(--surface)}
   .km-input .unit{color:var(--muted);font-size:14px;font-weight:400}
   .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-  .presets button{font:inherit;font-size:13px;color:var(--ink);background:#fff;border:1px solid var(--border);
+  .presets button{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--border);
     border-radius:20px;padding:5px 14px;cursor:pointer;transition:background .15s,border-color .15s}
   .presets button:hover{background:var(--red-bg);border-color:var(--red-line)}
   .avg-hint{margin-top:12px;font-size:13px;color:var(--muted)}
@@ -116,7 +157,7 @@
   .legend{display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink);margin-bottom:14px}
   .legend span{display:inline-flex;align-items:center;gap:7px}
   #cityLegend span{cursor:pointer;user-select:none;padding:3px 8px;border-radius:7px;border:1px solid transparent;transition:opacity .15s,background .15s}
-  #cityLegend span:hover{background:#f3f1ec}
+  #cityLegend span:hover{background:var(--hover-bg)}
   #cityLegend span.off{opacity:.32}
   #cityLegend span.off .sw{background:#bbb !important}
   .legend .sw{width:14px;height:3px;border-radius:2px;display:inline-block}
@@ -125,7 +166,7 @@
   .grid line{stroke:var(--line);stroke-width:1}
   .axis text{font-size:11px;fill:var(--muted)}
   .crosshair{stroke:#bbb;stroke-dasharray:4 3;stroke-width:1}
-  .dot{stroke:#fff;stroke-width:2}
+  .dot{stroke:var(--surface);stroke-width:2}
 
   .costbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;margin-top:2px}
   section:has(.costbox){padding-top:6px}
@@ -152,9 +193,9 @@
   .ep-title{font-size:13px;color:var(--muted);font-weight:600}
   .ep-search{position:relative}
   .ep-search input{width:100%;font:inherit;font-size:14px;padding:9px 12px;border:1px solid var(--border);
-    border-radius:9px;background:#fff;color:var(--ink)}
+    border-radius:9px;background:var(--surface);color:var(--ink)}
   .ep-search input:focus{outline:none;border-color:var(--red-line)}
-  .suggest{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid var(--border);
+  .suggest{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--surface);border:1px solid var(--border);
     border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.10);z-index:30;max-height:280px;overflow-y:auto;display:none}
   .suggest.open{display:block}
   .suggest .sg-item{touch-action:manipulation;padding:9px 13px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -163,11 +204,11 @@
   .suggest .sg-item .ln-dot{width:9px;height:9px;border-radius:50%;display:inline-block}
   .suggest .sg-empty{padding:10px 13px;font-size:13px;color:var(--muted)}
   .ep-selects{display:grid;grid-template-columns:104px minmax(0,1fr);gap:8px}
-  .ep-selects select{font:inherit;font-size:14px;padding:8px 8px;border:1px solid var(--border);border-radius:9px;background:#fff;color:var(--ink)}
+  .ep-selects select{font:inherit;font-size:14px;padding:8px 8px;border:1px solid var(--border);border-radius:9px;background:var(--surface);color:var(--ink)}
   .ep-selects select:first-child{width:108px;flex:none}
   .ep-selects select:last-child{flex:1;min-width:0}
   .swap-btn{font:inherit;font-size:17px;font-weight:600;padding:0 14px;border:1px solid var(--border);
-    border-radius:9px;background:#fff;cursor:pointer;color:var(--ink);align-self:center}
+    border-radius:9px;background:var(--surface);cursor:pointer;color:var(--ink);align-self:center}
   .swap-btn:hover{background:var(--gray-bg)}
   .s2s-presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
   .s2s-presets button{font:inherit;font-size:12.5px;color:var(--ink);background:#fff;border:1px solid var(--border);
@@ -193,14 +234,14 @@
   .foot .disclaimer{margin-top:12px;padding:10px 14px;background:var(--red-bg);border:1px solid var(--red-line);
     border-radius:9px;color:var(--red);font-size:13px;font-weight:600}
   .foot .disclaimer b{font-weight:800}
-  .route-note{margin-top:12px;padding:9px 13px;background:#fdf6e8;border:1px solid #e8cf9a;border-radius:9px;
+  .route-note{margin-top:12px;padding:9px 13px;background:var(--note-bg);border:1px solid var(--note-line);border-radius:9px;
     font-size:12.5px;color:#8a6116;line-height:1.55}
   .foot .copyright{margin-top:12px;font-size:12.5px}
 
   .modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;
     align-items:center;justify-content:center;padding:20px}
   .modal-mask.open{display:flex}
-  .modal{background:#fff;border-radius:16px;max-width:460px;width:100%;margin:auto;padding:26px 26px 22px;
+  .modal{background:var(--surface);border-radius:16px;max-width:460px;width:100%;margin:auto;padding:26px 26px 22px;
     box-shadow:0 20px 60px rgba(0,0,0,.25)}
   .modal h3{font-size:17px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
   .modal p{font-size:14px;line-height:1.7;color:var(--ink);margin-bottom:10px}
@@ -303,15 +344,15 @@
   .pick-search{width:100%;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--border);border-radius:7px;margin-bottom:6px;box-sizing:border-box}
   .pick-list{max-height:262px;overflow:auto}
   .pick-item{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:6px;font-size:13.5px;cursor:pointer;touch-action:manipulation}
-  .pick-item:hover{background:#f4f1ec}
-  .pick-item.on{background:#f1ede6;font-weight:600}
+  .pick-item:hover{background:var(--hover-bg)}
+  .pick-item.on{background:var(--sel-bg);font-weight:600}
   .pick-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
   .pick-dots{display:inline-flex;gap:3px;width:32px;flex:none;align-items:center}
   .pick-sub{flex:none;margin-left:auto;max-width:48%;text-align:right;font-size:11px;color:#b0aca6;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pick-empty{padding:10px 8px;font-size:12.5px;color:#999}
 
   /* ---- 线路图 ---- */
-  .metromap{margin-top:18px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fbfaf8;position:relative}
+  .metromap{margin-top:18px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--map-bg);position:relative}
   .map-tip{position:absolute;transform:translate(-50%,-135%);background:#2f2c29;color:#fff;font-size:12px;line-height:1;padding:5px 9px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .14s;z-index:5}
   .map-tip.on{opacity:1}
   .map-tip:after{content:'';position:absolute;left:50%;bottom:-4px;margin-left:-4px;border:4px solid transparent;border-top-color:#2f2c29}
@@ -320,10 +361,12 @@
   .metromap .map-hint{color:#b3aea8}
   .metromap svg{display:block;width:100%;height:auto;max-height:340px}
   .metromap{padding-bottom:6px}
-  .metromap .mstop{vector-effect:non-scaling-stroke;fill:#fff;stroke:#b8b2aa;stroke-width:1.6;transition:stroke .15s}
+  .metromap .mline{stroke:var(--border)}
+  .metromap .mhalo{stroke:var(--map-bg)}
+  .metromap .mstop{vector-effect:non-scaling-stroke;fill:var(--surface);stroke:#b8b2aa;stroke-width:1.6;transition:stroke .15s}
   .metromap .mstop.inter{stroke:#7a736b;stroke-width:2.2}
   .metromap .mstop.end{stroke:#2b2b2b;stroke-width:2.6}
-  .metromap .mstop.flag{stroke:var(--red);stroke-width:3;fill:#fff}
+  .metromap .mstop.flag{stroke:var(--red);stroke-width:3;fill:var(--surface)}
   .metromap circle:hover{stroke-width:4;cursor:pointer}
 
   /* ---- 改版详情：一页纸对比 ---- */
@@ -336,7 +379,7 @@
   .kv-sub.down{color:#b3261e}
   .kv-sub.up{color:#2e7d32}
   table.cmp{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
-  table.cmp th{font-size:12.5px;color:var(--muted);font-weight:600;text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);background:#faf8f5}
+  table.cmp th{font-size:12.5px;color:var(--muted);font-weight:600;text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--th-bg)}
   table.cmp td{padding:10px 14px;border-bottom:1px solid #f0ece6;font-variant-numeric:tabular-nums}
   table.cmp tr:last-child td{border-bottom:0}
   table.cmp td:first-child{font-weight:700}
@@ -398,8 +441,12 @@
   .sp-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px}
   .sp-h{font-size:14.5px;font-weight:700;margin-bottom:6px}
   .sp-card p{font-size:13px;color:var(--muted);line-height:1.7;margin:0 0 12px}
-  .sp-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:#fff;background:#24292f;border-radius:8px;padding:8px 14px;text-decoration:none}
-  .sp-btn:hover{background:#3a4149}
+  .sp-card.sp-github{background:linear-gradient(180deg,rgba(200,16,46,.07),rgba(200,16,46,.02));border-color:rgba(200,16,46,.22)}
+  .sp-kicker{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--red);background:rgba(200,16,46,.1);border-radius:6px;padding:2px 8px;margin-bottom:8px}
+  .sp-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .sp-btn{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#fff;background:#24292f;border-radius:9px;padding:10px 18px;text-decoration:none;transition:transform .12s,filter .12s}
+  .sp-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+  .sp-issue{background:var(--red);color:#fff}
   .sp-pay{text-align:center}
   .sp-pay img{width:148px;height:148px;border-radius:10px;border:1px solid var(--border);background:#fff;padding:6px}
   .tip-float{position:fixed;right:18px;top:96px;width:236px;background:#fffdfa;border:1px solid #e8e2d9;border-radius:14px;box-shadow:0 12px 32px rgba(60,45,30,.13);padding:16px 18px 14px;z-index:80;font-size:12.5px;color:#4a443d;display:none}
@@ -421,6 +468,7 @@
 <div class="wrap">
 
   <header>
+    <button type="button" class="theme-btn" id="themeBtn" aria-label="切换亮色/暗色" title="切换亮色/暗色">🌙</button>
     <h1>MetroChan<span class="h1-cn">魔都地铁酱</span></h1>
     <div class="sub">上海地铁票价对比 · 老方案（2005 版）vs 新方案（2026-12-01 生效）· 附听证方案一、二</div>
 
@@ -697,10 +745,14 @@
     站到站票价与换乘路径取自官方票价查询系统 2026-11-24 的数据，覆盖 418 站、87153 个站对；站间距来自公开资料推算。<br>
     与官方查询结果存在差异时，以官方为准。发现问题或有建议，欢迎<a class="lnk" href="https://github.com/miaotony/MetroChan/issues" target="_blank" rel="noopener">提 Issue</a>告诉我。</p>
     <div class="support">
-      <div class="sp-card">
+      <div class="sp-card sp-github">
+        <div class="sp-kicker">开源 · 免费 · 无广告</div>
         <div class="sp-h">项目开源在 GitHub</div>
-        <p>欢迎 Star、提 Issue，或者一起来完善数据。</p>
-        <a class="sp-btn" href="https://github.com/miaotony/MetroChan" target="_blank" rel="noopener">⭐ Star miaotony/MetroChan</a>
+        <p>发现数据有问题、有功能建议，或者想补一条线路，都欢迎提 Issue；觉得好用也欢迎点个 Star。</p>
+        <div class="sp-actions">
+          <a class="sp-btn sp-star" href="https://github.com/miaotony/MetroChan" target="_blank" rel="noopener">⭐ Star</a>
+          <a class="sp-btn sp-issue" href="https://github.com/miaotony/MetroChan/issues" target="_blank" rel="noopener">💬 提 Issue</a>
+        </div>
       </div>
       <div class="sp-card sp-pay">
         <div class="sp-h">制作不易，如果这页面对你有帮助</div>
@@ -1616,7 +1668,7 @@ const CITY_CARDS = [
     for (var ln in METRO_DATA.lines){
       var seq = METRO_DATA.lines[ln], seg = [];
       function flush(){
-        if (seg.length > 1) out += '<path d="' + smooth(seg) + '" fill="none" stroke="#e3ded7" stroke-width="' + (3*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+        if (seg.length > 1) out += '<path class="mline" d="' + smooth(seg) + '" fill="none" stroke-width="' + (3*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
         seg = [];
       }
       for (var i = 0; i < seq.length; i++){
@@ -1647,7 +1699,7 @@ const CITY_CARDS = [
     var out = '';
     routePts(G, segs).forEach(function(g){
       var d = smooth(g.pts);
-      out += '<path d="' + d + '" fill="none" stroke="#fff" stroke-width="' + (9*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+      out += '<path class="mhalo" d="' + d + '" fill="none" stroke-width="' + (9*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
       out += '<path d="' + d + '" fill="none" stroke="' + g.color + '" stroke-width="' + (5*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
     });
     return out;
@@ -2072,6 +2124,37 @@ const CITY_CARDS = [
     html += '<div class="ticket"><div class="tk-name">联程三日票（随申行）</div><div class="tk-price">62<small>元</small></div><div class="tk-per">72 小时地铁 + 公交 + 轮渡</div></div>';
     html += '<div class="ticket"><div class="tk-name">联程七日票（随申行）</div><div class="tk-price">112<small>元</small></div><div class="tk-per">168 小时地铁 + 公交 + 轮渡</div></div>';
     g.innerHTML = html;
+  }
+})();
+
+
+/* 亮暗色切换：默认跟随系统，手动选择存在本地 */
+(function(){
+  var KEY = 'mc_theme';
+  var btn = document.getElementById('themeBtn');
+  function effective(t){
+    if (t === 'dark' || t === 'light') return t;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function apply(t){
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    else document.documentElement.removeAttribute('data-theme');
+    if (btn) btn.textContent = effective(t) === 'dark' ? '☀️' : '🌙';
+  }
+  var saved = '';
+  try { saved = localStorage.getItem(KEY) || ''; } catch(e){}
+  apply(saved);
+  if (btn) btn.addEventListener('click', function(){
+    var next = effective(saved) === 'dark' ? 'light' : 'dark';
+    saved = next;
+    try { localStorage.setItem(KEY, next); } catch(e){}
+    apply(next);
+  });
+  if (window.matchMedia) {
+    var mq = window.matchMedia('(prefers-color-scheme: dark)');
+    var onChange = function(){ if (!saved) apply(''); };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else if (mq.addListener) mq.addListener(onChange);
   }
 })();
 
