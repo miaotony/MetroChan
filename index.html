@@ -462,6 +462,26 @@
     .tip-fab{display:block}
     .support{grid-template-columns:1fr}
   }
+
+  /* ---- 导航：桌面侧栏、移动端吸顶 ---- */
+  @media (min-width: 1000px){
+    .wrap{display:grid;grid-template-columns:178px minmax(0,1fr);column-gap:34px;max-width:1180px}
+    header{grid-column:1 / -1}
+    .tabs{grid-column:1;grid-row:2 / span 14;position:sticky;top:20px;align-self:start;
+      display:flex;flex-direction:column;gap:3px;margin-top:8px;border-bottom:0;
+      border-right:1px solid var(--line);padding-right:14px}
+    .tab{width:100%;text-align:left;padding:10px 13px;border-radius:9px;border-bottom:0;margin-bottom:0;font-size:14.5px;transition:background .15s,color .15s}
+    .tab:hover{background:var(--hover-bg);color:var(--ink)}
+    .tab.active{background:var(--red-bg);color:var(--red);border-bottom-color:transparent}
+    .panel,.share-bar,.support,.foot{grid-column:2}
+    .panel{margin-top:8px}
+  }
+  @media (max-width: 999px){
+    .tabs{position:sticky;top:0;z-index:60;background:var(--bg);margin:18px -20px 0;padding:7px 20px 0;
+      border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .tabs::-webkit-scrollbar{display:none}
+    .tab{flex:0 0 auto;padding:9px 15px;font-size:14px;white-space:nowrap}
+  }
 </style>
 </head>
 <body data-tab="s2s">
