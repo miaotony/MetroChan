@@ -308,9 +308,12 @@
 
   /* ---- 线路图 ---- */
   .metromap{margin-top:18px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fbfaf8;position:relative}
-  .metromap .map-cap{font-size:12px;color:var(--muted);padding:9px 12px 0}
-  .metromap svg{display:block;width:100%;height:auto;max-height:560px}
-  .metromap .mstop{fill:#fff;stroke:#c2bdb6;stroke-width:1.6;transition:stroke .15s,stroke-width .15s}
+  .metromap .map-cap{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);padding:9px 12px 0}
+  .metromap .map-cap span:first-child{font-weight:600;color:var(--ink)}
+  .metromap .map-hint{color:#b3aea8}
+  .metromap svg{display:block;width:100%;height:auto;max-height:340px}
+  .metromap{padding-bottom:6px}
+  .metromap .mstop{vector-effect:non-scaling-stroke;fill:#fff;stroke:#b8b2aa;stroke-width:1.6;transition:stroke .15s}
   .metromap .mstop.inter{stroke:#7a736b;stroke-width:2.2}
   .metromap .mstop.end{stroke:#2b2b2b;stroke-width:2.6}
   .metromap .mstop.flag{stroke:var(--red);stroke-width:3;fill:#fff}
@@ -1467,68 +1470,112 @@ const CITY_CARDS = [
     return MAPREQ;
   }
 
-  function mapBase(G){
+  var MW = 1000, MH = 1400;   /* 坐标系：与世界地图同比例的 x/y 空间 */
+
+  function pt(G, name){ var q = G[name]; return q ? [q[0]*MW, q[1]*MH] : null; }
+
+  /* Catmull-Rom -> 三次贝塞尔，接近官方图的圆滑走向 */
+  function smooth(pts){
+    if (!pts.length) return '';
+    if (pts.length < 3) return 'M' + pts.map(function(p){ return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join('L');
+    var d = 'M' + pts[0][0].toFixed(1) + ',' + pts[0][1].toFixed(1);
+    for (var i = 0; i < pts.length - 1; i++){
+      var p0 = pts[i-1] || pts[i], p1 = pts[i], p2 = pts[i+1], p3 = pts[i+2] || p2;
+      var c1x = p1[0] + (p2[0]-p0[0])/6, c1y = p1[1] + (p2[1]-p0[1])/6;
+      var c2x = p2[0] - (p3[0]-p1[0])/6, c2y = p2[1] - (p3[1]-p1[1])/6;
+      d += 'C' + c1x.toFixed(1) + ',' + c1y.toFixed(1) + ' '
+             + c2x.toFixed(1) + ',' + c2y.toFixed(1) + ' '
+             + p2[0].toFixed(1) + ',' + p2[1].toFixed(1);
+    }
+    return d;
+  }
+
+  /* 全网底图：断开的支线不硬连，避免出现假直线 */
+  function mapBase(G, k){
     var out = '';
     for (var ln in METRO_DATA.lines){
-      var seq = METRO_DATA.lines[ln], pts = [];
-      for (var i=0;i<seq.length;i++){
-        var q = G[seq[i]];
-        if (q) pts.push((q[0]*1000).toFixed(1) + ',' + (q[1]*1000).toFixed(1));
+      var seq = METRO_DATA.lines[ln], seg = [];
+      function flush(){
+        if (seg.length > 1) out += '<path d="' + smooth(seg) + '" fill="none" stroke="#e3ded7" stroke-width="' + (3*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+        seg = [];
       }
-      if (pts.length < 2) continue;
-      out += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="#ded9d2" stroke-width="3.4"'
-           + ' stroke-linejoin="round" stroke-linecap="round"/>';
+      for (var i = 0; i < seq.length; i++){
+        var q = pt(G, seq[i]);
+        if (!q){ flush(); continue; }
+        if (seg.length){
+          var pv = seg[seg.length-1];
+          if (Math.hypot(q[0]-pv[0], q[1]-pv[1]) > 130) flush();
+        }
+        seg.push(q);
+      }
+      flush();
     }
     return out;
   }
 
-  function mapRoute(G, segs){
-    var out = '';
+  function routePts(G, segs){
+    var groups = [];
     segs.forEach(function(sg){
       var seq = lineSlice(sg.line, sg.from, sg.to), pts = [];
-      for (var i=0;i<seq.length;i++){
-        var q = G[seq[i]];
-        if (q) pts.push((q[0]*1000).toFixed(1) + ',' + (q[1]*1000).toFixed(1));
-      }
-      if (pts.length < 2) return;
-      var color = lineColor(sg.line);
-      out += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="#fff" stroke-width="9.5"'
-           + ' stroke-linejoin="round" stroke-linecap="round"/>';
-      out += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + color + '" stroke-width="5"'
-           + ' stroke-linejoin="round" stroke-linecap="round"/>';
+      for (var i = 0; i < seq.length; i++){ var q = pt(G, seq[i]); if (q) pts.push(q); }
+      if (pts.length > 1) groups.push({pts: pts, color: lineColor(sg.line)});
+    });
+    return groups;
+  }
+
+  function mapRoute(G, segs, k){
+    var out = '';
+    routePts(G, segs).forEach(function(g){
+      var d = smooth(g.pts);
+      out += '<path d="' + d + '" fill="none" stroke="#fff" stroke-width="' + (9*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
+      out += '<path d="' + d + '" fill="none" stroke="' + g.color + '" stroke-width="' + (5*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
     });
     return out;
   }
 
-  function mapStops(G, segs, from, to){
+  function mapStops(G, segs, from, to, k){
     var marks = {}, out = '';
     segs.forEach(function(sg, i){
       if (i === 0) marks[sg.from] = 'end';
       marks[sg.to] = (i === segs.length-1) ? 'end' : 'inter';
     });
+    [from, to].forEach(function(nm){ marks[nm] = 'flag'; });
     for (var nm in marks){
-      var q = G[nm];
+      var q = pt(G, nm);
       if (!q) continue;
-      var cx = (q[0]*1000).toFixed(1), cy = (q[1]*1000).toFixed(1);
-      var r = marks[nm] === 'end' ? 6 : 5;
-      out += '<circle class="mstop ' + marks[nm] + '" cx="' + cx + '" cy="' + cy + '" r="' + r + '">'
+      var r = (marks[nm] === 'flag' ? 6.5 : 4.5) * k;
+      out += '<circle class="mstop ' + marks[nm] + '" cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="' + r.toFixed(2) + '" stroke-width="' + (1.6*k).toFixed(2) + '">'
            + '<title>' + nm + '</title></circle>';
     }
-    [from, to].forEach(function(nm){
-      var q = G[nm];
-      if (!q) return;
-      out += '<circle class="mstop flag" cx="' + (q[0]*1000).toFixed(1) + '" cy="' + (q[1]*1000).toFixed(1) + '" r="7">'
-           + '<title>' + nm + '</title></circle>';
-    });
     return out;
   }
 
+  /* 按路径范围裁出 2:1 的横向视野 */
+  function mapViewBox(groups){
+    var xs = [], ys = [];
+    groups.forEach(function(g){ g.pts.forEach(function(p){ xs.push(p[0]); ys.push(p[1]); }); });
+    if (!xs.length) return '0 0 ' + MW + ' ' + (MH*0.6);
+    var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
+    var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
+    var w = Math.max(maxX-minX, 140), h = Math.max(maxY-minY, 140);
+    var pad = Math.max(w, h) * 0.16;
+    w += pad*2; h += pad*2;
+    var RATIO = 2.6;
+    if (w/h < RATIO) w = h*RATIO; else h = w/RATIO;
+    var cx = (minX+maxX)/2, cy = (minY+maxY)/2;
+    return [ (cx-w/2).toFixed(1), (cy-h/2).toFixed(1), w.toFixed(1), h.toFixed(1) ].join(' ');
+  }
+
   function renderMapBox(G, segs, from, to){
-    if (!segs.length) return '';
+    var groups = routePts(G, segs);
+    if (!groups.length) return '';
+    var vb = mapViewBox(groups);
+    var vbW = parseFloat(vb.split(' ')[2]);
+    var k = Math.max(vbW / 820, 0.18);
     return '<div class="metromap">'
-      + '<div class="map-cap">线路图 · 高亮为官方推荐路径</div>'
-      + '<svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="上海地铁线路图，高亮 ' + from + ' 至 ' + to + ' 的官方路径">'
-      + mapBase(G) + mapRoute(G, segs) + mapStops(G, segs, from, to)
+      + '<div class="map-cap"><span>线路图</span><span class="map-hint">高亮为官方推荐路径 · 悬停站点看站名</span></div>'
+      + '<svg viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="上海地铁线路图，高亮 ' + from + ' 至 ' + to + ' 的官方路径">'
+      + mapBase(G, k) + mapRoute(G, segs, k) + mapStops(G, segs, from, to, k)
       + '</svg></div>';
   }
 
