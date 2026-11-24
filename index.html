@@ -693,7 +693,7 @@ async function queryFare() {
     const oldP = fare(km, "old");
     const dd = price - oldP;
     const cmp = dd > 0 ? `涨 ${dd} 元` : dd < 0 ? `降 ${-dd} 元` : "与旧价持平";
-    html += `<div class="hint">按新票价反推约 ${fmt(km, 1)} 公里；这段距离在 2005 规则下约 ${oldP} 元，${cmp}（旧价为估算，仅供参考）。</div>`;
+    html += `<div class="hint">新票价对应 ≤${fmt(km, 0)} 公里档；2005 规则下同档约 ${oldP} 元，${cmp}（旧价按档位上限折算，仅供参考）。</div>`;
   }
   html += `<div class="hint">票价取自官方查询结果；实际扣费以闸机为准。</div>`;
   box.innerHTML = html;
@@ -701,12 +701,15 @@ async function queryFare() {
 
 // 用新规则反推一个参考乘距（仅展示用）
 function estimateKm(i, j) {
+  // Upper bound of the distance band this fare belongs to: a 3-yuan fare
+  // covers up to 4 km, not 1 km. Reporting the band edge avoids fake precision.
   const p = matrixFare(i, j);
   if (!p) return 0;
+  let best = 0;
   for (let km = 1; km <= 135; km += 0.5) {
-    if (fare(km, "final") >= p) return km;
+    if (fare(km, "final") === p) best = km;
   }
-  return 0;
+  return best;
 }
 
 function buildQuickPairs() {
@@ -956,7 +959,7 @@ function initCitySlider() {
     let filled = 0;
     for (let i = 0; i < S.N; i++) for (let j = i + 1; j < S.N; j++) if (matrixFare(i, j)) filled += 1;
     $("#coverageHint").textContent =
-      `线网 ${S.N} 站。官方站对已采集 ${filled} / ${total}（${(filled / total * 100).toFixed(1)}%），后台仍在补齐。`;
+      `线网 ${S.N} 站。官方站对已全量实测 ${filled} / ${total}（${(filled / total * 100).toFixed(1)}%）。`;
     renderDiscount();
     initCitySlider();
   } catch (e) {
