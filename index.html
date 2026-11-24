@@ -388,6 +388,9 @@
   table.cmp .dneg{font-weight:800;font-size:14.5px}
   #panel-change h3{margin-top:26px}
   #panel-change h3:first-child{margin-top:0}
+  .share-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:30px}
+  .share-opt{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none}
+  .share-opt input{width:14px;height:14px;accent-color:var(--red);cursor:pointer}
 </style>
 </head>
 <body>
@@ -637,7 +640,8 @@
   </div>
 
   <div class="share-bar">
-    <button type="button" class="share-btn" id="shareBtn" title="复制包含当前标签页与乘距的链接">
+    <label class="share-opt"><input type="checkbox" id="shareWithParams"> 带上起点、终点和每月乘坐次数</label>
+    <button type="button" class="share-btn" id="shareBtn" title="复制当前视图链接">
       <span id="shareBtnText">🔗 复制当前视图链接</span>
     </button>
   </div>
@@ -779,8 +783,19 @@ window.addEventListener('load', function(){
     var active = document.querySelector('.tab.active');
     var tab = active ? active.dataset.tab : 'dist';
     var url = location.origin + location.pathname;
-    var num = document.getElementById(tab === 'cities' ? 'cityKmNum' : 'kmNum');
-    if(tab !== 's2s' && num && num.value) url += '?km=' + encodeURIComponent(num.value);
+    var qs = [];
+    var withParams = document.getElementById('shareWithParams');
+    if(tab === 's2s' && withParams && withParams.checked && window.__getS2S){
+      var p = window.__getS2S();
+      if(p.from) qs.push('from=' + encodeURIComponent(p.from));
+      if(p.to) qs.push('to=' + encodeURIComponent(p.to));
+      var rr = document.getElementById('ridesS2s');
+      if(rr && rr.value) qs.push('rides=' + encodeURIComponent(rr.value));
+    } else {
+      var num = document.getElementById(tab === 'cities' ? 'cityKmNum' : 'kmNum');
+      if(tab !== 's2s' && num && num.value) qs.push('km=' + encodeURIComponent(num.value));
+    }
+    if(qs.length) url += '?' + qs.join('&');
     if(tab !== 'dist') url += '#' + tab;
     return url;
   }
@@ -805,6 +820,23 @@ window.addEventListener('load', function(){
     } else fallback();
   });
 })();
+/* 解析分享参数：?from=&to=&rides=（等主脚本初始化完再跑） */
+window.addEventListener('load', function(){
+  var q;
+  try { q = new URLSearchParams(location.search); } catch(e){ return; }
+  var f = q.get('from'), t = q.get('to'), r = q.get('rides');
+  if(!f || !t || !window.__setS2S) return;
+  window.__setS2S(f, t);
+  if(r){
+    var rr = document.getElementById('ridesS2s');
+    var rd = document.getElementById('ridesS2sRange');
+    var v = Math.max(1, Math.min(120, parseInt(r, 10) || 44));
+    if(rr) rr.value = v;
+    if(rd) rd.value = v;
+  }
+  if(typeof switchTab === 'function') switchTab('s2s', false);
+});
+
 /* 浏览器前进/后退时同步 tab */
 window.addEventListener('hashchange', function(){
   var h = location.hash.replace('#','');
@@ -1462,6 +1494,8 @@ const CITY_CARDS = [
 
   var epFrom = Endpoint('from', '1号线', '人民广场');
   var epTo = Endpoint('to', '1号线', '徐家汇');
+  window.__getS2S = function(){ return { from: epFrom.get(), to: epTo.get() }; };
+  window.__setS2S = function(f, t){ if (f) epFrom.set(f); if (t) epTo.set(t); };
 
   var ridesS2s = document.getElementById('ridesS2s');
   var discS2s = document.getElementById('discountS2s');
