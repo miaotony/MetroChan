@@ -359,7 +359,9 @@
   .metromap .map-cap{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);padding:9px 12px 0}
   .metromap .map-cap span:first-child{font-weight:600;color:var(--ink)}
   .metromap .map-hint{color:#b3aea8}
-  .metromap svg{display:block;width:100%;height:auto;max-height:340px}
+  .metromap{aspect-ratio:2.35 / 1; height:auto}
+  .metromap svg{display:block;width:100%;height:100%}
+  @media(max-width:900px){.metromap{aspect-ratio:1.7 / 1}}
   .metromap{padding-bottom:6px}
   .metromap .mline{stroke:var(--border)}
   .metromap .mhalo{stroke:var(--map-bg)}
@@ -402,7 +404,7 @@
     .pick-btn{font-size:13.5px;padding:9px 10px}
     .pick-panel{width:min(88vw,320px);min-width:min(88vw,320px)}
     .s2s-grid{gap:10px}
-    .metromap svg{max-height:none}
+    .metromap svg{height:100%}
   }
   .foot a.lnk{color:var(--red);font-weight:600;text-decoration:none;border-bottom:1px dotted rgba(200,16,46,.45);transition:border-color .15s}
   .foot a.lnk:hover{border-bottom:1px solid var(--red)}
@@ -537,7 +539,7 @@
           <span class="lg-hearing"><i class="sw p2"></i>方案二</span>
           <label class="toggle hearing-toggle"><input type="checkbox" id="showHearing"> 显示听证方案一、二（未采纳）</label>
         </div>
-        <svg id="chart" viewBox="0 0 920 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="上海地铁四方案全乘距票价阶梯图" aria-live="polite"></svg>
+        <svg id="chart" viewBox="0 0 920 360" preserveAspectRatio="xMidYMid slice" role="img" aria-label="上海地铁四方案全乘距票价阶梯图" aria-live="polite"></svg>
       </div>
     </section>
 
@@ -641,7 +643,7 @@
       </div>
       <div class="chartbox">
         <div class="legend" id="cityLegend"></div>
-        <svg id="cityChart" viewBox="0 0 920 400" preserveAspectRatio="xMidYMid meet" role="img" aria-label="各城市票价阶梯对比图" aria-live="polite" style="cursor:crosshair"></svg>
+        <svg id="cityChart" viewBox="0 0 920 400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="各城市票价阶梯对比图" aria-live="polite" style="cursor:crosshair"></svg>
       </div>
       <div class="hint">广州、深圳、杭州现行计价公式完全一致，合并为一条线；成都与武汉一致，合并为一条线。</div>
     </section>
@@ -1668,17 +1670,24 @@ const CITY_CARDS = [
 
   /* Catmull-Rom -> 三次贝塞尔，接近官方图的圆滑走向 */
   function smooth(pts){
+    /* 官方线路图风格：直线段 + 拐角圆弧，不做样条拉伸 */
     if (!pts.length) return '';
-    if (pts.length < 3) return 'M' + pts.map(function(p){ return p[0].toFixed(1) + ',' + p[1].toFixed(1); }).join('L');
-    var d = 'M' + pts[0][0].toFixed(1) + ',' + pts[0][1].toFixed(1);
-    for (var i = 0; i < pts.length - 1; i++){
-      var p0 = pts[i-1] || pts[i], p1 = pts[i], p2 = pts[i+1], p3 = pts[i+2] || p2;
-      var c1x = p1[0] + (p2[0]-p0[0])/6, c1y = p1[1] + (p2[1]-p0[1])/6;
-      var c2x = p2[0] - (p3[0]-p1[0])/6, c2y = p2[1] - (p3[1]-p1[1])/6;
-      d += 'C' + c1x.toFixed(1) + ',' + c1y.toFixed(1) + ' '
-             + c2x.toFixed(1) + ',' + c2y.toFixed(1) + ' '
-             + p2[0].toFixed(1) + ',' + p2[1].toFixed(1);
+    var f = function(v){ return v.toFixed(1); };
+    if (pts.length < 3) return 'M' + pts.map(function(p){ return f(p[0]) + ',' + f(p[1]); }).join('L');
+    var R = 9;
+    var d = 'M' + f(pts[0][0]) + ',' + f(pts[0][1]);
+    for (var i = 1; i < pts.length - 1; i++){
+      var a = pts[i-1], p1 = pts[i], b = pts[i+1];
+      var v1x = p1[0]-a[0], v1y = p1[1]-a[1], v2x = b[0]-p1[0], v2y = b[1]-p1[1];
+      var l1 = Math.hypot(v1x, v1y), l2 = Math.hypot(v2x, v2y);
+      if (!l1 || !l2){ d += 'L' + f(p1[0]) + ',' + f(p1[1]); continue; }
+      var r = Math.min(R, l1/2, l2/2);
+      var s1x = p1[0]-v1x/l1*r, s1y = p1[1]-v1y/l1*r;
+      var s2x = p1[0]+v2x/l2*r, s2y = p1[1]+v2y/l2*r;
+      d += 'L' + f(s1x) + ',' + f(s1y) + 'Q' + f(p1[0]) + ',' + f(p1[1]) + ' ' + f(s2x) + ',' + f(s2y);
     }
+    var last = pts[pts.length-1];
+    d += 'L' + f(last[0]) + ',' + f(last[1]);
     return d;
   }
 
@@ -1752,7 +1761,7 @@ const CITY_CARDS = [
     var w = Math.max(maxX-minX, 140), h = Math.max(maxY-minY, 140);
     var pad = Math.max(w, h) * 0.16;
     w += pad*2; h += pad*2;
-    var RATIO = 2.6;
+    var RATIO = window.innerWidth < 900 ? 1.7 : 2.35;
     if (w/h < RATIO) w = h*RATIO; else h = w/RATIO;
     var cx = (minX+maxX)/2, cy = (minY+maxY)/2;
     return [ (cx-w/2).toFixed(1), (cy-h/2).toFixed(1), w.toFixed(1), h.toFixed(1) ].join(' ');
@@ -1791,7 +1800,7 @@ const CITY_CARDS = [
     var k = Math.max(vbW / 820, 0.18);
     return '<div class="metromap">'
       + '<div class="map-cap"><span>线路图</span><span class="map-hint">高亮为官方推荐路径 · 悬停站点看站名</span></div>'
-      + '<svg viewBox="' + vb + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="上海地铁线路图，高亮 ' + from + ' 至 ' + to + ' 的官方路径">'
+      + '<svg viewBox="' + vb + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="上海地铁线路图，高亮 ' + from + ' 至 ' + to + ' 的官方路径">'
       + mapBase(G, k) + mapRoute(G, segs, k) + mapStops(G, segs, from, to, k)
       + '</svg></div>';
   }
