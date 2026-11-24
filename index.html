@@ -303,7 +303,9 @@
   .pick-item{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:6px;font-size:13.5px;cursor:pointer;touch-action:manipulation}
   .pick-item:hover{background:#f4f1ec}
   .pick-item.on{background:#f1ede6;font-weight:600}
-  .pick-sub{margin-left:auto;font-size:11px;color:#b0aca6;font-weight:400;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .pick-name{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left}
+  .pick-dots{display:inline-flex;gap:3px;width:32px;flex:none;align-items:center}
+  .pick-sub{flex:none;width:78px;text-align:right;font-size:11px;color:#b0aca6;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pick-empty{padding:10px 8px;font-size:12.5px;color:#999}
 
   /* ---- 线路图 ---- */
@@ -353,6 +355,8 @@
     .s2s-grid{gap:10px}
     .metromap svg{max-height:none}
   }
+  .foot a.lnk{color:var(--red);font-weight:600;text-decoration:none;border-bottom:1px dotted rgba(200,16,46,.45);transition:border-color .15s}
+  .foot a.lnk:hover{border-bottom:1px solid var(--red)}
 </style>
 </head>
 <body>
@@ -615,14 +619,14 @@
     <p class="formula"><b>平均影响</b>：新方案口径下，据官方公布平均每人次多支出约 0.9 元；听证方案一 +23.3%（4.23→5.22 元），听证方案二 +22.9%（4.23→5.20 元）。</p>
 
     <p class="formula"><b>数据来源</b></p>
-    <p class="formula">站到站票价与换乘路径：<a href="https://metroplatform.tenchii.com/web/fare-query/h5/index" target="_blank" rel="noopener">官方票价查询系统</a>，2026-11-24 数据，418 站、87153 个站对。</p>
+    <p class="formula">站到站票价与换乘路径：<a class="lnk" href="https://metroplatform.tenchii.com/web/fare-query/h5/index" target="_blank" rel="noopener">官方票价查询系统</a>，2026-11-24 数据，418 站、87153 个站对。</p>
     <p class="formula">站间距：维基百科各线路词条，为官方设计/环评资料的米级精度，按<b>最短路径里程</b>计价（换乘不计里程）。</p>
     <p class="formula">适用范围：不含磁浮线、金山铁路、市域机场线及以后开通的市域线。</p>
-    <p class="formula">官方文件：<a href="https://fgw.sh.gov.cn/fgw_jjjctk/20261123/f57b63885c514c829ee269ed589ab2b9.html" target="_blank" rel="noopener">《关于优化上海市轨道交通票价机制的复函》</a>（沪发改价调〔2026〕58号，2026-11-23）· <a href="https://fgw.sh.gov.cn/fgw_gsgg/20261123/78e253eb2682475381bc60ce10f0b303.html" target="_blank" rel="noopener">《主要意见建议采纳情况》</a>（2026-11-23）</p>
+    <p class="formula">官方文件：<a href="https://fgw.sh.gov.cn/fgw_jjjctk/20261123/f57b63885c514c829ee269ed589ab2b9.html" target="_blank" rel="noopener">《关于优化上海市轨道交通票价机制的复函》</a>（沪发改价调〔2026〕58号，2026-11-23）· <a href="https://fgw.sh.gov.cn/fgw_gsgg/20261123/78e253eb2682475381bc60ce10f0b303.html" target="_blank" rel="noopener">《优化上海市轨道交通票价机制主要意见建议采纳情况》</a>（2026-11-23）</p>
 
     <p class="disclaimer">⚠️ 本站是个人整理的对比工具，非上海地铁官方页面。<br>
     站到站票价与换乘路径取自官方票价查询系统 2026-11-24 的数据，覆盖 418 站、87153 个站对；站间距来自公开资料推算。<br>
-    与官方查询结果存在差异时，以官方为准。发现数据问题欢迎<a href="https://github.com/miaotony/MetroChan/issues" target="_blank" rel="noopener">提 Issue</a>反馈。</p>
+    与官方查询结果存在差异时，以官方为准。发现问题或有建议，欢迎<a class="lnk" href="https://github.com/miaotony/MetroChan/issues" target="_blank" rel="noopener">提 Issue</a>告诉我。</p>
     <p class="copyright">© 2026 <a href="https://miaotony.xyz" target="_blank" rel="noopener">MiaoTony</a> · <a href="https://github.com/miaotony/MetroChan" target="_blank" rel="noopener">MetroChan (GitHub)</a> · All rights reserved.</p>
   </div>
 
@@ -1257,7 +1261,7 @@ const CITY_CARDS = [
       src = opt.items(q) || [];
       list.innerHTML = src.length ? src.map(function(it, i){
         return '<div class="pick-item' + (it.value === value ? ' on' : '') + '" data-i="' + i + '">'
-          + (opt.glyph ? opt.glyph(it) : '') + '<span>' + it.label + '</span>'
+          + (opt.glyph ? opt.glyph(it) : '') + '<span class="pick-name">' + it.label + '</span>'
           + (it.sub ? '<span class="pick-sub">' + it.sub + '</span>' : '') + '</div>';
       }).join('') : '<div class="pick-empty">没有匹配</div>';
       list.querySelectorAll('.pick-item').forEach(function(el){
@@ -1297,9 +1301,10 @@ const CITY_CARDS = [
     var curLine = defLine, curSta = defStation;
 
     function dotsOf(name){
-      return (METRO_DATA.stations[name]||[]).map(function(ln){
+      var dots = (METRO_DATA.stations[name]||[]).map(function(ln){
         return '<span class="ln-dot" style="background:'+(LINE_COLORS[ln]||'#888')+'" title="'+ln+'"></span>';
       }).join('');
+      return '<span class="pick-dots">' + dots + '</span>';
     }
     function chipOf(ln){
       return '<span class="pick-chip" style="background:'+(LINE_COLORS[ln]||'#888')+'"></span>';
@@ -1750,11 +1755,7 @@ const CITY_CARDS = [
         html += renderJourney(segs, o);
         if (window.__mapXY) html += renderMapBox(window.__mapXY, segs, fromName, toName);
 
-        html += '<div class="fare-foot">'
-          + '<span class="src">数据：<a href="https://metroplatform.tenchii.com/web/fare-query/h5/index" target="_blank" rel="noopener">官方票价查询系统</a> · 2026-11-24</span>'
-          + '<span class="sep">｜</span>'
-          + '<span>里程按公开站间距推算最短路径</span>'
-          + '</div>';
+        html += '<div class="fare-foot"><span>里程按公开站间距推算最短路径</span></div>';
 
         /* 票价对比卡：官方实测 + 各方案按里程推算 */
         html += '<div class="cards" style="margin-top:18px">';
