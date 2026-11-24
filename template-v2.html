@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MetroChan 魔都地铁酱 · 2026 新票价</title>
+<meta name="description" content="上海轨道交通 2026 新票价机制、官方站到站票价查询、满额优惠与计次票测算、城市对比与历史方案归档。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<style>
+:root{
+  --bg:#faf9f6; --surface:#fff; --ink:#1b1b1b; --muted:#6d6a64;
+  --border:#e6e2da; --line:#efece5;
+  --red:#c8102e; --red-bg:#fdf1f2; --red-line:#e08a96;
+  --blue:#1668a3; --blue-bg:#eef5fb; --blue-line:#8fb7d6;
+  --green:#2e7d32; --green-bg:#eef7ee;
+  --amber:#a15c00; --amber-bg:#fdf4e7;
+  --gray:#7d7d7d; --gray-bg:#f2f1ee; --gray-line:#c4c2bd;
+  --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);line-height:1.55;font-size:15px;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:32px 18px 72px}
+
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+header.top h1{font-size:28px;font-weight:800;letter-spacing:-.01em}
+header.top h1 .sub{font-size:14px;font-weight:600;color:var(--muted);margin-left:10px;letter-spacing:0}
+header.top .meta{font-size:12.5px;color:var(--muted);text-align:right}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--red-bg);color:var(--red);
+  border:1px solid var(--red-line);border-radius:999px;padding:3px 12px;font-size:12.5px;font-weight:700}
+.pill.green{background:var(--green-bg);color:var(--green);border-color:#a5d6a7}
+.pill.gray{background:var(--gray-bg);color:var(--muted);border-color:var(--border)}
+
+nav.tabs{display:flex;gap:4px;margin-top:22px;border-bottom:2px solid var(--line);overflow-x:auto;
+  scrollbar-width:none}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab{flex:none;padding:10px 18px;font:inherit;font-size:14.5px;font-weight:600;color:var(--muted);
+  background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;cursor:pointer;
+  transition:color .15s,border-color .15s}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--red);border-bottom-color:var(--red)}
+.panel{display:none;margin-top:24px}
+.panel.active{display:block;animation:fade .18s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+h2{font-size:17px;font-weight:700;margin:0 0 12px;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+h2 .tag{font-size:11.5px;font-weight:600;color:var(--muted);background:var(--gray-bg);padding:2px 8px;border-radius:10px}
+p.lead{color:var(--muted);font-size:14px;margin-bottom:16px}
+section{margin-bottom:26px}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px}
+.hero{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}
+.hero .big{background:linear-gradient(135deg,#c8102e0d,#c8102e03);border-color:var(--red-line)}
+.hero h3{font-size:15px;font-weight:700;color:var(--muted);margin-bottom:6px}
+.hero .num{font-size:42px;font-weight:800;letter-spacing:-.02em;line-height:1.05;
+  font-variant-numeric:tabular-nums}
+.hero .num .u{font-size:16px;font-weight:600;color:var(--muted);margin-left:4px}
+.hero .note{font-size:13px;color:var(--muted);margin-top:8px}
+.kpis{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.kpi .k{font-size:12.5px;color:var(--muted);font-weight:600}
+.kpi .v{font-size:22px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums}
+.kpi .v small{font-size:12px;font-weight:600;color:var(--muted);margin-left:3px}
+
+.chartbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;margin-bottom:10px}
+.legend span{display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:2px 6px;border-radius:6px}
+.legend span:hover{background:#f4f2ed}
+.legend span.off{opacity:.35}
+.legend .sw{width:14px;height:3px;border-radius:2px}
+svg{width:100%;height:auto;display:block;overflow:visible}
+.grid line{stroke:var(--line);stroke-width:1}
+.axis text{font-size:11px;fill:var(--muted)}
+svg text{pointer-events:none}
+.crosshair{stroke:#bbb;stroke-dasharray:4 3;stroke-width:1}
+
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+th,td{padding:9px 10px;text-align:right;font-size:13.5px;border-bottom:1px solid var(--line)}
+th{font-weight:600;color:var(--muted);font-size:12.5px;border-bottom:2px solid var(--border);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+tr.hl td{background:var(--red-bg)}
+td .up{color:var(--red);font-weight:700}
+td .same{color:var(--muted)}
+.badge{font-size:11px;font-weight:700;color:#fff;background:var(--red);border-radius:4px;padding:1px 6px;margin-left:5px}
+
+.s2s-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 22px}
+.s2s-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{position:relative}
+.field label{display:block;font-size:12.5px;font-weight:600;color:var(--muted);margin-bottom:5px}
+.field input{width:100%;font:inherit;font-size:15px;padding:10px 12px;border:1px solid var(--border);
+  border-radius:10px;background:#fff;color:var(--ink)}
+.field input:focus{outline:none;border-color:var(--red-line);box-shadow:0 0 0 3px var(--red-bg)}
+.suggest{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);
+  border-radius:10px;margin-top:4px;max-height:260px;overflow:auto;z-index:30;display:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.suggest.open{display:block}
+.suggest div{padding:8px 12px;cursor:pointer;font-size:14px;display:flex;justify-content:space-between;gap:8px}
+.suggest div:hover,.suggest div.sel{background:var(--red-bg)}
+.suggest small{color:var(--muted);font-size:11.5px}
+
+.result{margin-top:16px;border-top:1px solid var(--line);padding-top:16px}
+.result .price-line{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.result .price-line .p{font-size:38px;font-weight:800;color:var(--red);font-variant-numeric:tabular-nums}
+.result .price-line .from{color:var(--muted);font-size:13px}
+.route-list{display:grid;gap:8px;margin-top:12px}
+.route{background:#fbfaf7;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13.5px}
+.route .t{font-weight:700}
+.route .d{color:var(--muted);font-size:12.5px;margin-top:2px}
+
+.seg{display:flex;gap:4px;flex-wrap:wrap;margin:12px 0 0}
+.seg button{font:inherit;font-size:13px;padding:6px 13px;border-radius:20px;border:1px solid var(--border);
+  background:#fff;color:var(--ink);cursor:pointer}
+.seg button.on{background:var(--red);color:#fff;border-color:var(--red)}
+
+.calc-row{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.calc-row label{font-size:13.5px;color:var(--muted)}
+.calc-row input{width:84px;font:inherit;font-size:15px;font-weight:700;text-align:center;padding:7px 6px;
+  border:1px solid var(--border);border-radius:9px;font-family:var(--mono)}
+.out{background:var(--blue-bg);border:1px solid var(--blue-line);border-radius:10px;padding:12px 14px;
+  font-size:13.5px;margin-top:12px;line-height:1.7}
+.out b{color:var(--blue)}
+.out.green{background:var(--green-bg);border-color:#a5d6a7}
+.out.green b{color:var(--green)}
+
+.ticket-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.ticket{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.ticket .name{font-size:13px;font-weight:700;color:var(--muted)}
+.ticket .price{font-size:26px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+.ticket .price small{font-size:12px;font-weight:600;color:var(--muted);margin-left:2px}
+.ticket .per{font-size:12.5px;color:var(--muted);margin-top:2px}
+.ticket .fit{font-size:12.5px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line);color:var(--ink)}
+.ticket.best{border-color:var(--green);background:linear-gradient(180deg,var(--green-bg),#fff)}
+
+.cities-legend{display:flex;gap:12px;flex-wrap:wrap;font-size:13px;margin-bottom:10px}
+.cities-legend span{display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:2px 6px;border-radius:6px}
+.cities-legend span.off{opacity:.32}
+.cities-legend .sw{width:12px;height:3px;border-radius:2px}
+
+.city-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
+.city-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.city-card h3{font-size:15px;display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.city-card h3 .cdot{width:11px;height:11px;border-radius:3px}
+.city-card .rule{font-size:13px;line-height:1.65;color:var(--ink)}
+.city-card .meta{font-size:12px;color:var(--muted);margin-top:6px}
+
+.note-box{background:var(--amber-bg);border:1px solid #f0d9b5;border-radius:10px;padding:12px 14px;
+  font-size:13px;color:#6b4a12;line-height:1.7}
+.note-box b{color:var(--amber)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:10px}
+footer{margin-top:34px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--muted);
+  display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+footer a{color:var(--red);text-decoration:none}
+
+.loading{color:var(--muted);font-size:13.5px}
+.err{color:var(--red);font-size:13.5px}
+
+@media (max-width:760px){
+  .wrap{padding:22px 14px 60px}
+  header.top h1{font-size:23px}
+  header.top .meta{text-align:left}
+  .hero{grid-template-columns:1fr}
+  .s2s-grid{grid-template-columns:1fr}
+  .hero .num{font-size:36px}
+  .tab{padding:9px 13px;font-size:13.5px}
+  th,td{padding:8px 7px;font-size:12.5px}
+  .card,.s2s-box,.chartbox{padding:16px 15px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>MetroChan 魔都地铁酱<span class="sub">上海轨道交通票价</span></h1>
+    <div style="margin-top:8px"><span class="pill">2026-12-01 新票价生效</span></div>
+  </div>
+  <div class="meta">
+    <div>票价数据：官方计算器实采</div>
+    <div id="dataStamp">数据加载中…</div>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab active" data-tab="overview" role="tab">票价速览</button>
+  <button class="tab" data-tab="s2s" role="tab">站到站</button>
+  <button class="tab" data-tab="discount" role="tab">上海优惠</button>
+  <button class="tab" data-tab="cities" role="tab">城市对比</button>
+  <button class="tab" data-tab="archive" role="tab">归档</button>
+</nav>
+
+<!-- ============ 1. 票价速览 ============ -->
+<section class="panel active" id="panel-overview">
+  <div class="hero">
+    <div class="card big">
+      <h3>新基准票价</h3>
+      <div class="num">3<span class="u">元起</span></div>
+      <div class="note">0–4 公里 3 元；50 公里内按 4 / 4 / 4 / 7 / 7 / 10 / 10 公里逐档 +1 元；50 公里外每 15 公里 +1 元。</div>
+    </div>
+    <div class="kpis">
+      <div class="kpi"><div class="k">人均每次涨幅</div><div class="v">+0.9<small>元</small></div></div>
+      <div class="kpi"><div class="k">人均涨幅</div><div class="v">21.3<small>%</small></div></div>
+      <div class="kpi"><div class="k">满额优惠门槛</div><div class="v">90<small>元 / 月</small></div></div>
+      <div class="kpi"><div class="k">最低计次票单价</div><div class="v">4.33<small>元 / 次</small></div></div>
+    </div>
+  </div>
+
+  <section>
+    <h2>票价阶梯对比<span class="tag">按乘距</span></h2>
+    <div class="chartbox">
+      <div class="legend" id="tierLegend"></div>
+      <div id="tierChart"></div>
+      <div class="slider-row">
+        <input type="range" id="kmRange" min="1" max="135" step="1" value="16" aria-label="拖动选择乘距">
+        <div class="slider-readout" id="kmOut"></div>
+      </div>
+      <div class="hint">拖动上面的滑块换乘距，四个方案的价格、与本现状的差额、每月通勤多花多少会一起变。横轴乘距（公里），纵轴单程票价（元）。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>变与不变</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>项目</th><th>现状（2005）</th><th>最终方案（12/1）</th></tr></thead>
+        <tbody>
+          <tr><td>起步价</td><td>3 元 / 6 km</td><td class="up">3 元 / 4 km</td></tr>
+          <tr><td>加价间距</td><td>每 10 km +1 元</td><td class="up">4/4/4/7/7/10/10 km，50 km 后每 15 km</td></tr>
+          <tr><td>满额优惠</td><td>月满 70 元后 9 折</td><td class="up">月满 90 元后 9 折</td></tr>
+          <tr><td>计次票</td><td>无</td><td class="up">35/45/60/90 次四档</td></tr>
+          <tr><td>一日票</td><td>18 元</td><td class="up">24 元</td></tr>
+          <tr><td>三日票</td><td>45 元</td><td class="up">60 元</td></tr>
+          <tr><td>适用范围</td><td>全网</td><td>全网（不含磁浮、金山铁路、市域机场线及以后市域线）</td></tr>
+          <tr><td>动态调整</td><td>无</td><td class="up">建立，挂钩人工/电价/物价/负荷</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>新票价档位</h2>
+    <div class="card">
+      <table id="tierTable">
+        <thead><tr><th>最长乘距</th><th>票价</th><th>较现状</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="hint">「较现状」按 2005 版规则（6 公里 3 元、每 10 公里 +1 元）同距离折算。</div>
+    </div>
+  </section>
+</section>
+
+<!-- ============ 2. 站到站 ============ -->
+<section class="panel" id="panel-s2s">
+  <h2>站到站官方票价<span class="tag">实测数据</span></h2>
+  <p class="lead">票价来自上海地铁官方票价查询，逐站对实采，不是按距离推算。</p>
+  <div class="s2s-box">
+    <div class="s2s-grid">
+      <div class="field">
+        <label>出发站</label>
+        <input id="fromInput" autocomplete="off" placeholder="输入站名 / 全拼 / 首字母">
+        <div class="suggest" id="fromSuggest"></div>
+      </div>
+      <div class="field">
+        <label>到达站</label>
+        <input id="toInput" autocomplete="off" placeholder="输入站名 / 全拼 / 首字母">
+        <div class="suggest" id="toSuggest"></div>
+      </div>
+    </div>
+    <div class="seg" id="quickPairs"></div>
+    <div class="result" id="s2sResult"><div class="loading">选择起终点后显示官方票价</div></div>
+  </div>
+  <div class="hint" id="coverageHint"></div>
+</section>
+
+<!-- ============ 3. 上海优惠 ============ -->
+<section class="panel" id="panel-discount">
+  <h2>满额优惠<span class="tag">月累计满 90 元后 9 折</span></h2>
+  <div class="card">
+    <div class="calc-row">
+      <label>单程票价 <input id="dFare" type="number" value="4" min="2" max="20"> 元</label>
+      <label>每周乘车 <input id="dRides" type="number" value="10" min="1" max="60"> 次</label>
+    </div>
+    <div class="out" id="dResult"></div>
+    <div class="hint">满额优惠按自然月累计票款计算，达到 90 元后当月剩余行程 9 折；覆盖交通卡、银行卡、数字人民币硬钱包与各类乘车码，含市域线。</div>
+  </div>
+
+  <section style="margin-top:24px">
+    <h2>轨道交通计次票<span class="tag">30 天有效</span></h2>
+    <div class="card">
+      <div class="calc-row" style="margin-bottom:14px">
+        <label>你的单程票价 <input id="pFare" type="number" value="5" min="2" max="20"> 元</label>
+      </div>
+      <div class="ticket-grid" id="ticketGrid"></div>
+      <div class="hint">计次票仅限本人实名使用，30 个自然日内有效；不与满额优惠、公交换乘优惠同享；可同享 P+R 停车优惠。</div>
+    </div>
+  </section>
+
+  <section style="margin-top:24px">
+    <h2>一日票 / 三日票 / 联程日票</h2>
+    <div class="card">
+      <div class="calc-row">
+        <label>每天乘车 <input id="dayRides" type="number" value="4" min="1" max="20"> 次</label>
+        <label>单程票价 <input id="dayFare" type="number" value="4" min="2" max="20"> 元</label>
+      </div>
+      <div class="out green" id="dayResult"></div>
+      <table style="margin-top:14px">
+        <thead><tr><th>票种</th><th>价格</th><th>原价</th><th>有效期</th><th>适用</th></tr></thead>
+        <tbody>
+          <tr><td>一日票</td><td>24 元</td><td>18 元</td><td>24 小时</td><td>轨道交通</td></tr>
+          <tr><td>三日票</td><td>60 元</td><td>45 元</td><td>72 小时</td><td>轨道交通</td></tr>
+          <tr><td>联程日票·一日</td><td>26 元</td><td>19.8 元</td><td>24 小时</td><td>轨交 + 公交 + 轮渡</td></tr>
+          <tr><td>联程日票·三日</td><td>62 元</td><td>47.8 元</td><td>72 小时</td><td>轨交 + 公交 + 轮渡</td></tr>
+          <tr><td>联程日票·七日</td><td>112 元</td><td>85.8 元</td><td>168 小时</td><td>轨交 + 公交 + 轮渡</td></tr>
+        </tbody>
+      </table>
+      <div class="hint">日票以首次进站开始计时，不限乘次、单人使用；同一车站 5 分钟内不得再次进站。联程日票通过「随申行」购买，未启用可在 180 天内激活。</div>
+    </div>
+  </section>
+
+  <section style="margin-top:24px">
+    <h2>使用限制速查</h2>
+    <div class="note-box">
+      <b>不包括：</b>磁浮线、金山铁路、市域机场线及以后开通的市域线（计次票、日票、满额优惠的适用范围按各自规则）。<br>
+      <b>不叠加：</b>计次票与满额优惠、公交换乘优惠不同享；满额优惠与公交换乘优惠可按规则分别享受。<br>
+      <b>实名：</b>计次票仅限本人使用，不可转让；每自然年最多退票三次。
+    </div>
+  </section>
+</section>
+
+<!-- ============ 4. 城市对比 ============ -->
+<section class="panel" id="panel-cities">
+  <h2>全国城市票价对比<span class="tag">上海换新机制</span></h2>
+  <p class="lead">同为公共交通，各地计价规则差异很大。上海曲线已切换为 2026-12-01 新机制。</p>
+  <div class="chartbox">
+    <div class="cities-legend" id="cityLegend"></div>
+    <div id="cityChart"></div>
+    <div class="slider-row">
+      <input type="range" id="cityKmRange" min="1" max="135" step="1" value="16" aria-label="拖动选择乘距">
+      <div class="slider-readout" id="cityKmOut"></div>
+    </div>
+  </div>
+  <section style="margin-top:22px">
+    <h2>典型乘距票价</h2>
+    <div class="card scrollx"><table id="cityPriceTable">
+      <thead><tr><th>乘距</th></tr></thead><tbody></tbody>
+    </table></div>
+  </section>
+  <section style="margin-top:22px">
+    <h2>各城市计价规则</h2>
+    <div class="city-cards" id="cityCards"></div>
+  </section>
+</section>
+
+<!-- ============ 5. 归档 ============ -->
+<section class="panel" id="panel-archive">
+  <h2>历史方案归档<span class="tag">2005 → 2026</span></h2>
+  <p class="lead">从 2005 年现行票价到两套听证方案，再到最终落地机制。旧方案的站到站票价仍按规则估算。</p>
+
+  <section>
+    <h2>四套计价规则</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>方案</th><th>起步</th><th>加价间距</th><th>远距离</th><th>状态</th></tr></thead>
+        <tbody>
+          <tr><td>2005 现行</td><td>0–6 km 3 元</td><td>每 10 km +1 元</td><td>同左</td><td><span class="pill gray">2026-11-30 截止</span></td></tr>
+          <tr><td>听证方案一</td><td>0–4 km 3 元</td><td>4/4/4/7/7/7/10/10/10 km</td><td>67 km 外每 15 km +1</td><td><span class="pill gray">未采用</span></td></tr>
+          <tr><td>听证方案二</td><td>0–6 km 4 元</td><td>6/8/8/10/10/12/12 km</td><td>72 km 外每 14 km +1</td><td><span class="pill gray">未采用</span></td></tr>
+          <tr class="hl"><td>最终方案</td><td>0–4 km 3 元</td><td>4/4/4/7/7/10/10 km</td><td>50 km 外每 15 km +1</td><td><span class="pill green">2026-12-01 执行</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>意见采纳记录</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>听证意见</th><th>处理</th></tr></thead>
+        <tbody>
+          <tr><td>加价间距过密，中远距离负担重</td><td>拉大间距，以方案一为基础调整为 4/4/4/7/7/10/10</td></tr>
+          <tr><td>计次票档位不够灵活</td><td>新增 35 次 190 元档</td></tr>
+          <tr><td>满额优惠门槛偏高</td><td>从 100 元下调至 90 元</td></tr>
+          <tr><td>动态调整机制缺乏评估</td><td>明确定期成本监审与参数权重评估周期</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>2005 方案下的一日票与计次票</h2>
+    <div class="card">
+      <table>
+        <thead><tr><th>票种</th><th>旧价</th><th>新价</th><th>涨幅</th></tr></thead>
+        <tbody>
+          <tr><td>一日票</td><td>18 元</td><td>24 元</td><td class="up">+33.3%</td></tr>
+          <tr><td>三日票</td><td>45 元</td><td>60 元</td><td class="up">+33.3%</td></tr>
+          <tr><td>满额优惠门槛</td><td>70 元</td><td>90 元</td><td class="up">+28.6%</td></tr>
+        </tbody>
+      </table>
+      <div class="hint">旧方案无计次票；97 折等历史优惠不在本次比较范围内。</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>数据快照</h2>
+    <div class="card">
+      <div class="hint" id="archiveMeta">—</div>
+    </div>
+  </section>
+</section>
+
+<footer>
+  <div>非官方页面，数据仅供参考，实际票价以上海地铁官方计价为准。</div>
+  <div>© 2026 <a href="https://miaotony.xyz">MiaoTony</a></div>
+</footer>
+</div>
+
+<script>
+"use strict";
+/* ---------- 基础工具 ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const fmt = (n, d = 0) => Number(n).toFixed(d).replace(/\.0+$/, "");
+
+/* ---------- 计价规则 ---------- */
+// 规则：起乘价 + 分段加价间距（公里），远距离单独间距
+const RULES = {
+  old:   { start: 3, base: 6,  steps: [10,10,10,10,10,10,10,10,10,10,10,10,10,10], farFrom: 999, farStep: 0 },
+  final: { start: 3, base: 4,  steps: [4,4,4,7,7,10,10], farFrom: 50, farStep: 15 },
+  plan1: { start: 3, base: 4,  steps: [4,4,4,7,7,7,10,10,10], farFrom: 67, farStep: 15 },
+  plan2: { start: 4, base: 6,  steps: [6,8,8,10,10,12,12], farFrom: 72, farStep: 14 },
+};
+
+function fare(km, key) {
+  const r = RULES[key];
+  if (km <= 0) return r.start;
+  if (km <= r.base) return r.start;
+  let price = r.start, limit = r.base;
+  for (const step of r.steps) {
+    limit += step;
+    price += 1;
+    if (km <= limit) return price;
+  }
+  if (km <= r.farFrom) return price;
+  const extra = Math.ceil((km - r.farFrom) / r.farStep);
+  return price + extra;
+}
+
+/* ---------- 状态 ---------- */
+const S = {
+  stations: null,      // {order, py, lines, index}
+  matrix: null,        // Uint8Array
+  N: 0,
+  from: -1, to: -1,
+  paths: new Map(),    // idx -> detail map
+  cities: null,
+};
+
+/* ---------- tab ---------- */
+$$(".tab").forEach(btn => {
+  btn.addEventListener("click", () => {
+    $$(".tab").forEach(b => b.classList.toggle("active", b === btn));
+    const id = btn.dataset.tab;
+    $$(".panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + id));
+    history.replaceState(null, "", "#" + id);
+    if (id === "cities") renderCities();
+  });
+});
+(function initTab() {
+  const h = (location.hash || "").replace("#", "");
+  const btn = h && $(`.tab[data-tab="${h}"]`);
+  if (btn) btn.click();
+})();
+
+/* ---------- 数据加载 ---------- */
+async function loadData() {
+  const [stRes, binRes, metaRes] = await Promise.all([
+    fetch("data/stations.json"), fetch("data/fare_matrix.bin"), fetch("data/meta.json"),
+  ]);
+  if (!stRes.ok || !binRes.ok) throw new Error("数据文件缺失");
+  S.stations = await stRes.json();
+  const buf = await binRes.arrayBuffer();
+  S.matrix = new Uint8Array(buf);
+  S.N = S.stations.order.length;
+  if (S.matrix.length !== S.N * S.N) {
+    console.warn("matrix size mismatch", S.matrix.length, S.N * S.N);
+  }
+  const meta = metaRes.ok ? await metaRes.json() : {};
+  if (meta.generated_at) {
+    $("#dataStamp").textContent = "采集于 " + meta.generated_at.replace("T", " ").slice(0, 16);
+    $("#archiveMeta").textContent =
+      `站点 ${meta.stations} 个，已采站对 ${meta.pairs_filled} 条；数据源 ${meta.source}；政策生效 ${meta.policy_effective}。`;
+  }
+  return meta;
+}
+
+/* ---------- 票价速览 ---------- */
+const TIER_SERIES = [
+  { key: "old",   name: "现状 2005", color: "#7d7d7d", dash: "" },
+  { key: "plan1", name: "听证方案一", color: "#1668a3", dash: "5 4" },
+  { key: "plan2", name: "听证方案二", color: "#8a6d3b", dash: "2 3" },
+  { key: "final", name: "最终方案", color: "#c8102e", dash: "" },
+];
+
+function buildTierChart(kmAt) {
+  const W = 900, H = 330, P = { l: 46, r: 16, t: 14, b: 34 };
+  const KMAX = 135, VMIN = 2, VMAX = 16;
+  const KM = Math.max(1, Math.min(KMAX, kmAt == null ? 16 : kmAt));
+  const x = km => P.l + (km / KMAX) * (W - P.l - P.r);
+  const y = v => H - P.b - ((v - VMIN) / (VMAX - VMIN)) * (H - P.t - P.b);
+
+  let g = "";
+  for (let v = VMIN; v <= VMAX; v += 2) {
+    g += `<line x1="${P.l}" y1="${y(v)}" x2="${W - P.r}" y2="${y(v)}"/>`;
+    g += `<text x="${P.l - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  }
+  for (let km = 0; km <= KMAX; km += 15) {
+    g += `<text x="${x(km)}" y="${H - P.b + 18}" text-anchor="middle">${km}</text>`;
+  }
+
+  const hidden = new Set();
+  const lines = TIER_SERIES.map(s => {
+    let d = "";
+    for (let km = 0; km <= KMAX; km += 0.5) {
+      const px = x(km), py = y(fare(km, s.key));
+      d += (km === 0 ? "M" : "L") + px.toFixed(1) + " " + py.toFixed(1) + " ";
+    }
+    return `<path class="tl" data-k="${s.key}" d="${d}" fill="none" stroke="${s.color}"
+      stroke-width="2.2" ${s.dash ? `stroke-dasharray="${s.dash}"` : ""} ${hidden.has(s.key) ? 'opacity="0"' : ""}/>`;
+  }).join("");
+
+  const ticks = TIER_SERIES.map(s => {
+    const v = fare(KM, s.key);
+    return `<circle cx="${x(KM)}" cy="${y(v)}" r="4.5" fill="${s.color}" stroke="#fff" stroke-width="2"/>`;
+  }).join("");
+
+  $("#tierChart").innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="四套方案票价阶梯对比">
+      <g class="grid">${g}</g>
+      <g class="axis"></g>
+      ${lines}${ticks}
+      <line class="crosshair" x1="${x(KM)}" y1="${P.t}" x2="${x(KM)}" y2="${H - P.b}"/>
+      <text x="${x(KM)}" y="${P.t - 6}" text-anchor="middle" class="chlbl">${KM} km</text>
+     </svg>`;
+
+  $("#tierLegend").innerHTML = TIER_SERIES.map(s =>
+    `<span data-k="${s.key}"><i class="sw" style="background:${s.color}"></i>${s.name}</span>`
+  ).join("");
+  $$("#tierLegend span").forEach(el => el.addEventListener("click", () => {
+    const k = el.dataset.k;
+    const path = $(`.tl[data-k="${k}"]`);
+    const off = path.getAttribute("opacity") === "0";
+    path.setAttribute("opacity", off ? "1" : "0");
+    el.classList.toggle("off", !off);
+  }));
+}
+
+function buildTierTable() {
+  const tb = $("#tierTable tbody");
+  tb.innerHTML = TIER_SERIES[3] ? "" : "";
+  const pts = [[4,3],[8,4],[12,5],[16,6],[23,7],[30,8],[40,9],[50,10],[65,11],[80,12],[95,13],[110,14],[125,15]];
+  tb.innerHTML = pts.map(([km, p]) => {
+    const oldP = fare(km, "old");
+    const d = p - oldP;
+    const cls = d > 0 ? "up" : "same";
+    const txt = d > 0 ? `+${d} 元` : d === 0 ? "持平" : `${d} 元`;
+    return `<tr><td>≤ ${km} km</td><td><b>${p} 元</b></td><td class="${cls}">${txt}</td></tr>`;
+  }).join("");
+}
+
+/* ---------- 站到站 ---------- */
+function norm(s) { return (s || "").toLowerCase().replace(/\s+/g, ""); }
+
+function suggest(query, kind) {
+  const q = norm(query);
+  const box = kind === "from" ? $("#fromSuggest") : $("#toSuggest");
+  if (!q) { box.classList.remove("open"); box.innerHTML = ""; return; }
+  const order = S.stations.order, py = S.stations.py;
+  const out = [];
+  for (let i = 0; i < order.length && out.length < 12; i++) {
+    const n = order[i];
+    const p = py[n] || ["", ""];
+    const hit = norm(n).includes(q) || (p[0] && p[0].includes(q)) || (p[1] && p[1].startsWith(q));
+    if (hit) out.push({ i, n, lines: linesOf(n) });
+  }
+  box.innerHTML = out.length
+    ? out.map(o => `<div data-i="${o.i}">${o.n}<small>${o.lines}</small></div>`).join("")
+    : `<div style="color:var(--muted);cursor:default">无匹配站点</div>`;
+  box.classList.add("open");
+  $$("div[data-i]", box).forEach(el => el.addEventListener("mousedown", ev => {
+    ev.preventDefault();
+    pickStation(kind, Number(el.dataset.i));
+  }));
+}
+
+function linesOf(name) {
+  const L = S.stations.lines;
+  return Object.keys(L).filter(k => L[k].stations.some(i => S.stations.order[i] === name)).join(" · ");
+}
+
+function pickStation(kind, idx) {
+  const name = S.stations.order[idx];
+  if (kind === "from") { S.from = idx; $("#fromInput").value = name; }
+  else { S.to = idx; $("#toInput").value = name; }
+  (kind === "from" ? $("#fromSuggest") : $("#toSuggest")).classList.remove("open");
+  queryFare();
+}
+
+function bindInput(kind) {
+  const input = kind === "from" ? $("#fromInput") : $("#toInput");
+  input.addEventListener("input", () => suggest(input.value, kind));
+  input.addEventListener("focus", () => { if (input.value) suggest(input.value, kind); });
+  input.addEventListener("blur", () => setTimeout(() => {
+    (kind === "from" ? $("#fromSuggest") : $("#toSuggest")).classList.remove("open");
+  }, 120));
+  input.addEventListener("keydown", ev => {
+    const box = kind === "from" ? $("#fromSuggest") : $("#toSuggest");
+    const items = $$("div[data-i]", box);
+    if (!items.length) return;
+    let cur = items.findIndex(el => el.classList.contains("sel"));
+    if (ev.key === "ArrowDown") { ev.preventDefault(); cur = (cur + 1) % items.length; }
+    else if (ev.key === "ArrowUp") { ev.preventDefault(); cur = (cur - 1 + items.length) % items.length; }
+    else if (ev.key === "Enter" && cur >= 0) { ev.preventDefault(); items[cur].dispatchEvent(new MouseEvent("mousedown")); return; }
+    else return;
+    items.forEach((el, i) => el.classList.toggle("sel", i === cur));
+  });
+}
+
+function matrixFare(i, j) {
+  if (!S.matrix || i < 0 || j < 0) return 0;
+  return S.matrix[i * S.N + j] || 0;
+}
+
+async function ensurePaths(i) {
+  if (S.paths.has(i)) return S.paths.get(i);
+  try {
+    const r = await fetch(`data/paths/${i}.json`);
+    if (!r.ok) { S.paths.set(i, new Map()); return S.paths.get(i); }
+    const obj = await r.json();
+    const m = new Map(Object.entries(obj).map(([k, v]) => [Number(k), v]));
+    S.paths.set(i, m);
+    return m;
+  } catch (e) {
+    S.paths.set(i, new Map());
+    return S.paths.get(i);
+  }
+}
+
+async function queryFare() {
+  const box = $("#s2sResult");
+  if (S.from < 0 || S.to < 0) {
+    box.innerHTML = `<div class="loading">选择起终点后显示官方票价</div>`;
+    return;
+  }
+  if (S.from === S.to) {
+    box.innerHTML = `<div class="loading">起终点相同</div>`;
+    return;
+  }
+  const price = matrixFare(S.from, S.to);
+  const fromName = S.stations.order[S.from], toName = S.stations.order[S.to];
+
+  if (!price) {
+    box.innerHTML = `<div class="err">该站对的官方票价还没采到（后台采集中）。</div>`;
+    return;
+  }
+
+  box.innerHTML = `<div class="price-line"><span class="p">${price} 元</span>
+    <span class="from">${fromName} → ${toName} · 官方票价</span></div>
+    <div class="loading" id="routeLoading">正在取路线…</div>`;
+
+  const det = await ensurePaths(S.from);
+  const d = det.get(S.to);
+  let html = `<div class="price-line"><span class="p">${price} 元</span>
+    <span class="from">${fromName} → ${toName} · 官方票价</span></div>`;
+
+  if (d && d.r && d.r.length) {
+    html += `<div class="route-list">`;
+    for (const rt of d.r) {
+      for (const opt of (rt.opts || []).slice(0, 2)) {
+        html += `<div class="route"><div class="t">${rt.n || "路线"}${opt.name ? " · " + opt.name : ""}</div>
+          <div class="d">${opt.desc || ""}${opt.min ? " · 约 " + opt.min + " 分钟" : ""}${opt.tr === 0 ? " · 无需换乘" : (opt.tr ? " · 换乘 " + opt.tr + " 次" : "")}</div></div>`;
+      }
+    }
+    html += `</div>`;
+  } else {
+    html += `<div class="hint">路线明细尚未采集，仅显示官方票价。</div>`;
+  }
+  const km = estimateKm(S.from, S.to);
+  if (km) {
+    const oldP = fare(km, "old");
+    const dd = price - oldP;
+    const cmp = dd > 0 ? `涨 ${dd} 元` : dd < 0 ? `降 ${-dd} 元` : "与旧价持平";
+    html += `<div class="hint">按新票价反推约 ${fmt(km, 1)} 公里；这段距离在 2005 规则下约 ${oldP} 元，${cmp}（旧价为估算，仅供参考）。</div>`;
+  }
+  html += `<div class="hint">票价取自官方查询结果；实际扣费以闸机为准。</div>`;
+  box.innerHTML = html;
+}
+
+// 用新规则反推一个参考乘距（仅展示用）
+function estimateKm(i, j) {
+  const p = matrixFare(i, j);
+  if (!p) return 0;
+  for (let km = 1; km <= 135; km += 0.5) {
+    if (fare(km, "final") >= p) return km;
+  }
+  return 0;
+}
+
+function buildQuickPairs() {
+  const presets = [
+    ["人民广场", "陆家嘴"], ["徐家汇", "虹桥火车站"], ["莘庄", "人民广场"],
+    ["滴水湖", "西岑"], ["龙阳路", "浦东国际机场"], ["上海南站", "迪士尼"],
+  ];
+  const idx = S.stations.index;
+  const html = presets.filter(([a, b]) => idx[a] !== undefined && idx[b] !== undefined)
+    .map(([a, b]) => `<button data-a="${idx[a]}" data-b="${idx[b]}">${a} → ${b}</button>`).join("");
+  $("#quickPairs").innerHTML = html;
+  $$("#quickPairs button").forEach(b => b.addEventListener("click", () => {
+    S.from = Number(b.dataset.a); S.to = Number(b.dataset.b);
+    $("#fromInput").value = S.stations.order[S.from];
+    $("#toInput").value = S.stations.order[S.to];
+    queryFare();
+  }));
+}
+
+/* ---------- 上海优惠 ---------- */
+function monthlyRides(perWeek) { return Math.round(perWeek * 52 / 12); }
+
+function renderDiscount() {
+  const fareV = Number($("#dFare").value) || 4;
+  const perWeek = Number($("#dRides").value) || 10;
+  const rides = monthlyRides(perWeek);
+  const gross = fareV * rides;
+  const threshold = 90;
+  let save = 0, before = 0, after = 0;
+  if (gross > threshold) {
+    const fullPriceRides = Math.floor(threshold / fareV);
+    before = fullPriceRides;
+    after = rides - fullPriceRides;
+    save = after * fareV * 0.1;
+  } else {
+    before = rides;
+  }
+  const net = gross - save;
+  $("#dResult").innerHTML = gross > threshold
+    ? `每月约 <b>${rides}</b> 次、票款 <b>${gross.toFixed(0)}</b> 元：前 <b>${before}</b> 次按原价（累计到 90 元），之后 <b>${after}</b> 次 9 折，每月省 <b>${save.toFixed(1)}</b> 元，实付约 <b>${net.toFixed(0)}</b> 元。`
+    : `每月约 <b>${rides}</b> 次、票款 <b>${gross.toFixed(0)}</b> 元，未达到 <b>90</b> 元门槛，本月不触发 9 折。再坐 <b>${Math.max(0, Math.ceil(threshold / fareV) - rides)}</b> 次可触发。`;
+
+  // 计次票
+  const pFare = Number($("#pFare").value) || 5;
+  const TICKETS = [
+    { n: 35, price: 190 }, { n: 45, price: 210 }, { n: 60, price: 270 }, { n: 90, price: 390 },
+  ];
+  const best = TICKETS.map(t => t.price / t.n).reduce((a, b) => Math.min(a, b));
+  $("#ticketGrid").innerHTML = TICKETS.map(t => {
+    const per = t.price / t.n;
+    const need = Math.ceil(t.price / pFare);          // 30 天内坐多少次才回本
+    const saveVsSingle = pFare * t.n - t.price;
+    const fit = pFare > per
+      ? `按 ${pFare} 元/次算，30 天内坐满 ${need} 次即回本，最多省 ${saveVsSingle.toFixed(0)} 元`
+      : `按 ${pFare} 元/次算不划算（单次 ${per.toFixed(2)} 元高于票价）`;
+    return `<div class="ticket ${Math.abs(per - best) < 1e-9 ? "best" : ""}">
+      <div class="name">${t.n} 次票</div>
+      <div class="price">${t.price}<small>元</small></div>
+      <div class="per">${per.toFixed(2)} 元 / 次</div>
+      <div class="fit">${fit}</div>
+    </div>`;
+  }).join("");
+
+  // 日票
+  const dRides = Number($("#dayRides").value) || 4;
+  const dFare = Number($("#dayFare").value) || 4;
+  const singleDay = dRides * dFare;
+  const cmp = [
+    { name: "一日票 24 元", price: 24, days: 1 },
+    { name: "三日票 60 元", price: 60, days: 3 },
+    { name: "联程日票·一日 26 元", price: 26, days: 1 },
+    { name: "联程日票·三日 62 元", price: 62, days: 3 },
+    { name: "联程日票·七日 112 元", price: 112, days: 7 },
+  ];
+  const chosen = cmp.filter(c => c.days === 1).map(c => {
+    const perDay = c.price / c.days;
+    const ok = singleDay > perDay;
+    const need = Math.ceil(c.price / dFare / c.days);
+    return `<div>${c.name}：每天坐 <b>${need}</b> 次回本，你现在每天 ${dRides} 次、单程 ${dFare} 元（${singleDay} 元 / 天）—— <b>${ok ? "买日票更省" : "直接刷码更省"}</b></div>`;
+  }).join("");
+  const three = (() => {
+    const perDay = 60 / 3;
+    const need = Math.ceil(perDay / dFare);
+    return `三日票 60 元：平均每天 20 元，按每天 ${dRides} 次、单程 ${dFare} 元，需要每天坐满 <b>${need}</b> 次才回本 —— <b>${singleDay * 3 > 60 ? "买三日票更省" : "直接刷码更省"}</b>。`;
+  })();
+  $("#dayResult").innerHTML = chosen + `<div style="margin-top:6px">${three}</div>`;
+}
+
+["dFare", "dRides", "pFare", "dayRides", "dayFare"].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener("input", renderDiscount);
+});
+
+/* ---------- 城市对比 ---------- */
+function fareBJ(d) { if (d <= 6) return 3; if (d <= 12) return 4; if (d <= 32) return 4 + Math.ceil((d - 12) / 10); return 6 + Math.ceil((d - 32) / 20); }
+function fareGSH(d) { if (d <= 4) return 2; if (d <= 12) return 2 + Math.ceil((d - 4) / 4); if (d <= 24) return 4 + Math.ceil((d - 12) / 6); return 6 + Math.ceil((d - 24) / 8); }
+function fareNJ(d) {
+  const steps = [5, 5, 7, 7, 9, 11, 13, 15];
+  let price = 2, km = 4;
+  for (let i = 0; i < steps.length; i++) { if (d <= km) return price; km += steps[i]; price += 1; }
+  if (d <= km) return price;
+  return price + Math.ceil((d - km) / 15);
+}
+function fareCDWH(d) { if (d <= 4) return 2; if (d <= 12) return 2 + Math.ceil((d - 4) / 4); if (d <= 24) return 4 + Math.ceil((d - 12) / 6); if (d <= 40) return 6 + Math.ceil((d - 24) / 8); if (d <= 50) return 8 + Math.ceil((d - 40) / 10); return 9 + Math.ceil((d - 50) / 20); }
+
+const CITY_SERIES = [
+  { key: "sh", name: "上海（新机制）", fn: d => fare(d, "final"), color: "#c8102e" },
+  { key: "bj", name: "北京", fn: fareBJ, color: "#e6a23c" },
+  { key: "gsh", name: "广州 / 深圳 / 杭州", fn: fareGSH, color: "#2e7d32" },
+  { key: "nj", name: "南京", fn: fareNJ, color: "#7b1fa2" },
+  { key: "cdwh", name: "成都 / 武汉", fn: fareCDWH, color: "#00838f" },
+];
+
+const CITY_CARDS = [
+  { name: "上海（2026 新机制）", color: "#c8102e",
+    rule: "3 元起乘 0–4 公里；50 公里内按 4/4/4/7/7/10/10 公里逐档 +1 元；50 公里外每 15 公里 +1 元。",
+    meta: "满 90 元后 9 折；计次票 35/45/60/90 次；一日票 24 元、三日票 60 元。不含磁浮、金山铁路、市域机场线。",
+    src: "https://www.shanghai.gov.cn", srcName: "上海市人民政府" },
+  { name: "北京", color: "#e6a23c",
+    rule: "6 公里内 3 元；6–12 公里 4 元；12–22 公里 5 元；22–32 公里 6 元；32 公里以上每 20 公里加 1 元。",
+    meta: "一卡通月累计满 100 元 8 折、满 150 元 5 折。",
+    src: "https://www.mtr.bj.cn/page/instructions.html", srcName: "京港地铁" },
+  { name: "广州 / 深圳 / 杭州", color: "#2e7d32",
+    rule: "4 公里内 2 元；4–12 公里每 4 公里 +1 元；12–24 公里每 6 公里 +1 元；24 公里以上每 8 公里 +1 元。",
+    meta: "广州满 80 元 8 折、200 元后 5 折；深圳通 9.5 折；杭州按 50/100 元分段 9/7/5 折。",
+    src: "https://www.gz.gov.cn", srcName: "广州市人民政府" },
+  { name: "南京", color: "#7b1fa2",
+    rule: "2 元乘 4 公里；之后每 1 元晋级里程依次 5/5/7/7/9/11/13/15 公里。",
+    meta: "储值卡月累计分段 9.5 折 / 9 折 / 8 折。",
+    src: "https://www.njmetro.com.cn", srcName: "南京地铁" },
+  { name: "成都 / 武汉", color: "#00838f",
+    rule: "4 公里内 2 元；4–12 公里每 4 公里 +1 元；12–24 公里每 6 公里 +1 元；24 公里以上按 8/10/20 公里递进。",
+    meta: "两地均有月累计折扣与换乘优惠。",
+    src: "https://www.chengdurail.com", srcName: "成都轨道" },
+];
+
+let citiesRendered = false;
+function renderCities(kmAt) {
+  if (citiesRendered) return;
+  citiesRendered = true;
+
+  const W = 900, H = 320, P = { l: 46, r: 16, t: 14, b: 34 };
+  const KMAX = 130, VMIN = 2, VMAX = 16;
+  const x = km => P.l + (km / KMAX) * (W - P.l - P.r);
+  const y = v => H - P.b - ((v - VMIN) / (VMAX - VMIN)) * (H - P.t - P.b);
+
+  let g = "";
+  for (let v = VMIN; v <= VMAX; v += 2) {
+    g += `<line x1="${P.l}" y1="${y(v)}" x2="${W - P.r}" y2="${y(v)}"/>`;
+    g += `<text x="${P.l - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`;
+  }
+  for (let km = 0; km <= KMAX; km += 20) {
+    g += `<text x="${x(km)}" y="${H - P.b + 18}" text-anchor="middle">${km}</text>`;
+  }
+  const paths = CITY_SERIES.map(s => {
+    let d = "";
+    for (let km = 0; km <= KMAX; km += 0.5) {
+      d += (km === 0 ? "M" : "L") + x(km).toFixed(1) + " " + y(s.fn(km)).toFixed(1) + " ";
+    }
+    return `<path class="cl" data-k="${s.key}" d="${d}" fill="none" stroke="${s.color}" stroke-width="2.2"/>`;
+  }).join("");
+
+  const KM = Math.max(1, Math.min(KMAX, kmAt == null ? 16 : kmAt));
+  const dots = CITY_SERIES.map(s =>
+    `<circle cx="${x(KM)}" cy="${y(s.fn(KM))}" r="4" fill="${s.color}" stroke="#fff" stroke-width="2"/>`).join("");
+  $("#cityChart").innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="城市票价对比">
+    <g class="grid">${g}</g>${paths}${dots}
+    <line class="crosshair" x1="${x(KM)}" y1="${P.t}" x2="${x(KM)}" y2="${H - P.b}"/>
+    <text x="${x(KM)}" y="${P.t - 6}" text-anchor="middle" class="chlbl">${KM} km</text></svg>`;
+  $("#cityLegend").innerHTML = CITY_SERIES.map(s =>
+    `<span data-k="${s.key}"><i class="sw" style="background:${s.color}"></i>${s.name}</span>`).join("");
+  $$("#cityLegend span").forEach(el => el.addEventListener("click", () => {
+    const p = $(`.cl[data-k="${el.dataset.k}"]`);
+    const off = p.getAttribute("opacity") === "0";
+    p.setAttribute("opacity", off ? "1" : "0");
+    el.classList.toggle("off", !off);
+  }));
+
+  // 表格
+  const kms = [5, 10, 16, 25, 40, 60, 80, 124];
+  const head = `<thead><tr><th>乘距</th>${CITY_SERIES.map(s => `<th>${s.name}</th>`).join("")}</tr></thead>`;
+  const body = kms.map(km => {
+    const vals = CITY_SERIES.map(s => s.fn(km));
+    const min = Math.min(...vals);
+    return `<tr><td>${km} km</td>` + vals.map(v =>
+      `<td${v === min ? ' style="color:#2e7d32;font-weight:700"' : ""}>${v} 元</td>`).join("") + `</tr>`;
+  }).join("");
+  $("#cityPriceTable").innerHTML = head + `<tbody>${body}</tbody>`;
+
+  $("#cityCards").innerHTML = CITY_CARDS.map(c => `
+    <div class="city-card">
+      <h3><span class="cdot" style="background:${c.color}"></span>${c.name}</h3>
+      <div class="rule">${c.rule}</div>
+      <div class="meta">${c.meta}</div>
+      <div class="meta">来源：<a href="${c.src}" target="_blank" rel="noopener">${c.srcName}</a></div>
+    </div>`).join("");
+}
+
+/* ---------- 乘距滑块 ---------- */
+function initKmSlider() {
+  const el = $("#kmRange");
+  if (!el) return;
+  const paint = () => {
+    const km = +el.value;
+    buildTierChart(km);
+    const base = fare(km, "old");
+    const now = fare(km, "final");
+    const d = now - base;
+    const month = d * 2 * 21.75;
+    $("#kmOut").innerHTML =
+      `<span class="km-now">${km} 公里</span>` +
+      `<span>最终方案 <b>${now}</b> 元</span>` +
+      `<span>现状 <b>${base}</b> 元</span>` +
+      `<span class="${d > 0 ? "up" : d < 0 ? "down" : "flat"}">${d > 0 ? "+" : ""}${d} 元</span>` +
+      `<span class="muted">每月通勤（往返 21.75 天）${month >= 0 ? "多花" : "省"} ${Math.abs(month).toFixed(0)} 元</span>`;
+  };
+  el.addEventListener("input", paint);
+  paint();
+}
+
+/* ---------- 城市乘距滑块 ---------- */
+function initCitySlider() {
+  const el = $("#cityKmRange");
+  if (!el) return;
+  const paint = () => {
+    const km = +el.value;
+    renderCities(km);
+    const vals = CITY_SERIES.map(s => ({ n: s.name, v: s.fn(km), c: s.color }));
+    const min = Math.min(...vals.map(x => x.v));
+    $("#cityKmOut").innerHTML = vals.sort((a, b) => a.v - b.v).map(x =>
+      `<span class="city-pill${x.v === min ? " best" : ""}"><i class="sw" style="background:${x.c}"></i>${x.n} <b>${x.v}</b> 元</span>`
+    ).join("");
+  };
+  el.addEventListener("input", paint);
+  paint();
+}
+
+/* ---------- 启动 ---------- */
+(async function boot() {
+  try {
+    await loadData();
+    buildTierTable();
+    initKmSlider();
+    bindInput("from"); bindInput("to");
+    buildQuickPairs();
+    const total = (S.N * (S.N - 1)) / 2;
+    let filled = 0;
+    for (let i = 0; i < S.N; i++) for (let j = i + 1; j < S.N; j++) if (matrixFare(i, j)) filled += 1;
+    $("#coverageHint").textContent =
+      `线网 ${S.N} 站。官方站对已采集 ${filled} / ${total}（${(filled / total * 100).toFixed(1)}%），后台仍在补齐。`;
+    renderDiscount();
+    initCitySlider();
+  } catch (e) {
+    console.error(e);
+    $("#dataStamp").innerHTML = `<span class="err">数据加载失败：${e.message}</span>`;
+  }
+})();
+</script>
+</body>
+</html>
