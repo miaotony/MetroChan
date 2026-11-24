@@ -274,6 +274,14 @@
   table td.up{color:var(--red);font-weight:600}
   table td.down{color:#2e7d32;font-weight:600}
   table td.eq{color:var(--muted)}
+
+  /* ---- 听证方案开关 / 次数滑块 ---- */
+  .hearing-toggle{margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer}
+  .legend .hearing-toggle{margin-left:14px}
+  .legend .lg-hearing{display:none}
+  body.show-hearing .legend .lg-hearing{display:inline-flex;align-items:center}
+  .rides-range{width:170px;height:20px;accent-color:var(--red);vertical-align:middle;cursor:pointer}
+  @media (max-width:560px){ .rides-range{width:130px} }
 </style>
 </head>
 <body>
@@ -283,7 +291,7 @@
     <h1>MetroChan<span class="h1-cn">魔都地铁酱</span></h1>
     <div class="sub">上海地铁票价对比 · 现状（2005 版）vs 最终方案（2026-12-01 生效）· 附听证方案一、二</div>
     <div class="src">
-      票价数据：<a href="https://fgw.sh.gov.cn/cmsres/24/2480505af8bb4b50bfa75092e12fe6af/535b6d58b1fd807bb0b9a2b92ecd078e.wps" target="_blank" rel="noopener">《优化上海市轨道交通票价机制听证方案》</a>（上海市发改委，2026-08-19）。
+      票价数据：2026-11-24 官方票价查询系统全量抓取的站到站票价与换乘路径（418 站、87153 对）。最终方案依据<a href="https://fgw.sh.gov.cn/fgw_jjjctk/20261123/f57b63885c514c829ee269ed589ab2b9.html" target="_blank" rel="noopener">《关于优化上海市轨道交通票价机制的复函》</a>（沪发改价调〔2026〕58号，2026-12-01 起执行）；听证方案见<a href="https://fgw.sh.gov.cn/cmsres/24/2480505af8bb4b50bfa75092e12fe6af/535b6d58b1fd807bb0b9a2b92ecd078e.wps" target="_blank" rel="noopener">《优化上海市轨道交通票价机制听证方案》</a>（2026-08-19）。
       站间距数据：中文维基百科各线路词条（官方设计/环评资料，米级）。
       不含磁浮线、金山铁路、市域机场线。
     </div>
@@ -326,8 +334,9 @@
         <div class="legend">
           <span><i class="sw cur"></i>现状（2005 版）</span>
           <span><i class="sw final"></i>最终方案（2026-12）</span>
-          <span><i class="sw p1"></i>方案一</span>
-          <span><i class="sw p2"></i>方案二</span>
+          <span class="lg-hearing"><i class="sw p1"></i>方案一</span>
+          <span class="lg-hearing"><i class="sw p2"></i>方案二</span>
+          <label class="toggle hearing-toggle"><input type="checkbox" id="showHearing"> 显示听证方案一、二（未采纳）</label>
         </div>
         <svg id="chart" viewBox="0 0 920 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="上海地铁四方案全乘距票价阶梯图" aria-live="polite"></svg>
       </div>
@@ -338,6 +347,7 @@
       <div class="costbox">
         <div class="cost-inputs">
           <label for="rides">每月乘坐次数</label>
+          <input type="range" id="ridesRange" min="1" max="90" value="44" class="rides-range" aria-label="每月乘坐次数滑块">
           <input type="number" id="rides" min="1" max="200" value="44">
           <span class="km-label">次/月（按上方乘距）</span>
           <label class="toggle"><input type="checkbox" id="discount" checked> 计入满额后 9 折（现状满 70 / 最终方案满 90 / 听证方案满 100 元）</label>
@@ -386,6 +396,7 @@
           <button data-pair="花桥,滴水湖">花桥 → 滴水湖</button>
           <button data-pair="滴水湖,西岑">滴水湖 → 西岑（全网最远）</button>
         </div>
+        <label class="toggle hearing-toggle"><input type="checkbox" id="showHearingS2s"> 显示听证方案一、二（未采纳）</label>
         <div class="route-result" id="routeResult"></div>
       </div>
     </section>
@@ -395,6 +406,7 @@
       <div class="costbox">
         <div class="cost-inputs">
           <label for="ridesS2s">每月乘坐次数</label>
+          <input type="range" id="ridesS2sRange" min="1" max="90" value="44" class="rides-range" aria-label="每月乘坐次数滑块">
           <input type="number" id="ridesS2s" min="1" max="200" value="44">
           <span class="km-label">次/月</span>
           <label class="toggle"><input type="checkbox" id="discountS2s" checked> 计入满额后 9 折（现状满 70 / 最终方案满 90 / 听证方案满 100 元）</label>
@@ -503,8 +515,10 @@
     <p class="formula">方案一：0-4km 3 元，之后按 4/4/4/7/7/7/10/10/10km 每档 +1 元，67km 以上每 15km +1 元。</p>
     <p class="formula">方案二：0-6km 4 元，之后按 6/8/8/10/10/12/12km 每档 +1 元，72km 以上每 14km +1 元。</p>
     <p class="formula">最终方案：0-4km 3 元，4-16km 每 4km +1 元，16-30km 每 7km +1 元，30-50km 每 10km +1 元，50-125km 每 15km +1 元，125km 以上每 20km +1 元（推算）。</p>
-    <p>平均影响：方案一 +23.3%（4.23→5.22 元），方案二 +22.9%（4.23→5.20 元）。</p>
+    <p>平均影响：最终方案口径下，据官方公布平均每人次多支出约 0.9 元；听证方案一 +23.3%（4.23→5.22 元），听证方案二 +22.9%（4.23→5.20 元）。</p>
     <p>站到站里程按线网<b>最短路径里程</b>计价（换乘不计里程），站间距来自维基百科各线路词条，为官方设计/环评数据的米级精度。</p>
+    <p>官方资料：<a href="https://fgw.sh.gov.cn/fgw_jjjctk/20261123/f57b63885c514c829ee269ed589ab2b9.html" target="_blank" rel="noopener">《关于优化上海市轨道交通票价机制的复函》</a>（沪发改价调〔2026〕58号，2026-11-23）·<a href="https://fgw.sh.gov.cn/fgw_gsgg/20261123/78e253eb2682475381bc60ce10f0b303.html" target="_blank" rel="noopener">《优化上海市轨道交通票价机制主要意见建议采纳情况》</a>（2026-11-23）</p>
+    <p>站到站票价与换乘路径取自 2026-11-24 官方票价查询系统的全量抓取（418 站、87153 个站对），供参考，实际以车站公示与官方查询为准。</p>
     <p class="disclaimer">⚠️ 本页面为个人自行整理的对比工具，<b>非官方页面</b>，数据仅供参考。上海地铁实际计价机制可以说是「<span class="spoiler" tabindex="0">沪国机密</span>」，本页估算结果可能与实际存在差异，一切以官方实际计价为准。</p>
     <p class="copyright">© 2026 <a href="https://miaotony.xyz" target="_blank" rel="noopener">MiaoTony</a> · <a href="https://github.com/miaotony/MetroChan" target="_blank" rel="noopener">MetroChan (GitHub)</a> · All rights reserved.</p>
   </div>
@@ -555,9 +569,13 @@ function fareFinal(d){
 const FARES = [
   {key:'cur',   name:'现状（2005 版）',      fn:fareCurrent, color:'#8a8a8a'},
   {key:'final', name:'最终方案（2026-12）',  fn:fareFinal,   color:'#c8102e'},
-  {key:'p1',    name:'听证方案一（未采纳）', fn:farePlan1,   color:'#1668a3'},
-  {key:'p2',    name:'听证方案二（未采纳）', fn:farePlan2,   color:'#2f8f6b'}
+  {key:'p1',    name:'听证方案一（未采纳）', fn:farePlan1,   color:'#1668a3', hearing:true},
+  {key:'p2',    name:'听证方案二（未采纳）', fn:farePlan2,   color:'#2f8f6b', hearing:true}
 ];
+var SHOW_HEARING = false;
+function activeFares(){
+  return SHOW_HEARING ? FARES : FARES.filter(function(f){ return !f.hearing; });
+}
 
 /* ============ Tab 切换 ============ */
 var s2sModalWired = false;
@@ -662,7 +680,7 @@ document.addEventListener('click', function(ev){
 /* ============ 共用：月成本表 ============ */
 function renderCostTable(container, km, rides, useDisc){
   var rows = [];
-  FARES.forEach(function(f){
+  activeFares().forEach(function(f){
     var per = f.fn(km);
     var total = per * rides;
     var th = f.key==='cur' ? 70 : (f.key==='final' ? 90 : 100);  // 现状满70、最终方案满90、听证方案满100 打 9 折
@@ -717,7 +735,7 @@ function renderCostTable(container, km, rides, useDisc){
     var d = getKm();
     var cur = fareCurrent(d);
     var html = '';
-    FARES.forEach(function(f){
+    activeFares().forEach(function(f){
       var p = f.fn(d);
       var cls = f.key==='cur'?'cur':(f.key==='p1'?'p1':(f.key==='p2'?'p2':'final'));
       var deltaTxt, deltaCls, note;
@@ -756,7 +774,7 @@ function renderCostTable(container, km, rides, useDisc){
     });
     out += '<text class="axis" x="'+sx(xMax)+'" y="'+(H-B+18)+'" text-anchor="end">公里</text>';
     out += '<text class="axis" x="'+(L-8)+'" y="14" text-anchor="end">元</text>';
-    FARES.forEach(function(f){
+    activeFares().forEach(function(f){
       var pts=[];
       for(var x=1; x<=xMax; x++){ pts.push([x, f.fn(x)]); }
       var d='M '+sx(pts[0][0])+' '+sy(pts[0][1]);
@@ -767,12 +785,12 @@ function renderCostTable(container, km, rides, useDisc){
       out += '<path d="'+d+'" fill="none" stroke="'+f.color+'" stroke-width="2.2" stroke-linejoin="round"/>';
     });
     var km = getKm();
-    var desc1 = '横轴为乘距 0 至 135 公里，纵轴为票价 0 至 16 元。三条阶梯曲线分别为：'
-      + FARES.map(function(f){ return f.name + ' 在 ' + km + ' 公里时 ' + f.fn(km) + ' 元'; }).join('；') + '。';
+    var desc1 = '横轴为乘距 0 至 135 公里，纵轴为票价 0 至 16 元。' + activeFares().length + ' 条阶梯曲线分别为：'
+      + activeFares().map(function(f){ return f.name + ' 在 ' + km + ' 公里时 ' + f.fn(km) + ' 元'; }).join('；') + '。';
     out = '<title>上海地铁三方案全乘距票价阶梯图</title><desc>' + desc1 + '</desc>' + out;
     out += '<line class="crosshair" x1="'+sx(km)+'" y1="'+sy(yMin)+'" x2="'+sx(km)+'" y2="'+sy(yMax)+'"/>';
     out += '<text class="axis" x="'+sx(km)+'" y="'+(T-8)+'" text-anchor="middle" font-weight="700">'+km+' km</text>';
-    FARES.forEach(function(f){
+    activeFares().forEach(function(f){
       var y=f.fn(km);
       out += '<circle class="dot" cx="'+sx(km)+'" cy="'+sy(y)+'" r="4.5" fill="'+f.color+'"/>';
     });
@@ -799,6 +817,23 @@ function renderCostTable(container, km, rides, useDisc){
   });
   ridesInput.addEventListener('input', renderCost);
   discInput.addEventListener('change', renderCost);
+
+  window.__renderDist = function(){ renderCards(); renderChart(); renderCost(); };
+  var ridesRange = document.getElementById('ridesRange');
+  ridesRange.addEventListener('input', function(){ ridesInput.value = ridesRange.value; renderCost(); });
+  ridesInput.addEventListener('input', function(){ ridesRange.value = ridesInput.value; });
+
+  var showHearing = document.getElementById('showHearing');
+  var showHearingS2s = document.getElementById('showHearingS2s');
+  if (showHearing) {
+    showHearing.addEventListener('change', function(){
+      SHOW_HEARING = showHearing.checked;
+      document.body.classList.toggle('show-hearing', SHOW_HEARING);
+      if (showHearingS2s) showHearingS2s.checked = SHOW_HEARING;
+      renderCards(); renderChart(); renderCost();
+      if (window.__renderRoute) window.__renderRoute();
+    });
+  }
 
   /* 点击/拖动图表直接选距离 */
   svg.style.cursor = 'crosshair';
@@ -1395,14 +1430,14 @@ const CITY_CARDS = [
         html += renderJourney(segs, o);
 
         html += '<div class="fare-foot">'
-          + '<span class="src">数据：上海地铁官方票价查询 · 普通出行</span>'
+          + '<span class="src">数据：官方票价查询系统 · 2026-11-24 全量抓取</span>'
           + '<span class="sep">｜</span>'
-          + '<span>里程为按公开站间距推算的最短路径，实际计价算法未完全公开</span>'
+          + '<span>里程按公开站间距推算最短路径</span>'
           + '</div>';
 
         /* 票价对比卡：官方实测 + 各方案按里程推算 */
         html += '<div class="cards" style="margin-top:18px">';
-        FARES.forEach(function(f){
+        activeFares().forEach(function(f){
           var isOff = (f.key === 'final');
           var offFare = Number(off.p);
           var p = isOff ? offFare : f.fn(km);
@@ -1465,6 +1500,23 @@ const CITY_CARDS = [
   epTo.onchange = renderRoute;
   ridesS2s.addEventListener('input', renderCostS2s);
   discS2s.addEventListener('change', renderCostS2s);
+
+  var ridesS2sRange = document.getElementById('ridesS2sRange');
+  ridesS2sRange.addEventListener('input', function(){ ridesS2s.value = ridesS2sRange.value; renderCostS2s(); });
+  ridesS2s.addEventListener('input', function(){ ridesS2sRange.value = ridesS2s.value; });
+
+  var showHearingS2sEl = document.getElementById('showHearingS2s');
+  if (showHearingS2sEl) {
+    showHearingS2sEl.addEventListener('change', function(){
+      SHOW_HEARING = showHearingS2sEl.checked;
+      document.body.classList.toggle('show-hearing', SHOW_HEARING);
+      var sh = document.getElementById('showHearing');
+      if (sh) sh.checked = SHOW_HEARING;
+      renderRoute();
+      if (window.__renderDist) window.__renderDist();
+    });
+  }
+  window.__renderRoute = renderRoute;
   document.getElementById('swapBtn').addEventListener('click', function(){
     var a = epFrom.get(), b = epTo.get();
     epFrom.set(b); epTo.set(a);
