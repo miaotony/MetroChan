@@ -305,6 +305,16 @@
   .pick-item.on{background:#f1ede6;font-weight:600}
   .pick-sub{margin-left:auto;font-size:11px;color:#b0aca6;font-weight:400;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .pick-empty{padding:10px 8px;font-size:12.5px;color:#999}
+
+  /* ---- 线路图 ---- */
+  .metromap{margin-top:18px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:#fbfaf8;position:relative}
+  .metromap .map-cap{font-size:12px;color:var(--muted);padding:9px 12px 0}
+  .metromap svg{display:block;width:100%;height:auto;max-height:560px}
+  .metromap .mstop{fill:#fff;stroke:#c2bdb6;stroke-width:1.6;transition:stroke .15s,stroke-width .15s}
+  .metromap .mstop.inter{stroke:#7a736b;stroke-width:2.2}
+  .metromap .mstop.end{stroke:#2b2b2b;stroke-width:2.6}
+  .metromap .mstop.flag{stroke:var(--red);stroke-width:3;fill:#fff}
+  .metromap circle:hover{stroke-width:4;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1379,6 +1389,84 @@ const CITY_CARDS = [
     renderCostTable(costTableS2s, lastKm, rides, discS2s.checked);
   }
 
+  /* ---------- 线路图（站点坐标来自官方地图接口） ---------- */
+  var MAPXY = null, MAPREQ = null;
+  function loadMapXY(){
+    if (MAPXY) return Promise.resolve(MAPXY);
+    if (!MAPREQ){
+      MAPREQ = fetch('data/map_xy.json', {cache:'force-cache'})
+        .then(function(r){ return r.json(); })
+        .then(function(d){ MAPXY = d || {}; return MAPXY; })
+        .catch(function(){ MAPXY = {}; return MAPXY; });
+    }
+    return MAPREQ;
+  }
+
+  function mapBase(G){
+    var out = '';
+    for (var ln in METRO_DATA.lines){
+      var seq = METRO_DATA.lines[ln], pts = [];
+      for (var i=0;i<seq.length;i++){
+        var q = G[seq[i]];
+        if (q) pts.push((q[0]*1000).toFixed(1) + ',' + (q[1]*1000).toFixed(1));
+      }
+      if (pts.length < 2) continue;
+      out += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="#ded9d2" stroke-width="3.4"'
+           + ' stroke-linejoin="round" stroke-linecap="round"/>';
+    }
+    return out;
+  }
+
+  function mapRoute(G, segs){
+    var out = '';
+    segs.forEach(function(sg){
+      var seq = lineSlice(sg.line, sg.from, sg.to), pts = [];
+      for (var i=0;i<seq.length;i++){
+        var q = G[seq[i]];
+        if (q) pts.push((q[0]*1000).toFixed(1) + ',' + (q[1]*1000).toFixed(1));
+      }
+      if (pts.length < 2) return;
+      var color = lineColor(sg.line);
+      out += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="#fff" stroke-width="9.5"'
+           + ' stroke-linejoin="round" stroke-linecap="round"/>';
+      out += '<polyline points="' + pts.join(' ') + '" fill="none" stroke="' + color + '" stroke-width="5"'
+           + ' stroke-linejoin="round" stroke-linecap="round"/>';
+    });
+    return out;
+  }
+
+  function mapStops(G, segs, from, to){
+    var marks = {}, out = '';
+    segs.forEach(function(sg, i){
+      if (i === 0) marks[sg.from] = 'end';
+      marks[sg.to] = (i === segs.length-1) ? 'end' : 'inter';
+    });
+    for (var nm in marks){
+      var q = G[nm];
+      if (!q) continue;
+      var cx = (q[0]*1000).toFixed(1), cy = (q[1]*1000).toFixed(1);
+      var r = marks[nm] === 'end' ? 6 : 5;
+      out += '<circle class="mstop ' + marks[nm] + '" cx="' + cx + '" cy="' + cy + '" r="' + r + '">'
+           + '<title>' + nm + '</title></circle>';
+    }
+    [from, to].forEach(function(nm){
+      var q = G[nm];
+      if (!q) return;
+      out += '<circle class="mstop flag" cx="' + (q[0]*1000).toFixed(1) + '" cy="' + (q[1]*1000).toFixed(1) + '" r="7">'
+           + '<title>' + nm + '</title></circle>';
+    });
+    return out;
+  }
+
+  function renderMapBox(G, segs, from, to){
+    if (!segs.length) return '';
+    return '<div class="metromap">'
+      + '<div class="map-cap">线路图 · 高亮为官方推荐路径</div>'
+      + '<svg viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet" role="img" aria-label="上海地铁线路图，高亮 ' + from + ' 至 ' + to + ' 的官方路径">'
+      + mapBase(G) + mapRoute(G, segs) + mapStops(G, segs, from, to)
+      + '</svg></div>';
+  }
+
   /* ---------- 官方实测数据：按起点站懒加载分片 ---------- */
   var OFFICIAL = { index: null, req: null, cache: {} };
 
@@ -1501,7 +1589,8 @@ const CITY_CARDS = [
 
     var token = (renderRoute.tk = (renderRoute.tk || 0) + 1);
 
-    officialPair(fromName, toName).then(function(off){
+    Promise.all([officialPair(fromName, toName), loadMapXY()]).then(function(res){
+      var off = res[0]; window.__mapXY = res[1];
       if (token !== renderRoute.tk) return;
       var idxMap = OFFICIAL.index || {};
       var fi0 = idxMap[fromName], ti0 = idxMap[toName];
@@ -1547,6 +1636,7 @@ const CITY_CARDS = [
         }
 
         html += renderJourney(segs, o);
+        if (window.__mapXY) html += renderMapBox(window.__mapXY, segs, fromName, toName);
 
         html += '<div class="fare-foot">'
           + '<span class="src">数据：<a href="https://metroplatform.tenchii.com" target="_blank" rel="noopener">官方票价查询系统</a> · 2026-11-24</span>'
