@@ -416,7 +416,7 @@
   }
 </style>
 </head>
-<body>
+<body data-tab="s2s">
 <div class="wrap">
 
   <header>
@@ -574,7 +574,7 @@
         <div class="legend" id="cityLegend"></div>
         <svg id="cityChart" viewBox="0 0 920 400" preserveAspectRatio="xMidYMid meet" role="img" aria-label="各城市票价阶梯对比图" aria-live="polite" style="cursor:crosshair"></svg>
       </div>
-      <div class="hint">广州、深圳、杭州现行计价公式完全一致，合并为一条线；成都与武汉一致，合并为一条线。上海方案一/二为听证方案，其余城市均为现行票价。</div>
+      <div class="hint">广州、深圳、杭州现行计价公式完全一致，合并为一条线；成都与武汉一致，合并为一条线。</div>
     </section>
 
     <section>
@@ -628,11 +628,11 @@
         <div class="chg-col">
           <h3>变了什么</h3>
           <ul>
-            <li>起步可乘里程 6 → 4 公里，短途更早进入 4 元档</li>
-            <li>加价间距加密：4/4/4/7/7/10/10 公里，50 公里后每 15 公里加 1 元</li>
-            <li>满额 9 折门槛 70 → 90 元，但覆盖全支付方式，市域线也纳入</li>
-            <li>新增计次票 35 / 45 / 60 / 90 次，190 / 210 / 270 / 390 元</li>
-            <li>一日票 18 → 24 元，三日票 45 → 60 元</li>
+            <li>起步可乘里程 <b class="hl">6 → 4</b> 公里，短途更早进入 4 元档</li>
+            <li>加价间距加密：<b class="hl">4/4/4/7/7/10/10</b> 公里，50 公里后每 15 公里加 1 元</li>
+            <li>满额 9 折门槛 <b class="hl">70 → 90 元</b>，覆盖全支付方式，市域线也纳入</li>
+            <li>新增计次票 <b class="hl">35 / 45 / 60 / 90 次</b>，190 / 210 / 270 / 390 元</li>
+            <li>一日票 <b class="hl">18 → 24 元</b>，三日票 <b class="hl">45 → 60 元</b></li>
             <li>建立票价动态调整机制，与人工、电价、物价、线网负荷挂钩</li>
           </ul>
         </div>
@@ -787,6 +787,7 @@ function maybeShowS2sModal(){
   mask.addEventListener('click', function(ev){ if(ev.target===mask) close(); });
 }
 function switchTab(name, updateHash){
+  document.body.dataset.tab = name;
   document.querySelectorAll('.tab').forEach(function(x){x.classList.toggle('active', x.dataset.tab===name);});
   document.querySelectorAll('.panel').forEach(function(x){x.classList.toggle('active', x.id==='panel-'+name);});
   if(updateHash !== false){
@@ -1942,7 +1943,7 @@ const CITY_CARDS = [
           var deltaTxt = isOff ? '官方实测' : (diff === 0 ? '与官方同步' : '比官方 ' + (diff>0?'+':'') + (Math.round(diff*10)/10) + ' 元');
           var deltaCls = isOff ? 'eq' : (diff === 0 ? 'eq' : (diff > 0 ? 'up' : 'down'));
           html += '<div class="card ' + f.key + '">'
-            + '<div class="name">' + f.name + '</div>'
+            + '<div class="name">' + f.name.replace(/^(.+?)（(.+)）$/, '<span class="nm-main">$1</span><span class="nm-sub">$2</span>') + '</div>'
             + '<div class="price">' + p + '<span class="u">元</span></div>'
             + '<div class="delta ' + deltaCls + '">' + deltaTxt + '</div>'
             + '</div>';
