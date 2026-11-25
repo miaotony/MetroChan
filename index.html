@@ -235,6 +235,9 @@
   .foot{margin-top:36px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
   .foot p{margin-bottom:4px}
   .foot a{color:var(--muted)}
+  .foot a.sp-btn{color:inherit}
+  .foot a.sp-star{color:#7a5200}
+  html[data-theme="dark"] .foot a.sp-star{color:#ffd666}
   .foot .disclaimer{margin-top:12px;padding:10px 14px;background:var(--red-bg);border:1px solid var(--red-line);
     border-radius:9px;color:var(--red);font-size:13px;font-weight:600}
   .foot .disclaimer b{font-weight:800}
@@ -368,8 +371,12 @@
   .metromap svg{display:block;width:100%;height:100%}
   @media(max-width:900px){.metromap{aspect-ratio:1.7 / 1}}
   .metromap{padding-bottom:6px}
-  .metromap .lbase{fill:none;stroke:var(--mapline);stroke-width:5.5;stroke-linecap:round;stroke-linejoin:round;opacity:1}
-  .metromap .mhalo{stroke:var(--map-bg)}
+  .metromap .lbase,.mapv .lbase{fill:none;stroke:var(--mapline);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;opacity:1}
+  .metromap .mhalo,.mapv .mhalo{stroke:var(--map-bg)}
+  .mapv .mstop{vector-effect:non-scaling-stroke;fill:var(--surface);stroke:#b8b2aa;stroke-width:1.6}
+  .mapv .mstop.flag{stroke:var(--red);stroke-width:3}
+  .mapv .mstop.end{stroke:#2b2b2b;stroke-width:2.6}
+  .mapv .mstop.inter{stroke:#7a736b;stroke-width:2.2}
   .metromap .mstop{vector-effect:non-scaling-stroke;fill:var(--surface);stroke:#b8b2aa;stroke-width:1.6;transition:stroke .15s}
   .metromap .mstop.inter{stroke:#7a736b;stroke-width:2.2}
   .metromap .mstop.end{stroke:#2b2b2b;stroke-width:2.6}
@@ -454,9 +461,9 @@
   .sp-actions{display:flex;gap:10px;flex-wrap:wrap}
   .sp-btn{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#fff;background:#24292f;border-radius:9px;padding:10px 18px;text-decoration:none;transition:transform .12s,filter .12s}
   .sp-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
-  .sp-star{background:#1f2328;color:#fff;box-shadow:0 2px 0 #000}
-  .sp-star:hover{filter:brightness(1.25)}
-  html[data-theme="dark"] .sp-star{background:#e8e5df;color:#14161a;box-shadow:0 2px 0 #a8a49c}
+  .sp-star{background:#fff4d6;color:#7a5200;border:1px solid #f1c75b;box-shadow:0 2px 0 #f1c75b}
+  .sp-star:hover{filter:brightness(1.05)}
+  html[data-theme="dark"] .sp-star{background:#3a2f12;color:#ffd666;border:1px solid #8a6d1f;box-shadow:0 2px 0 #5c4a14}
   .sp-issue{background:#1f883d;color:#fff;box-shadow:0 2px 0 #146c2e}
   html[data-theme="dark"] .sp-issue,.sp-issue{background:#238636 !important;color:#fff !important}
   [data-theme="dark"] .sp-issue,html[data-theme="dark"] .sp-issue{background:#238636}
@@ -546,6 +553,17 @@
     .cost-inputs{gap:10px}
     .cost-inputs label{font-size:13px}
   }
+
+  /* 全屏地图查看器 */
+  .mapv{position:fixed;inset:0;z-index:300;background:var(--map-bg);display:flex;flex-direction:column}
+  .mapv-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--muted)}
+  .mapv-bar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mapv-btn{font:inherit;font-size:15px;min-width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer}
+  .mapv-close{font:inherit;font-size:28px;line-height:1;width:46px;height:46px;border-radius:50%;border:none;background:var(--red);color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25);margin-left:4px}
+  .mapv-stage{flex:1;position:relative;overflow:hidden;touch-action:none;cursor:grab}
+  .mapv-stage:active{cursor:grabbing}
+  .mapv-stage svg{width:100%;height:100%;display:block}
+  @media (max-width:600px){ .mapv-bar span{font-size:11.5px} .mapv-btn{min-width:38px;height:38px} }
 </style>
 </head>
 <body data-tab="s2s">
@@ -1186,6 +1204,12 @@ function renderCostTable(container, km, rides, useDisc){
     renderCostTable(costTable, d, rides, discInput.checked);
   }
 
+  (function(){
+    function off(){ document.querySelectorAll('.ride-chips[data-target="km"] button.on').forEach(function(x){ x.classList.remove('on'); }); }
+    var rr = document.getElementById('ridesRange');
+    if (rr) rr.addEventListener('input', off);
+    ridesInput.addEventListener('input', off);
+  })();
   document.querySelectorAll('.ride-chips[data-target="km"] button').forEach(function(b){
     b.addEventListener('click', function(){
       var v = b.getAttribute('data-rides');
@@ -1767,13 +1791,21 @@ const CITY_CARDS = [
   }
 
   /* ---------- 线路图（站点坐标来自官方地图接口） ---------- */
-  var MAPXY = null, MAPREQ = null;
+  var MAPXY = null, MAPREQ = null, MAPGEO = null;
   function loadMapXY(){
     if (MAPXY) return Promise.resolve(MAPXY);
     if (!MAPREQ){
-      MAPREQ = fetch('data/map_xy.json', {cache:'force-cache'})
+      MAPREQ = fetch('data/map_geo.json?v=2', {cache:'force-cache'})
         .then(function(r){ return r.json(); })
-        .then(function(d){ MAPXY = d || {}; return MAPXY; })
+        .then(function(d){
+          d = d || {};
+          MAPXY = d.st || {};                 /* 站点：官方图 1:1 页面坐标 */
+          MAPGEO = d;
+          var b = '';
+          (d.base || []).forEach(function(x){ b += '<path class="lbase" d="' + x + '"/>'; });
+          OFFICIAL_MAP = b;
+          return MAPXY;
+        })
         .catch(function(){ MAPXY = {}; return MAPXY; });
     }
     return MAPREQ;
@@ -1781,7 +1813,7 @@ const CITY_CARDS = [
 
   var MW = 1000, MH = 1400;   /* 坐标系：与世界地图同比例的 x/y 空间 */
 
-  function pt(G, name){ var q = G[name]; return q ? [q[0]*MW, q[1]*MH] : null; }
+  function pt(G, name){ var q = G[name]; return q ? [q[0], q[1]] : null; }
 
   /* Catmull-Rom -> 三次贝塞尔，接近官方图的圆滑走向 */
   function smooth(pts){
@@ -1807,7 +1839,7 @@ const CITY_CARDS = [
   }
 
   /* 全网底图：官方线路图矢量（service.shmetro.com/xltzt，站名坐标同源，等比缩放 0.379 对齐坐标轴） */
-  var OFFICIAL_MAP = '<image class="lbase-img" x="0" y="0" width="1000" height="1400" href="assets/net_base.webp" preserveAspectRatio="none"/>';
+  var OFFICIAL_MAP = '';
   function mapBase(G, k){ return OFFICIAL_MAP; }
 
   function routePts(G, segs){
@@ -1821,10 +1853,31 @@ const CITY_CARDS = [
   }
 
 
+  function segGeo(line, seq){
+    if (!MAPGEO || !MAPGEO.seg) return null;
+    var d = '';
+    for (var i = 0; i < seq.length - 1; i++){
+      var a = seq[i], b = seq[i+1];
+      var g = MAPGEO.seg[a + '|' + b + '|' + line], rev = false;
+      if (!g){ g = MAPGEO.seg[b + '|' + a + '|' + line]; rev = true; }
+      if (!g) return null;
+      var pts = g.slice(1).split('L');
+      if (rev) pts.reverse();
+      d += (d ? 'L' : 'M') + pts.join('L');
+    }
+    return d;
+  }
   function mapRoute(G, segs, k){
     var out = '';
-    routePts(G, segs).forEach(function(g){
-      var d = smooth(g.pts);
+    segs.forEach(function(sg){
+      var seq = lineSlice(sg.line, sg.from, sg.to);
+      var d = segGeo(sg.line, seq);
+      if (!d){
+        var pts = []; seq.forEach(function(n){ var q = pt(G, n); if (q) pts.push(q); });
+        if (pts.length < 2) return;
+        d = smooth(pts);
+      }
+      var g = {color: lineColor(sg.line)};
       out += '<path class="mhalo" d="' + d + '" fill="none" stroke-width="' + (9*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
       out += '<path d="' + d + '" fill="none" stroke="' + g.color + '" stroke-width="' + (5*k).toFixed(2) + '" stroke-linecap="round" stroke-linejoin="round"/>';
     });
@@ -1864,15 +1917,119 @@ const CITY_CARDS = [
     return [ (cx-w/2).toFixed(1), (cy-h/2).toFixed(1), w.toFixed(1), h.toFixed(1) ].join(' ');
   }
 
+  /* ---------- 全屏地图查看器：双指缩放 / 拖拽 / 滚轮 / 双击 ---------- */
+  function openMapViewer(srcSvg){
+    var full = srcSvg.cloneNode(true);
+    var vb0 = (srcSvg.getAttribute('data-full') || '0 0 1000 1400').split(' ').map(Number);
+    var vbR = srcSvg.getAttribute('viewBox').split(' ').map(Number);   /* 初始视野=路径附近 */
+    full.removeAttribute('preserveAspectRatio');
+    full.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+    var ov = document.createElement('div');
+    ov.className = 'mapv';
+    ov.innerHTML = '<div class="mapv-bar"><span>线路图 · 双指或滚轮缩放，拖动平移</span>'
+      + '<button type="button" class="mapv-btn" data-z="in" aria-label="放大">＋</button>'
+      + '<button type="button" class="mapv-btn" data-z="out" aria-label="缩小">－</button>'
+      + '<button type="button" class="mapv-btn" data-z="fit" aria-label="全图">全图</button>'
+      + '<button type="button" class="mapv-close" aria-label="关闭">×</button></div>'
+      + '<div class="mapv-stage"></div>';
+    ov.querySelector('.mapv-stage').appendChild(full);
+    document.body.appendChild(ov);
+    document.body.classList.add('map-zoom-open');
+
+    var stage = ov.querySelector('.mapv-stage');
+    var vb = vbR.slice();
+    function apply(){ full.setAttribute('viewBox', vb.map(function(v){ return v.toFixed(2); }).join(' ')); }
+    function fitAspect(b){
+      var r = stage.clientWidth / Math.max(1, stage.clientHeight);
+      var cx = b[0] + b[2]/2, cy = b[1] + b[3]/2, w = b[2], h = b[3];
+      if (w / h < r) w = h * r; else h = w / r;
+      return [cx - w/2, cy - h/2, w, h];
+    }
+    vb = fitAspect(vbR); apply();
+    var MINW = 60, MAXW = vb0[2] * 1.6;
+    function zoomAt(f, px, py){        /* px,py: stage 内像素 */
+      var w = Math.min(MAXW, Math.max(MINW, vb[2] * f)); f = w / vb[2];
+      var ux = vb[0] + vb[2] * px / stage.clientWidth, uy = vb[1] + vb[3] * py / stage.clientHeight;
+      vb = [ux - (ux - vb[0]) * f, uy - (uy - vb[1]) * f, vb[2] * f, vb[3] * f]; apply();
+    }
+    function panPx(dx, dy){
+      vb[0] -= dx * vb[2] / stage.clientWidth; vb[1] -= dy * vb[3] / stage.clientHeight; apply();
+    }
+    function rel(e){ var r = stage.getBoundingClientRect(); return [e.clientX - r.left, e.clientY - r.top]; }
+
+    stage.addEventListener('wheel', function(e){
+      e.preventDefault(); var q = rel(e); zoomAt(Math.exp(e.deltaY * 0.0015), q[0], q[1]);
+    }, {passive:false});
+
+    var ptrs = {}, last = null, lastDist = 0, lastMid = null, moved = 0;
+    stage.addEventListener('pointerdown', function(e){
+      stage.setPointerCapture(e.pointerId); ptrs[e.pointerId] = rel(e); moved = 0;
+      var ids = Object.keys(ptrs);
+      if (ids.length === 1) last = ptrs[ids[0]];
+      if (ids.length === 2){
+        var a = ptrs[ids[0]], b = ptrs[ids[1]];
+        lastDist = Math.hypot(a[0]-b[0], a[1]-b[1]); lastMid = [(a[0]+b[0])/2, (a[1]+b[1])/2];
+      }
+    });
+    stage.addEventListener('pointermove', function(e){
+      if (!ptrs[e.pointerId]) return;
+      ptrs[e.pointerId] = rel(e);
+      var ids = Object.keys(ptrs);
+      if (ids.length === 1 && last){
+        var c = ptrs[ids[0]]; panPx(c[0]-last[0], c[1]-last[1]);
+        moved += Math.abs(c[0]-last[0]) + Math.abs(c[1]-last[1]); last = c;
+      } else if (ids.length === 2){
+        var a = ptrs[ids[0]], b = ptrs[ids[1]];
+        var d = Math.hypot(a[0]-b[0], a[1]-b[1]), m = [(a[0]+b[0])/2, (a[1]+b[1])/2];
+        if (lastDist > 0) zoomAt(lastDist / d, m[0], m[1]);
+        if (lastMid) panPx(m[0]-lastMid[0], m[1]-lastMid[1]);
+        lastDist = d; lastMid = m; moved = 99;
+      }
+    });
+    function up(e){
+      delete ptrs[e.pointerId];
+      var ids = Object.keys(ptrs);
+      last = ids.length === 1 ? ptrs[ids[0]] : null; lastDist = 0; lastMid = null;
+    }
+    stage.addEventListener('pointerup', up);
+    stage.addEventListener('pointercancel', up);
+    stage.addEventListener('dblclick', function(e){ var q = rel(e); zoomAt(0.5, q[0], q[1]); });
+
+    /* 点站名 */
+    var tip = document.createElement('div'); tip.className = 'map-tip'; stage.appendChild(tip);
+    full.addEventListener('click', function(e){
+      if (moved > 6) return;
+      var c = e.target.closest ? e.target.closest('circle.mstop') : null;
+      if (!c){ tip.classList.remove('on'); return; }
+      var t = c.querySelector('title'), r = c.getBoundingClientRect(), pr = stage.getBoundingClientRect();
+      tip.textContent = t ? t.textContent : '';
+      tip.style.left = (r.left - pr.left + r.width/2) + 'px'; tip.style.top = (r.top - pr.top) + 'px';
+      tip.classList.add('on');
+    });
+
+    ov.querySelectorAll('.mapv-btn').forEach(function(b){
+      b.addEventListener('click', function(){
+        var z = b.getAttribute('data-z'), cx = stage.clientWidth/2, cy = stage.clientHeight/2;
+        if (z === 'in') zoomAt(0.6, cx, cy);
+        else if (z === 'out') zoomAt(1/0.6, cx, cy);
+        else { vb = fitAspect(vb0); apply(); }
+      });
+    });
+    function close(){
+      ov.remove(); document.body.classList.remove('map-zoom-open');
+      document.removeEventListener('keydown', onKey);
+    }
+    function onKey(e){ if (e.key === 'Escape') close(); }
+    document.addEventListener('keydown', onKey);
+    ov.querySelector('.mapv-close').addEventListener('click', close);
+    window.addEventListener('resize', function rs(){ if (!ov.isConnected){ window.removeEventListener('resize', rs); return; } vb = fitAspect(vb); apply(); });
+  }
+
   function wireMap(box){
     var zbtn = box.querySelector('.map-zoom');
     if (zbtn) zbtn.addEventListener('click', function(ev){
       ev.stopPropagation();
-      var mp = zbtn.closest('.metromap');
-      var on = !mp.classList.contains('zoom');
-      mp.classList.toggle('zoom', on);
-      document.body.classList.toggle('map-zoom-open', on);
-      zbtn.textContent = on ? '× 关闭' : '⤢ 放大';
+      openMapViewer(zbtn.closest('.metromap').querySelector('svg'));
     });
     var wrap = box.querySelector('.metromap');
     if (!wrap) return;
@@ -1906,7 +2063,7 @@ const CITY_CARDS = [
     var k = Math.max(vbW / 820, 0.18);
     return '<div class="metromap">'
       + '<div class="map-cap"><span>线路图</span><span class="map-hint">高亮为官方推荐路径 · 悬停或点击站点看站名</span><button type="button" class="map-zoom" aria-label="放大线路图">⤢ 放大</button></div>'
-      + '<svg viewBox="' + vb + '" preserveAspectRatio="xMidYMid slice" role="img" aria-label="上海地铁线路图，高亮 ' + from + ' 至 ' + to + ' 的官方路径">'
+      + '<svg viewBox="' + vb + '" data-full="0 0 1000 1400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="上海地铁线路图，高亮 ' + from + ' 至 ' + to + ' 的官方路径">'
       + mapBase(G, k) + mapRoute(G, segs, k) + mapStops(G, segs, from, to, k)
       + '</svg></div>';
   }
@@ -2202,6 +2359,9 @@ const CITY_CARDS = [
   var ridesS2sRange = document.getElementById('ridesS2sRange');
   ridesS2sRange.addEventListener('input', function(){ ridesS2s.value = ridesS2sRange.value; renderCostS2s(); });
   ridesS2s.addEventListener('input', function(){ ridesS2sRange.value = ridesS2s.value; });
+  function chipsOff(t){ document.querySelectorAll('.ride-chips[data-target="' + t + '"] button.on').forEach(function(x){ x.classList.remove('on'); }); }
+  ridesS2sRange.addEventListener('input', function(){ chipsOff('s2s'); });
+  ridesS2s.addEventListener('input', function(){ chipsOff('s2s'); });
   document.querySelectorAll('.ride-chips[data-target="s2s"] button').forEach(function(b){
     b.addEventListener('click', function(){
       var v = b.getAttribute('data-rides');
