@@ -237,6 +237,8 @@
   .foot a{color:var(--muted)}
   .foot a.sp-btn{color:inherit}
   .foot a.sp-star{color:#7a5200}
+  .foot a.sp-issue{color:#0d4f8b}
+  html[data-theme="dark"] .foot a.sp-issue{color:#8fc2ff}
   html[data-theme="dark"] .foot a.sp-star{color:#ffd666}
   .foot .disclaimer{margin-top:12px;padding:10px 14px;background:var(--red-bg);border:1px solid var(--red-line);
     border-radius:9px;color:var(--red);font-size:13px;font-weight:600}
@@ -348,7 +350,9 @@
   .pick-caret:before{content:'▼'}
   .pick-panel{display:none;position:absolute;z-index:60;left:0;min-width:100%;width:max(100%,268px);top:calc(100% + 5px);background:var(--surface);border:1px solid var(--border);border-radius:10px;box-shadow:0 12px 30px rgba(0,0,0,.13);padding:8px}
   .pick-panel.open{display:block}
-  .pick-search{width:100%;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--border);border-radius:7px;margin-bottom:6px;box-sizing:border-box}
+  .pick-search{width:100%;font:inherit;font-size:13px;padding:7px 9px;border:1px solid var(--border);border-radius:7px;margin-bottom:6px;box-sizing:border-box;background:var(--surface);color:var(--ink)}
+  .pick-search::placeholder{color:var(--muted);opacity:.8}
+  .pick-search:focus{outline:none;border-color:var(--red)}
   .pick-list{max-height:262px;overflow:auto}
   .pick-item{display:flex;align-items:center;gap:7px;padding:7px 8px;border-radius:6px;font-size:13.5px;cursor:pointer;touch-action:manipulation}
   .pick-item:hover{background:var(--hover-bg)}
@@ -464,9 +468,9 @@
   .sp-star{background:#fff4d6;color:#7a5200;border:1px solid #f1c75b;box-shadow:0 2px 0 #f1c75b}
   .sp-star:hover{filter:brightness(1.05)}
   html[data-theme="dark"] .sp-star{background:#3a2f12;color:#ffd666;border:1px solid #8a6d1f;box-shadow:0 2px 0 #5c4a14}
-  .sp-issue{background:#1f883d;color:#fff;box-shadow:0 2px 0 #146c2e}
-  html[data-theme="dark"] .sp-issue,.sp-issue{background:#238636 !important;color:#fff !important}
-  [data-theme="dark"] .sp-issue,html[data-theme="dark"] .sp-issue{background:#238636}
+  .sp-issue{background:#eaf3fd;color:#0d4f8b;border:1px solid #a9c9ea;box-shadow:0 2px 0 #a9c9ea}
+  html[data-theme="dark"] .sp-issue{background:#12263c;color:#8fc2ff;border:1px solid #2f6294;box-shadow:0 2px 0 #2f6294}
+  
   .sp-pay{text-align:center}
   .sp-pay img{width:148px;height:148px;border-radius:10px;border:1px solid var(--border);background:#fff;padding:6px}
   .tip-float{position:fixed;right:18px;top:96px;width:236px;background:#fffdfa;border:1px solid #e8e2d9;border-radius:14px;box-shadow:0 12px 32px rgba(60,45,30,.13);padding:16px 18px 14px;z-index:80;font-size:12.5px;color:#4a443d;display:none}
@@ -558,6 +562,7 @@
   .mapv{position:fixed;inset:0;z-index:300;background:var(--map-bg);display:flex;flex-direction:column}
   .mapv-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--muted)}
   .mapv-bar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mapv-btn.on{background:var(--red);color:#fff;border-color:var(--red)}
   .mapv-btn{font:inherit;font-size:15px;min-width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer}
   .mapv-close{font:inherit;font-size:28px;line-height:1;width:46px;height:46px;border-radius:50%;border:none;background:var(--red);color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25);margin-left:4px}
   .mapv-stage{flex:1;position:relative;overflow:hidden;touch-action:none;cursor:grab}
@@ -1901,6 +1906,21 @@ const CITY_CARDS = [
     return out;
   }
 
+  function mapMidStops(G, segs, k){
+    var seen = {}, out = '';
+    segs.forEach(function(sg){
+      var seq = lineSlice(sg.line, sg.from, sg.to);
+      seq.forEach(function(nm){
+        if (seen[nm]) return; seen[nm] = 1;
+        var q = pt(G, nm); if (!q) return;
+        out += '<circle class="mstop mid" cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1)
+             + '" r="' + (3.4*k).toFixed(2) + '" stroke-width="' + (1.4*k).toFixed(2) + '">'
+             + '<title>' + nm + '</title></circle>';
+      });
+    });
+    return '<g class="mids" style="display:none">' + out + '</g>';
+  }
+
   /* 按路径范围裁出 2:1 的横向视野 */
   function mapViewBox(groups){
     var xs = [], ys = [];
@@ -1930,6 +1950,7 @@ const CITY_CARDS = [
       + '<button type="button" class="mapv-btn" data-z="in" aria-label="放大">＋</button>'
       + '<button type="button" class="mapv-btn" data-z="out" aria-label="缩小">－</button>'
       + '<button type="button" class="mapv-btn" data-z="fit" aria-label="全图">全图</button>'
+      + '<button type="button" class="mapv-btn mapv-mid" aria-pressed="false" aria-label="显示沿途站点">沿途站点</button>'
       + '<button type="button" class="mapv-close" aria-label="关闭">×</button></div>'
       + '<div class="mapv-stage"></div>';
     ov.querySelector('.mapv-stage').appendChild(full);
@@ -2007,7 +2028,17 @@ const CITY_CARDS = [
       tip.classList.add('on');
     });
 
+    var midBtn = ov.querySelector('.mapv-mid');
+    midBtn.addEventListener('click', function(){
+      var g = full.querySelector('.mids');
+      if (!g) return;
+      var on = g.style.display === 'none';
+      g.style.display = on ? '' : 'none';
+      midBtn.classList.toggle('on', on);
+      midBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
     ov.querySelectorAll('.mapv-btn').forEach(function(b){
+      if (b.classList.contains('mapv-mid')) return;
       b.addEventListener('click', function(){
         var z = b.getAttribute('data-z'), cx = stage.clientWidth/2, cy = stage.clientHeight/2;
         if (z === 'in') zoomAt(0.6, cx, cy);
@@ -2064,7 +2095,7 @@ const CITY_CARDS = [
     return '<div class="metromap">'
       + '<div class="map-cap"><span>线路图</span><span class="map-hint">高亮为官方推荐路径 · 悬停或点击站点看站名</span><button type="button" class="map-zoom" aria-label="放大线路图">⤢ 放大</button></div>'
       + '<svg viewBox="' + vb + '" data-full="0 0 1000 1400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="上海地铁线路图，高亮 ' + from + ' 至 ' + to + ' 的官方路径">'
-      + mapBase(G, k) + mapRoute(G, segs, k) + mapStops(G, segs, from, to, k)
+      + mapBase(G, k) + mapRoute(G, segs, k) + mapStops(G, segs, from, to, k) + mapMidStops(G, segs, k)
       + '</svg></div>';
   }
 
