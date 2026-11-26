@@ -127,7 +127,7 @@
   input[type=range]{flex:1;min-width:200px;accent-color:var(--red);height:26px}
   .km-input{display:flex;align-items:center;gap:6px;font-weight:700}
   .km-input input{width:64px;text-align:center;font-size:18px;font-weight:700;font-family:var(--mono);
-    border:1px solid var(--border);border-radius:8px;padding:6px 4px;background:var(--surface)}
+    border:1px solid var(--border);border-radius:8px;padding:6px 4px;background:var(--surface);color:var(--ink);caret-color:var(--red)}
   .km-input .unit{color:var(--muted);font-size:14px;font-weight:400}
   .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
   .presets button{font:inherit;font-size:13px;color:var(--ink);background:var(--surface);border:1px solid var(--border);
@@ -175,8 +175,13 @@
   .cost-inputs{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
   .cost-inputs label{font-size:14px;color:var(--muted)}
   .cost-inputs input[type=number]{width:72px;font-size:16px;font-weight:700;font-family:var(--mono);text-align:center;
-    border:1px solid var(--border);border-radius:8px;padding:6px 4px}
+    border:1px solid var(--border);border-radius:8px;padding:6px 4px;background:var(--surface);color:var(--ink);caret-color:var(--red)}
   .toggle{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer;user-select:none;color:var(--ink)}
+  /* 表单控件兜底：任何新增的输入框都不会在深色下出现黑字 */
+  input[type=text],input[type=number],input[type=search],input[type=tel],input[type=email],input[type=url],textarea,select{
+    color:var(--ink);background:var(--surface);caret-color:var(--red)}
+  input[type=text]::placeholder,input[type=number]::placeholder,input[type=search]::placeholder,textarea::placeholder{color:var(--muted);opacity:.8}
+  html[data-theme="dark"]{color-scheme:dark}
   .toggle input{accent-color:var(--red);width:16px;height:16px}
   table.cost{width:100%;border-collapse:collapse;margin-top:18px;font-variant-numeric:tabular-nums}
   table.cost th,table.cost td{padding:10px 12px;text-align:right;font-size:14px}
@@ -461,7 +466,6 @@
   .sp-h{font-size:14.5px;font-weight:700;margin-bottom:6px}
   .sp-card p{font-size:13px;color:var(--muted);line-height:1.7;margin:0 0 12px}
   .sp-card.sp-github{background:linear-gradient(180deg,rgba(200,16,46,.07),rgba(200,16,46,.02));border-color:rgba(200,16,46,.22)}
-  .sp-kicker{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--red);background:rgba(200,16,46,.1);border-radius:6px;padding:2px 8px;margin-bottom:8px}
   .sp-actions{display:flex;gap:10px;flex-wrap:wrap}
   .sp-btn{display:inline-flex;align-items:center;gap:6px;font-size:14px;font-weight:700;color:#fff;background:#24292f;border-radius:9px;padding:10px 18px;text-decoration:none;transition:transform .12s,filter .12s}
   .sp-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
@@ -518,6 +522,15 @@
   .to-top.on{opacity:1;pointer-events:auto;transform:none}
   .to-top:hover{background:var(--hover-bg)}
   @media (max-width:900px){.tip-fab{bottom:78px}}
+  /* 移动端：复制链接 / 二维码 悬浮按钮（与打赏同款圆形，右下角堆叠） */
+  .mfab{position:fixed;right:16px;bottom:134px;z-index:81;display:none;flex-direction:column;gap:8px}
+  .mfab-btn{width:46px;height:46px;border-radius:50%;border:1px solid var(--border);background:var(--surface);
+    color:var(--ink);font-size:19px;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.14);
+    display:flex;align-items:center;justify-content:center;padding:0}
+  .mfab-btn:active{transform:scale(.94)}
+  .mfab-btn.done{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok-ink)}
+  @media (max-width:999px){ .mfab{display:flex} .share-bar{display:none} }
+  @media (min-width:901px) and (max-width:999px){ .mfab{bottom:78px} }
 
   @media (max-width: 900px){
     .map-row{flex-wrap:wrap;gap:10px}
@@ -579,6 +592,14 @@
   .mapv-stage{flex:1;position:relative;overflow:hidden;touch-action:none;cursor:grab}
   .mapv-stage:active{cursor:grabbing}
   .mapv-stage svg{width:100%;height:100%;display:block}
+  /* 大图：全网站点 + 站名标签（屏幕空间避让，绝不重叠） */
+  .mapv .netdots circle{fill:var(--surface);stroke:#b8b2aa}
+  .mapv .netdots circle.tr{stroke:#5d5750}
+  .mapv .mlabels text{fill:var(--ink);font-weight:500;paint-order:stroke;stroke:var(--map-bg);
+    stroke-width:3px;stroke-linejoin:round;stroke-linecap:round;pointer-events:none;user-select:none}
+  .mapv .mlabels text.tr{font-weight:700}
+  html[data-theme="dark"] .mapv .netdots circle{stroke:#6f6862}
+  html[data-theme="dark"] .mapv .netdots circle.tr{stroke:#a49a8e}
   @media (max-width:600px){ .mapv-bar span{font-size:11.5px} .mapv-btn{min-width:38px;height:38px} }
 </style>
 </head>
@@ -861,6 +882,10 @@
   <img src="assets/wechat-reward.png" alt="微信打赏二维码" loading="lazy">
 </div>
 <button type="button" class="tip-fab" id="tipFab" aria-label="打赏与分享">💰</button>
+<div class="mfab" id="mfab">
+  <button type="button" class="mfab-btn" id="mShareBtn" aria-label="复制当前视图链接" title="复制链接">🔗</button>
+  <button type="button" class="mfab-btn" id="mQrBtn" aria-label="显示二维码" title="二维码">▣</button>
+</div>
 <button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部">↑</button>
 
   <div class="foot">
@@ -882,7 +907,6 @@
     与官方查询结果存在差异时，以官方为准。发现问题或有建议，欢迎<a class="lnk" href="https://github.com/miaotony/MetroChan/issues" target="_blank" rel="noopener">提 Issue</a>进行反馈。</p>
     <div class="support">
       <div class="sp-card sp-github">
-        <div class="sp-kicker"></div>
         <div class="sp-h">项目开源在 GitHub</div>
         <p>发现数据有问题、有功能建议，都欢迎提 Issue 反馈；觉得好用也欢迎点个 Star。</p>
         <div class="sp-actions">
@@ -1041,7 +1065,7 @@ window.addEventListener('load', function(){
     btn.classList.toggle('done', !!ok);
     setTimeout(function(){ txt.textContent = LABEL; btn.classList.remove('done'); }, 2000);
   }
-  btn.addEventListener('click', function(){
+  function copyNow(cb){
     var url = buildUrl();
     function fallback(){
       var ta = document.createElement('textarea');
@@ -1051,12 +1075,15 @@ window.addEventListener('load', function(){
       try { ok = document.execCommand('copy'); } catch(e){}
       document.body.removeChild(ta);
       flash(ok ? '✅ 已复制链接' : '复制失败，请手动复制', ok);
+      if(cb) cb(ok);
     }
     if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(url).then(function(){ flash('✅ 已复制链接', true); }, fallback);
+      navigator.clipboard.writeText(url).then(function(){ flash('✅ 已复制链接', true); if(cb) cb(true); }, fallback);
     } else fallback();
-  });
+  }
+  btn.addEventListener('click', function(){ copyNow(); });
   window.__buildShareUrl = buildUrl;
+  window.__copyShareLink = copyNow;
 })();
 /* 二维码分享 */
 (function(){
@@ -1113,6 +1140,23 @@ window.addEventListener('load', function(){
       card0 = holder.closest('.qr-card'); if(card0) card0.querySelector('.qr-url').textContent = '二维码生成失败，请直接复制链接';
     }
   }
+})();
+/* 移动端悬浮按钮：复制链接 / 二维码 */
+(function(){
+  var b1 = document.getElementById('mShareBtn'), b2 = document.getElementById('mQrBtn');
+  if(b1) b1.addEventListener('click', function(){
+    if(!window.__copyShareLink){ return; }
+    window.__copyShareLink(function(ok){
+      var icon = b1.textContent;
+      b1.textContent = ok ? '✓' : '!';
+      b1.classList.toggle('done', !!ok);
+      setTimeout(function(){ b1.textContent = icon; b1.classList.remove('done'); }, 1500);
+    });
+  });
+  if(b2) b2.addEventListener('click', function(){
+    var q = document.getElementById('qrBtn');
+    if(q) q.click();
+  });
 })();
 /* 解析分享参数：?from=&to=&rides=（等主脚本初始化完再跑） */
 window.addEventListener('load', function(){
@@ -2030,7 +2074,125 @@ const CITY_CARDS = [
 
     var stage = ov.querySelector('.mapv-stage');
     var vb = vbR.slice();
-    function apply(){ full.setAttribute('viewBox', vb.map(function(v){ return v.toFixed(2); }).join(' ')); }
+
+    /* ---- 大图：全网站点 + 站名（屏幕空间避让，绝不重叠） ---- */
+    var NSV = 'http://www.w3.org/2000/svg';
+    var ROUTE = {}, FLAGS = {}, LABS = [], DOTS = [];
+    (function(){
+      var collect = function(sel, set){
+        full.querySelectorAll(sel).forEach(function(c){
+          var t = c.querySelector('title'); if (t) set[t.textContent] = 1;
+        });
+      };
+      collect('.mids circle', ROUTE); collect('.mstop.flag', ROUTE);
+      collect('.mstop.inter', ROUTE); collect('.mstop.end', ROUTE);
+      collect('.mstop.flag', FLAGS);
+
+      var netG = document.createElementNS(NSV, 'g'); netG.setAttribute('class', 'netdots');
+      var labG = document.createElementNS(NSV, 'g'); labG.setAttribute('class', 'mlabels');
+      var G = MAPXY || {};
+      Object.keys(G).forEach(function(nm){
+        var q = G[nm]; if (!q) return;
+        var lines = (typeof METRO_DATA !== 'undefined' && METRO_DATA.stations && METRO_DATA.stations[nm]) || [];
+        var tr = lines.length > 1;
+        var c = document.createElementNS(NSV, 'circle');
+        c.setAttribute('class', 'mstop all' + (tr ? ' tr' : ''));
+        c.setAttribute('cx', q[0].toFixed(1)); c.setAttribute('cy', q[1].toFixed(1));
+        var ti = document.createElementNS(NSV, 'title'); ti.textContent = nm;
+        c.appendChild(ti); netG.appendChild(c);
+
+        var t = document.createElementNS(NSV, 'text');
+        t.setAttribute('class', 'mlab' + (tr ? ' tr' : ''));
+        t.setAttribute('text-anchor', 'start');
+        t.setAttribute('dominant-baseline', 'middle');
+        t.textContent = nm; t.style.display = 'none';
+        labG.appendChild(t);
+        LABS.push({ n: nm, x: q[0], y: q[1], tr: tr, el: t });
+      });
+      var stops = full.querySelectorAll('.mstop');
+      if (stops.length) full.insertBefore(netG, stops[0]); else full.appendChild(netG);
+      full.appendChild(labG);
+      DOTS = Array.prototype.slice.call(full.querySelectorAll('circle.mstop'));
+    })();
+
+    var layoutT = null;
+    function scheduleLayout(){
+      if (layoutT) clearTimeout(layoutT);
+      layoutT = setTimeout(function(){ layoutT = null; layoutAll(); }, 60);
+    }
+    function layoutAll(){
+      var W = stage.clientWidth || 1, H = stage.clientHeight || 1;
+      var upp = vb[2] / W;                 /* 1 屏幕像素 = 多少用户单位 */
+      DOTS.forEach(function(c){
+        var r, sw;
+        if (c.classList.contains('flag')){ r = 7; sw = 2.8; }
+        else if (c.classList.contains('end')){ r = 5.6; sw = 2.4; }
+        else if (c.classList.contains('all')){
+          if (c.classList.contains('tr')){ r = 3.4; sw = 1.7; } else { r = 1.6; sw = 1.0; }
+        }
+        else if (c.classList.contains('inter')){ r = 4.4; sw = 2.0; }
+        else { r = 3.2; sw = 1.1; }
+        c.setAttribute('r', (r * upp).toFixed(2));
+        c.setAttribute('stroke-width', (sw * upp).toFixed(2));
+      });
+
+      var midOn = midBtn && midBtn.classList.contains('on');
+      var FS = W < 620 ? 10 : 11;
+      var kx = W / vb[2], ky = H / vb[3];
+      var PAD = 3;                         /* 站名之间的安全间距（屏幕像素） */
+      function prio(L){
+        if (FLAGS[L.n]) return 0;
+        if (midOn && ROUTE[L.n]) return 1;
+        if (L.tr) return 2;
+        return 3;
+      }
+      var arr = LABS.slice().sort(function(a, b){ return prio(a) - prio(b); });
+      var placed = [];
+      arr.forEach(function(L){
+        var el = L.el;
+        var sx = (L.x - vb[0]) * kx, sy = (L.y - vb[1]) * ky;
+        if (sx < -40 || sx > W + 40 || sy < -20 || sy > H + 20){ el.style.display = 'none'; return; }
+        var w = L.n.length * FS * 1.06 + 3, h = FS * 1.18 + 3;
+        var bw = w + PAD * 2, bh = h + PAD * 2;     /* 参与碰撞的盒子 */
+        /* 右 / 左 / 上 / 下 四向找位，全都放不下才隐藏 */
+        var cand = [
+          [sx + 7, sy - bh / 2],
+          [sx - 7 - bw, sy - bh / 2],
+          [sx - bw / 2, sy - 9 - bh],
+          [sx - bw / 2, sy + 9],
+          [sx + 6, sy - 7 - bh],
+          [sx + 6, sy + 6],
+          [sx - 6 - bw, sy - 7 - bh],
+          [sx - 6 - bw, sy + 6],
+          [sx + 15, sy - bh / 2],
+          [sx - 15 - bw, sy - bh / 2],
+          [sx - bw / 2, sy - 18 - bh],
+          [sx - bw / 2, sy + 18]
+        ];
+        var bx = null, by = null;
+        for (var c = 0; c < cand.length; c++){
+          var tx = cand[c][0], ty = cand[c][1];
+          if (tx < 2 || tx + bw > W - 2 || ty < 2 || ty + bh > H - 2) continue;
+          var hit = false;
+          for (var i = 0; i < placed.length; i++){
+            var o = placed[i];
+            if (tx < o[0] + o[2] && o[0] < tx + bw && ty < o[1] + o[3] && o[1] < ty + bh){ hit = true; break; }
+          }
+          if (!hit){ bx = tx; by = ty; break; }
+        }
+        if (bx === null){ el.style.display = 'none'; return; }
+        placed.push([bx, by, bw, bh]);
+        /* 文字盒在碰撞盒内部居中：x 左对齐 + 半个 PAD，y 取垂直中心 */
+        el.setAttribute('x', (vb[0] + (bx + PAD) / kx).toFixed(2));
+        el.setAttribute('y', (vb[1] + (by + bh / 2) / ky).toFixed(2));
+        el.setAttribute('font-size', (FS * upp).toFixed(2));
+        el.style.display = '';
+      });
+    }
+    function apply(){
+      full.setAttribute('viewBox', vb.map(function(v){ return v.toFixed(2); }).join(' '));
+      scheduleLayout();
+    }
     function fitAspect(b){
       var r = stage.clientWidth / Math.max(1, stage.clientHeight);
       var cx = b[0] + b[2]/2, cy = b[1] + b[3]/2, w = b[2], h = b[3];
@@ -2111,6 +2273,7 @@ const CITY_CARDS = [
       g.style.display = on ? '' : 'none';
       midBtn.classList.toggle('on', on);
       midBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      scheduleLayout();
     });
     ov.querySelectorAll('.mapv-btn').forEach(function(b){
       if (b.classList.contains('mapv-mid')) return;
