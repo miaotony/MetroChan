@@ -530,21 +530,9 @@
   .mfab-btn:active{transform:scale(.94)}
   .share-btn .qr-ico{display:block;flex:none;width:16px;height:16px}
   .mfab-btn .qr-ico{display:block;flex:none;width:22px;height:22px}
-  .mfab-btn.done{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok-ink)}
   @media (max-width:999px){ .mfab{display:flex} .share-bar{display:none} }
   @media (min-width:901px) and (max-width:999px){ .mfab{bottom:78px} }
-  /* 右下角悬浮组：可整体收起，避免遮挡正文 */
-  .fab-toggle{position:fixed;right:18px;bottom:240px;z-index:83;width:30px;height:30px;border-radius:50%;
-    border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;line-height:1;
-    display:none;align-items:center;justify-content:center;cursor:pointer;opacity:.62;padding:0;
-    box-shadow:0 2px 8px rgba(0,0,0,.10);transition:opacity .15s}
-  .fab-toggle:hover,.fab-toggle:active{opacity:1}
-  @media (max-width:999px){ .fab-toggle{display:flex} }
-  @media (min-width:901px) and (max-width:999px){ .fab-toggle{bottom:134px} }
-  body.fabs-hidden .mfab,
-  body.fabs-hidden .tip-fab,
-  body.fabs-hidden .to-top{display:none !important}
-  body.fabs-hidden .fab-toggle{bottom:20px}
+
 
   @media (max-width: 900px){
     .map-row{flex-wrap:wrap;gap:10px}
@@ -594,7 +582,9 @@
   .qr-card .qr-img{display:inline-block;background:#fff;padding:10px;border-radius:10px;border:1px solid var(--border)}
   .qr-card .qr-img canvas,.qr-card .qr-img img{display:block;width:min(60vw,232px);height:auto}
   .qr-card .qr-url{font-size:12px;color:var(--muted);margin-top:12px;word-break:break-all;max-height:3.2em;overflow:hidden}
-  .qr-card .qr-close{margin-top:14px;font:inherit;font-size:14px;height:36px;padding:0 22px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer}
+  .qr-card .qr-acts{display:flex;gap:10px;margin-top:14px;justify-content:center}
+  .qr-card .qr-copy,.qr-card .qr-close{font:inherit;font-size:14px;height:36px;padding:0 18px;border-radius:9px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer}
+  .qr-card .qr-copy{border-color:var(--red);color:var(--red);font-weight:600}
 
   /* 全屏地图查看器 */
   .mapv{position:fixed;inset:0;z-index:300;background:var(--map-bg);display:flex;flex-direction:column}
@@ -886,8 +876,6 @@
     </section>
   </div>
 
-
-
   <div class="tip-float" id="tipFloat">
   <button type="button" class="tip-close" id="tipClose" aria-label="关闭">×</button>
   <div class="tip-h">喜欢这个页面？</div>
@@ -896,9 +884,7 @@
   <img src="assets/wechat-reward.png" alt="微信打赏二维码" loading="lazy">
 </div>
 <button type="button" class="tip-fab" id="tipFab" aria-label="打赏与分享">💰</button>
-<button type="button" class="fab-toggle" id="fabToggle" aria-label="隐藏右下角按钮" title="隐藏按钮">⌄</button>
 <div class="mfab" id="mfab">
-  <button type="button" class="mfab-btn" id="mShareBtn" aria-label="复制当前视图链接" title="复制链接">🔗</button>
   <button type="button" class="mfab-btn" id="mQrBtn" aria-label="显示二维码" title="二维码"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" class="qr-ico"><rect x="3" y="3" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="3" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="14" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="5.6" y="5.6" width="1.9" height="1.9" fill="currentColor"/><rect x="16.6" y="5.6" width="1.9" height="1.9" fill="currentColor"/><rect x="5.6" y="16.6" width="1.9" height="1.9" fill="currentColor"/><rect x="14.2" y="14.2" width="2.6" height="2.6" fill="currentColor"/><path d="M19 14.5v3M14 19.6v2M17.6 21.2h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
 </div>
 <button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部">↑</button>
@@ -1114,10 +1100,19 @@ window.addEventListener('load', function(){
         + '<div class="qr-sub"></div>'
         + '<div class="qr-img"></div>'
         + '<div class="qr-url"></div>'
+        + '<div class="qr-acts"><button type="button" class="qr-copy">复制链接</button>'
         + '<button type="button" class="qr-close">关闭</button></div>';
       document.body.appendChild(box);
       box.addEventListener('click', function(e){ if(e.target === box) close(); });
       box.querySelector('.qr-close').addEventListener('click', close);
+      box.querySelector('.qr-copy').addEventListener('click', function(e){
+        var b = e.currentTarget;
+        if(!window.__copyShareLink) return;
+        window.__copyShareLink(function(ok){
+          b.textContent = ok ? '已复制 ✓' : '复制失败';
+          setTimeout(function(){ b.textContent = '复制链接'; }, 1400);
+        });
+      });
       document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && box && !box.hidden) close(); });
     }
     var url = buildShareUrl();
@@ -1156,43 +1151,15 @@ window.addEventListener('load', function(){
     }
   }
 })();
-/* 右下角悬浮按钮整体收起/展开（默认记忆上次选择） */
+/* 移动端悬浮按钮：二维码（复制链接在弹层内） */
 (function(){
-  var t = document.getElementById('fabToggle');
-  if(!t) return;
-  var KEY = 'metrochan_fabs_hidden';
-  function paint(hidden){
-    document.body.classList.toggle('fabs-hidden', hidden);
-    t.textContent = hidden ? '⌃' : '⌄';
-    t.setAttribute('aria-label', hidden ? '显示右下角按钮' : '隐藏右下角按钮');
-    t.setAttribute('title', hidden ? '显示按钮' : '隐藏按钮');
-  }
-  var saved = false;
-  try { saved = localStorage.getItem(KEY) === '1'; } catch(e){}
-  paint(saved);
-  t.addEventListener('click', function(){
-    var hidden = !document.body.classList.contains('fabs-hidden');
-    paint(hidden);
-    try { localStorage.setItem(KEY, hidden ? '1' : '0'); } catch(e){}
-  });
-})();
-/* 移动端悬浮按钮：复制链接 / 二维码 */
-(function(){
-  var b1 = document.getElementById('mShareBtn'), b2 = document.getElementById('mQrBtn');
-  if(b1) b1.addEventListener('click', function(){
-    if(!window.__copyShareLink){ return; }
-    window.__copyShareLink(function(ok){
-      var icon = b1.textContent;
-      b1.textContent = ok ? '✓' : '!';
-      b1.classList.toggle('done', !!ok);
-      setTimeout(function(){ b1.textContent = icon; b1.classList.remove('done'); }, 1500);
-    });
-  });
+  var b2 = document.getElementById('mQrBtn');
   if(b2) b2.addEventListener('click', function(){
     var q = document.getElementById('qrBtn');
     if(q) q.click();
   });
 })();
+
 /* 解析分享参数：?from=&to=&rides=（等主脚本初始化完再跑） */
 window.addEventListener('load', function(){
   var q;
