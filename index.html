@@ -2254,8 +2254,10 @@ const CITY_CARDS = [
       if (w / h < r) w = h * r; else h = w / r;
       return [cx - w/2, cy - h/2, w, h];
     }
-    vb = fitAspect(vbR); apply();
-    var MINW = 60, MAXW = vb0[2] * 1.6;
+    var vbFit = fitAspect(vbR);
+    vb = vbFit.slice(); apply();
+    /* 缩放下限要覆盖“初始适配视野”和整张图，否则长线路放大后缩不回去 */
+    var MINW = 60, MAXW = Math.max(vbFit[2], vb0[2]) * 1.6;
     function zoomAt(f, px, py){        /* px,py: stage 内像素 */
       var w = Math.min(MAXW, Math.max(MINW, vb[2] * f)); f = w / vb[2];
       var ux = vb[0] + vb[2] * px / stage.clientWidth, uy = vb[1] + vb[3] * py / stage.clientHeight;
@@ -2342,8 +2344,8 @@ const CITY_CARDS = [
       if (b.classList.contains('mapv-mid') || b.classList.contains('mapv-net')) return;
       b.addEventListener('click', function(){
         var z = b.getAttribute('data-z'), cx = stage.clientWidth/2, cy = stage.clientHeight/2;
-        if (z === 'in') zoomAt(0.6, cx, cy);
-        else if (z === 'out') zoomAt(1/0.6, cx, cy);
+        if (z === 'in') zoomAt(0.7, cx, cy);
+        else if (z === 'out') zoomAt(1/0.7, cx, cy);
         else { vb = fitAspect(vb0); apply(); }
       });
     });
