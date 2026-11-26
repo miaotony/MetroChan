@@ -348,7 +348,7 @@
   .cal-row input[type=date]{font:inherit;font-size:13.5px;font-family:var(--mono);color:var(--ink);background:var(--surface);
     border:1px solid var(--border);border-radius:8px;padding:6px 9px;color-scheme:light}
   html[data-theme="dark"] .cal-row input[type=date],
-  body:not([data-theme="light"]) .cal-row input[type=date]{color-scheme:dark}
+  html:not([data-theme="light"]) .cal-row input[type=date]{color-scheme:dark}
   input[type=range].fare-range{flex:0 1 190px;min-width:120px;accent-color:var(--red);height:22px;cursor:pointer}
   .cal-val{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--red);min-width:104px;font-variant-numeric:tabular-nums}
   .cal-hint{font-size:12.5px;color:var(--muted)}
@@ -393,6 +393,15 @@
   table.cost.cal-table tr.best td{background:var(--red-bg)}
   table.cost.cal-table tr.best td:first-child{font-weight:700}
   .cal-star{color:var(--red);font-weight:800;margin-left:2px}
+  table.cost.cal-table tr.cur td{background:var(--hover-bg);box-shadow:inset 0 0 0 1px var(--red-line)}
+  table.cost.cal-table tr.cur td:first-child{font-weight:700}
+  #adoptRefS2s{font:inherit;font-size:12.5px;padding:5px 10px;border:1px solid var(--border);border-radius:7px;
+    background:var(--surface);color:var(--blue);cursor:pointer}
+  #adoptRefS2s:hover:not(:disabled){border-color:var(--blue-line)}
+  #adoptRefS2s:disabled{opacity:.45;cursor:not-allowed}
+  .cal-ref-warn{margin-top:6px;padding:8px 11px;background:var(--note-bg);border:1px solid var(--note-line);
+    border-radius:8px;color:#8a6116;font-size:12.5px;line-height:1.5}
+  html[data-theme="dark"] .cal-ref-warn{color:var(--note-line)}
   .cal-tips{margin-top:10px;font-size:12px;color:var(--muted);line-height:1.6}
   .cal-tips summary{cursor:pointer;color:var(--blue);font-weight:600}
   .cal-tips ul{margin:6px 0 4px 18px}
@@ -769,18 +778,18 @@
     </section>
 
     <section>
-      <h2>月度通勤成本估算 <span class="tag">按此站对 · 起始日 + 30 天窗口</span></h2>
+      <h2>月度通勤成本估算 <span class="tag">起始日 + 30 天窗口 · 参考价取当前站对</span></h2>
       <div class="costbox calbox" id="calboxS2s">
         <div class="cal-group">
           <div class="cal-ttl">时间窗口</div>
           <div class="cal-row">
             <label for="startDateS2s">激活起始日</label>
             <div class="cal-date" id="startDateWrapS2s">
-              <button type="button" class="cal-date-btn" id="startDateBtnS2s" aria-haspopup="dialog" aria-expanded="false" aria-label="选择激活起始日"><span id="startDateLabelS2s">2026-12-01</span><span class="caret">▼</span></button>
+              <button type="button" class="cal-date-btn" id="startDateBtnS2s" aria-haspopup="dialog" aria-expanded="false" aria-label="选择激活起始日，当前 2026-12-01"><span id="startDateLabelS2s">2026-12-01</span><span class="caret">▼</span></button>
               <input type="date" class="cal-date-native" id="startDateS2s" min="2026-01-01" max="2027-12-02" value="2026-12-01" tabindex="-1" aria-hidden="true">
               <div class="cal-pop" id="startDatePopS2s" role="dialog" aria-label="选择激活起始日" hidden></div>
             </div>
-            <span class="cal-hint" id="segHintS2s">计次票自激活日起 30 个自然日有效。</span>
+            <span class="cal-hint" id="segHintS2s">计次票自激活日起 30 个自然日有效，购买后须在 7 个自然日内手动激活。</span>
           </div>
           <div class="cal-row">
             <label class="toggle"><input type="checkbox" id="saturdayModeS2s"> 周六是否上班</label>
@@ -807,6 +816,11 @@
             <label for="weekendFareS2s">非工作日单程票价</label>
             <input type="range" id="weekendFareS2s" min="3" max="15" step="1" value="6" class="fare-range">
             <span class="cal-val" id="pnValS2s">¥6</span>
+          </div>
+          <div class="cal-row" id="refRowS2s" style="display:none">
+            <span class="cal-hint" id="refTextS2s"></span>
+            <button type="button" id="adoptRefS2s">采用参考价</button>
+            <span class="cal-ref-warn" id="refWarnS2s" style="display:none"></span>
           </div>
         </div>
         <div class="scrollx"><div id="costTableS2s"></div></div>
@@ -1049,11 +1063,12 @@ function activeFares(){
 
 /* ============ 起始日 + 30 天日历：常量与算法内核（纯函数） ============
    口径见 docs/start-date-calendar-spec.md v1.2。金额内部以「角」整数运算，展示 ÷10 固定 1 位小数。 */
+var WIN_LO = '2026-01-01', WIN_HI = '2027-12-31', WIN_LEN = 30;
 var DEFAULTS = {
   pw:(typeof APP_DEFAULTS.workday_fare==='number' ? APP_DEFAULTS.workday_fare : 6),
   pn:(typeof APP_DEFAULTS.weekend_fare==='number' ? APP_DEFAULTS.weekend_fare : 6),
   k:(typeof APP_DEFAULTS.weekend_trips==='number' ? APP_DEFAULTS.weekend_trips : 0),
-  L:30,
+  L:WIN_LEN,
   makeup:(typeof APP_DEFAULTS.makeup_weekends==='boolean' ? APP_DEFAULTS.makeup_weekends : false),
   sat:(typeof APP_DEFAULTS.saturday_work==='boolean' ? APP_DEFAULTS.saturday_work : false),
   S:(typeof APP_DEFAULTS.start_date==='string' ? APP_DEFAULTS.start_date : '2026-12-01')
@@ -1096,7 +1111,7 @@ function classify(d, M, Sat){
   return (wd===0 || wd===6) ? 'Wk' : 'D';
 }
 function checkWindow(S, L){
-  var lo = ymdToDate('2026-01-01'), hi = addDays(ymdToDate('2027-12-31'), -(L-1));
+  var lo = ymdToDate(WIN_LO), hi = addDays(ymdToDate(WIN_HI), -(L-1));
   return S>=lo && S<=hi;
 }
 function buildWindow(S, L){ var a=[]; for(var i=0;i<L;i++) a.push(addDays(S,i)); return a; }
@@ -1197,6 +1212,9 @@ window.addEventListener('load', function(){
     if(!km) return;
     var v = parseFloat(km);
     if(isNaN(v) || v < 1) return;
+    /* 带 km 但没有 hash / 站对参数的旧链接，还原到 dist tab，否则乘距值用户看不到 */
+    var q0 = new URLSearchParams(location.search);
+    if(!location.hash && !q0.get('from') && !q0.get('to') && typeof switchTab === 'function') switchTab('dist', false);
     v = Math.min(v, 135);
     var active = document.querySelector('.tab.active');
     var tab = active ? active.dataset.tab : 'dist';
@@ -1234,11 +1252,11 @@ window.addEventListener('load', function(){
     } else {
       var num = document.getElementById(tab === 'cities' ? 'cityKmNum' : 'kmNum');
       if(num && num.value) qs.push('km=' + encodeURIComponent(num.value));
-      var rr = document.getElementById('rides');
-      if(rr && rr.value) qs.push('rides=' + encodeURIComponent(rr.value));
+      /* cities/dist 不再产出 rides（rides 属于旧 s2s 月成本控件） */
     }
     if(qs.length) url += '?' + qs.join('&');
-    if(tab !== 'dist') url += '#' + tab;
+    /* dist 也必须带 #dist，否则打开链接会停在默认 s2s tab，乘距还原用户看不到 */
+    url += '#' + tab;
     return url;
   }
   function flash(msg, ok){
@@ -1272,14 +1290,10 @@ window.addEventListener('load', function(){
     window.__setS2S(f, t);
     if(typeof switchTab === 'function') switchTab('s2s', false);
   }
-  /* 旧 rides 参数：同步到 dist/s2s 旧控件，并用于反解 k */
-  if(q.has('rides')){
-    var rv = Math.max(1, Math.min(120, parseInt(q.get('rides'),10) || 44));
-    ['rides','ridesS2s'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=rv; });
-    ['ridesRange','ridesS2sRange'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=rv; });
-  }
-  var hasCal = q.has('s')||q.has('k')||q.has('pw')||q.has('pn')||q.has('mk')||q.has('sat')||q.has('rides');
-  if(!hasCal) return;
+  /* 旧 rides 只在「链接无 km」时反解 k（兼容老 s2s 链接）；有 km 时静默忽略，不弹提示 */
+  var legacyRides = q.has('rides') && !q.has('km');
+  var hasCal = q.has('s')||q.has('k')||q.has('pw')||q.has('pn')||q.has('mk')||q.has('sat');
+  if(!hasCal && !legacyRides) return;
   var o = {}, D = DEFAULTS;
   if(q.has('s')){
     var sv=q.get('s'), sd=/^\d{4}-\d{2}-\d{2}$/.test(sv)?ymdToDate(sv):null;
@@ -1302,7 +1316,7 @@ window.addEventListener('load', function(){
   if(q.has('k')){
     var k=parseInt(q.get('k'),10);
     if(isNaN(k)||k<0) msgs.push('k='+q.get('k')+' 非法，已忽略'); else o.k=k;
-  } else if(q.has('rides')){
+  } else if(legacyRides){
     var rs=parseInt(q.get('rides'),10);
     if(!isNaN(rs)){
       var s0=o.s?ymdToDate(o.s):ymdToDate(D.S);
@@ -1310,7 +1324,7 @@ window.addEventListener('load', function(){
       var rk=(rs - sm.R0)/2;
       if(rk>=0 && rk<=sm.N.length && Math.abs(rk-Math.round(rk))<1e-9) o.k=Math.round(rk);
       else msgs.push('旧参数 rides='+rs+' 无法反解有效 k，已忽略');
-    }
+    } else msgs.push('旧参数 rides='+q.get('rides')+' 非法，已忽略');
   }
   var cal = window.__calS2s;
   if(!cal) return;
@@ -1341,7 +1355,7 @@ function renderCostTable(container, km, rides, useDisc){
     rows.push({label:f.name+'（单程）', detail:per+' 元/次', cost:total});
   });
   var perFinal = fareFinal(km);
-  [{n:35,c:190},{n:45,c:210},{n:60,c:270},{n:90,c:390}].forEach(function(t){
+  TICKETS.forEach(function(t){
     var over = rides - t.n;
     if (over > 0) {
       /* 超出次数用单程票补齐：计次票 + 单程票组合 */
@@ -1574,32 +1588,56 @@ function segmentText(summary, k, R){
   return '<div>'+line1+'</div><div style="margin-top:3px">'+line2+'</div>';
 }
 
-/* 决策表只显示当前 k 的一组 5 行方案；k 滑块切换时替换这 5 行。
-   主表四列：方案 / 预计花费 / 比最低 / 次数使用；省钱口径与差额收进「省钱技巧」折叠区。 */
-function buildCostTable(ev){
-  var html = '<table class="cost cal-table"><thead><tr>'
-    + '<th>方案</th><th>预计花费</th><th>比最低</th><th>次数使用</th></tr></thead><tbody>';
-  ev.rows.forEach(function(r, ri){
-    var n=ticketN(ri);
-    var cover = r.gray ? '—'
-      : ('用 '+r.used+' / '+n+' 次 · '+(r.remain>0?'剩 '+r.remain+' 次':(r.gap>0?'缺 '+r.gap+' 次':'用满')));
-    html += '<tr class="'+(r.isBestCt?'best':'')+'" data-plan="'+r.key+'">'
-      + '<td>'+r.label+(r.isBestCt?'<span class="cal-star">★最低</span>':'')+'</td>'
-      + '<td>¥'+yuan(r.ct)+'</td>'
-      + '<td>'+(r.isBestCt?'最低':'+¥'+yuan(r.diffCt))+'</td>'
-      + '<td>'+cover+'</td></tr>';
+/* 全量决策表：行 = k=0..|N|。k 滑块只切高亮 / 摘要 / 色带，绝不增删行。
+   方案列取该 k 下顺序成本最低者；0.05 角容差内并列用 ' / ' 连接。 */
+function coverText(r, ri){
+  var n=ticketN(ri);
+  return r.gray ? '—'
+    : ('用 '+r.used+' / '+n+' 次 · '+(r.remain>0?'剩 '+r.remain+' 次':(r.gap>0?'缺 '+r.gap+' 次':'用满')));
+}
+function buildCostTable(list, summary, detailsId){
+  var allCt=[];
+  list.forEach(function(e){ e.rows.forEach(function(r){ allCt.push(r.ct); }); });
+  var globalMin=Math.min.apply(null, allCt);
+  var html = '<div class="cal-hint" style="margin-bottom:6px">'
+    + ymd(summary.days[0])+' ~ '+ymd(summary.days[summary.days.length-1])
+    + '（'+summary.L+' 天） · 全量 k=0..'+summary.N.length+'</div>'
+    + '<table class="cost cal-table"><thead><tr>'
+    + '<th>方案</th><th>顺序口径成本</th><th>最优口径成本</th><th>差额</th><th>与最低差</th><th>覆盖·剩余</th>'
+    + '</tr></thead><tbody>';
+  list.forEach(function(e){
+    var minCt=Math.min.apply(null, e.rows.map(function(r){ return r.ct; }));
+    var tied=e.rows.filter(function(r){ return approxEq(r.ct, minCt, 0.05); });
+    var pick=tied[0], ri=e.rows.indexOf(pick), isGlobal=approxEq(pick.ct, globalMin, 0.05);
+    html += '<tr data-k="'+e.k+'" class="cur-row'+(isGlobal?' best':'')+'" data-plan="'+pick.key+'">'
+      + '<td>'+tied.map(function(r){ return r.label; }).join(' / ')+'</td>'
+      + '<td>¥'+yuan(pick.ct)+(isGlobal?'<span class="cal-star">★最低</span>':'')+'</td>'
+      + '<td>¥'+yuan(pick.op)+'</td>'
+      + '<td>+¥'+yuan(pick.ct-pick.op)+'</td>'
+      + '<td>'+(isGlobal?'最低':'+¥'+yuan(pick.ct-globalMin))+'</td>'
+      + '<td>'+coverText(pick, ri)+'</td></tr>';
+  });
+  html += '</tbody></table><div id="'+detailsId+'"></div>'
+    + '<div class="cal-hint" style="margin-top:8px">最优口径 = 把贵的行程留给计次票、便宜的自费；需主动选择支付方式，属规划上限，不是自动获得。</div>';
+  return html;
+}
+function buildCurDetails(ev){
+  var tips=ev.rows.filter(function(r){ return r.ct-r.op>0.0001; });
+  var html='<details class="cal-tips"><summary>当前 k='+ev.k+' 的 '+ev.rows.length+' 方案明细</summary>'
+    + '<table class="cost cal-table"><thead><tr>'
+    + '<th>方案</th><th>顺序口径成本</th><th>最优口径成本</th><th>差额</th><th>覆盖·剩余</th>'
+    + '</tr></thead><tbody>';
+  ev.rows.forEach(function(r,ri){
+    html += '<tr><td>'+r.label+'</td><td>¥'+yuan(r.ct)+'</td><td>¥'+yuan(r.op)+'</td>'
+      + '<td>'+(r.ct-r.op>0.0001?'+¥'+yuan(r.ct-r.op):'0')+'</td><td>'+coverText(r,ri)+'</td></tr>';
   });
   html += '</tbody></table>';
-  var tips=ev.rows.filter(function(r){ return r.ct-r.op>0.0001; });
   if(tips.length){
-    html += '<details class="cal-tips"><summary>省钱技巧（'+tips.length+' 项）</summary><ul>';
-    tips.forEach(function(r){
-      html += '<li>'+r.label+'：预计 ¥'+yuan(r.ct)+'，若主动把贵的行程留给卡可降到 ¥'+yuan(r.op)
-        +'（省 ¥'+yuan(r.ct-r.op)+'）</li>';
-    });
-    html += '</ul><div>需主动选择支付方式，属规划上限，不是自动获得。</div></details>';
+    html += '<ul>';
+    tips.forEach(function(r){ html += '<li>'+r.label+'：若主动把贵的行程留给卡可降到 ¥'+yuan(r.op)+'（省 ¥'+yuan(r.ct-r.op)+'）</li>'; });
+    html += '</ul>';
   }
-  return html;
+  return html+'</details>';
 }
 function ticketN(rowIndex){ return TICKETS[rowIndex-1] ? TICKETS[rowIndex-1].n : 0; }
 
@@ -1677,7 +1715,10 @@ function createDatePicker(opts){
     var n=days[i+step]; if(n) n.focus();
   });
   document.addEventListener('click', function(e){ if(!wrap.contains(e.target)) close(); });
-  return function(){ if(label) label.textContent=input.value||'未选择'; };
+  return function(){
+    if(label) label.textContent=input.value||'未选择';
+    btn.setAttribute('aria-label','选择激活起始日，当前 '+(input.value||'未选择'));
+  };
 }
 
 /*
@@ -1688,8 +1729,8 @@ function createDatePicker(opts){
 function createCalController(cfg){
   var sfx = cfg.sfx || '', $ = function(id){ return document.getElementById(id+sfx); };
   var state = { S:ymdToDate(DEFAULTS.S), pw:DEFAULTS.pw, pn:DEFAULTS.pn, k:DEFAULTS.k,
-                L:30, makeup:DEFAULTS.makeup, sat:DEFAULTS.sat };
-  var summary=null, evList=[];
+                L:WIN_LEN, makeup:DEFAULTS.makeup, sat:DEFAULTS.sat };
+  var summary=null, evList=[], refKm=null;
 
   function el(id){ return document.getElementById(id+sfx); }
   var syncStartLabel = createDatePicker({inputId:'startDate'+sfx, btnId:'startDateBtn'+sfx,
@@ -1705,7 +1746,7 @@ function createCalController(cfg){
   }
   function syncControls(){
     el('startDate').value = ymd(state.S);
-    el('startDate').max = ymd(addDays(ymdToDate('2027-12-31'), -(state.L-1)));
+    el('startDate').max = ymd(addDays(ymdToDate(WIN_HI), -(state.L-1)));
     el('workdayFare').value = state.pw; el('weekendFare').value = state.pn;
     el('weekendTrips').value = state.k;
     el('pwVal').textContent = '¥'+state.pw; el('pnVal').textContent = '¥'+state.pn;
@@ -1715,20 +1756,26 @@ function createCalController(cfg){
   }
   function rebuild(){
     summary = summarize(state.S, state.L, state.makeup, state.sat);
-    if(state.k > summary.N.length) state.k = summary.N.length;
+    if(state.k > summary.N.length){
+      state.k = summary.N.length;
+      calToast('非工作日出行次数已按窗口上限 '+state.k+' 收敛（当前窗口最多 '+state.k+' 次）');
+    }
     if(state.k < 0) state.k = 0;
     el('weekendTrips').max = summary.N.length;
     el('weekendTrips').value = state.k;
     el('kVal').textContent = '非工作日出行 '+state.k+' 次 · 往返 '+(state.k*2)+' 程';
     evList = [];
     for(var kk=0; kk<=summary.N.length; kk++){ var ev=evaluate(summary,kk,state.pw,state.pn); ev.k=kk; evList.push(ev); }
+    el('costTable').innerHTML = buildCostTable(evList, summary, 'curDetails'+sfx);
     el('calFoot').innerHTML = '<div class="cal-foot">'
       + '<div>'+GRAY_NOTE+'</div>'
-      + '<div>预计花费按主口径计算；更省的方案与前提见表下「省钱技巧」。</div>'
+      + '<div>本表按你设定的上班/非工作日单程票价计算，参考价仅供一键填充。</div>'
+      + '<div>本表按新方案满 90 元九折计算，不含老方案（满 70）/听证方案（满 100）；其月成本见『按乘距』页。</div>'
       + '<div class="cal-tip">'+REFUND_NOTE+'</div></div>';
     renderCurrent();
+    setRef(refKm);
   }
-  /* 只重绘 k 相关的三处：色带、k 文案、当前 k 的 5 行表；表头摘要随之更新 */
+  /* k 变化只切高亮行 + 顶部摘要 + 色带，不重建行集合 */
   function renderCurrent(){
     var ev=evList[state.k]; if(!ev) return;
     el('segmentSummary').innerHTML = segmentText(summary, state.k, ev.R);
@@ -1736,7 +1783,11 @@ function createCalController(cfg){
     if(tripLabel) tripLabel.textContent='非工作日出行次数（周末 '+summary.Wk.length+' 天 · 放假 '+summary.H.length+' 天）';
     el('kVal').textContent = '非工作日出行 '+state.k+' 次 · 往返 '+(state.k*2)+' 程';
     renderBand(el('segBand'), summary, new Set(summary.N.slice(0,state.k).map(ymd)));
-    el('costTable').innerHTML = buildCostTable(ev);
+    var details=el('curDetails'); if(details) details.innerHTML=buildCurDetails(ev);
+    var rows=el('costTable').querySelectorAll('tr.cur-row');
+    Array.prototype.forEach.call(rows, function(tr){
+      tr.classList.toggle('cur', Number(tr.getAttribute('data-k'))===state.k);
+    });
   }
   function onKInput(){
     var v=parseInt(el('weekendTrips').value,10); if(isNaN(v)) v=0;
@@ -1750,13 +1801,40 @@ function createCalController(cfg){
     var d=ymdToDate(dv);
     if(!checkWindow(d,state.L)){
       el('startDate').value=ymd(state.S); refreshDateLabels();
-      calToast('起始日窗口必须完整落在 2026–2027（'+ymd(addDays(ymdToDate('2027-12-31'),-(state.L-1)))+' 为最晚）');
+      calToast('起始日窗口必须完整落在 2026–2027（'+ymd(addDays(ymdToDate(WIN_HI),-(state.L-1)))+' 为最晚）');
       return;
     }
     state.S=d; refreshDateLabels(); rebuild(); if(cfg.onChange) cfg.onChange();
   }
+  /* 参考价只读自当前站对乘距，永不自动改写 pw/pn；>15 时禁用按钮并按 spec B#2c 黄条提示 */
+  function setRef(km){
+    refKm = (typeof km==='number' && isFinite(km) && km>=0) ? km : null;
+    var row=el('refRow'), txt=el('refText'), btn=el('adoptRef'), warn=el('refWarn');
+    if(!row||!txt||!btn||!warn) return;
+    if(refKm===null){
+      row.style.display='none'; warn.style.display='none'; return;
+    }
+    row.style.display='';
+    var raw=fareFinal(refKm), capped=Math.min(raw,15), note='';
+    if(refKm>=126) note='；126 km 以上无法用 3–15 元表达，参考价按 ¥15 估算';
+    txt.textContent='参考价 ¥'+capped+'（按当前乘距 '+refKm.toFixed(1)+' km 推算）'+note;
+    if(raw>15){
+      btn.disabled=true; warn.style.display='';
+      warn.textContent='当前乘距对应票价 ¥'+raw+'，超出本工具支持范围（3–15）；仍按你设定的 ¥'+state.pw+' 计算';
+    } else {
+      btn.disabled=false; warn.style.display='none'; warn.textContent='';
+    }
+  }
   function bind(){
     el('startDate').addEventListener('change', onStartDate);
+    var adopt=el('adoptRef');
+    if(adopt) adopt.addEventListener('click', function(){
+      if(refKm===null || this.disabled) return;
+      var v=Math.max(3, Math.min(15, fareFinal(refKm)));
+      state.pw=v; el('workdayFare').value=v; el('pwVal').textContent='¥'+v;
+      rebuild(); setRef(refKm);
+      calToast('已采用参考价 ¥'+v+' 作为上班单程票价');
+    });
     el('workdayFare').addEventListener('input', function(){
       state.pw=parseInt(this.value,10); el('pwVal').textContent='¥'+state.pw;
       rebuild(); if(cfg.onChange) cfg.onChange();
@@ -1787,7 +1865,8 @@ function createCalController(cfg){
       syncControls(); rebuild();
       refreshDateLabels();
     },
-    rebuild: rebuild
+    rebuild: rebuild,
+    setRef: setRef
   };
 }
 
@@ -2278,10 +2357,8 @@ const CITY_CARDS = [
   window.__getS2S = function(){ return { from: epFrom.get(), to: epTo.get() }; };
   window.__setS2S = function(f, t){ if (f) epFrom.set(f); if (t) epTo.set(t); };
 
-  var ridesS2s = document.getElementById('ridesS2s');
-  var discS2s = document.getElementById('discountS2s');
   var costTableS2s = document.getElementById('costTableS2s');
-  var lastKm = null;
+  var refKm = null;   /* 当前站对计价里程，仅用于参考价显示 */
 
   function dijkstra(src){
     var dist = {}; dist[src] = 0;
@@ -2302,7 +2379,7 @@ const CITY_CARDS = [
     return {dist:dist, prev:prev};
   }
 
-  function renderCostS2s(){ if(window.__calS2s) window.__calS2s.rebuild(); }
+  function setRefS2s(){ if(window.__calS2s) window.__calS2s.setRef(refKm); }
 
   /* ---------- 线路图（站点坐标来自官方地图接口） ---------- */
   var MAPXY = null, MAPREQ = null, MAPGEO = null;
@@ -2754,22 +2831,22 @@ const CITY_CARDS = [
     var fromName = epFrom.get(), toName = epTo.get();
     var box = document.getElementById('routeResult');
     if(!graph[fromName] || !graph[toName]){
-      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; lastKm=null; renderCostS2s(); return;
+      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; refKm=null; setRefS2s(); return;
     }
     if(fromName === toName){
-      box.innerHTML = '<div class="no-route">起点和终点相同。</div>'; lastKm=null; renderCostS2s(); return;
+      box.innerHTML = '<div class="no-route">起点和终点相同。</div>'; refKm=null; setRefS2s(); return;
     }
 
     /* 本地最短里程路径（算里程/站数，也作为官方数据缺失时的兜底） */
     var r = dijkstra(fromName);
     var path = [], cur = toName;
     if(!(toName in r.dist)){
-      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; lastKm=null; renderCostS2s(); return;
+      box.innerHTML = '<div class="no-route">无法计算该站对间的路径。</div>'; refKm=null; setRefS2s(); return;
     }
     while(cur){ path.push(cur); cur = r.prev[cur]; }
     path.reverse();
     var km = r.dist[toName] / 1000;
-    lastKm = km;
+    refKm = km;
 
     var token = (renderRoute.tk = (renderRoute.tk || 0) + 1);
 
@@ -2851,7 +2928,7 @@ const CITY_CARDS = [
         box.querySelectorAll('.plan-btn').forEach(function(b){
           b.addEventListener('click', function(){ paint(parseInt(b.getAttribute('data-plan'),10)); });
         });
-        renderCostS2s();
+        setRefS2s();
       }
       paint(active);
     });
@@ -2888,7 +2965,7 @@ const CITY_CARDS = [
     box.innerHTML = html;
     wireJourney(box);
     wireMap(box);
-    renderCostS2s();
+    setRefS2s();
   }
 
   epFrom.onchange = renderRoute;
