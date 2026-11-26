@@ -136,20 +136,20 @@
   .avg-hint{margin-top:12px;font-size:13px;color:var(--muted)}
 
   .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:14px;margin-top:16px}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px 18px 16px;position:relative}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 14px 12px;position:relative}
   .card.cur{border-top:3px solid var(--gray-line)}
   .card.final{border-top:3px solid var(--red)}
   .card.p1{border-top:3px solid var(--blue)}
   .card.p2{border-top:3px solid #2f8f6b}
   .card .name{font-size:13px;color:var(--muted);font-weight:600}
-  .card .price{font-size:40px;font-weight:800;letter-spacing:-.02em;margin-top:6px;font-variant-numeric:tabular-nums}
-  .card .price .u{font-size:18px;font-weight:600;color:var(--muted);margin-left:2px}
+  .card .price{font-size:30px;font-weight:800;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums}
+  .card .price .u{font-size:14px;font-weight:600;color:var(--muted);margin-left:2px}
   .card.cur .price{color:var(--gray)}
   .card.p1 .price{color:var(--red)}
   .card.p2 .price{color:var(--blue)}
-  .card .delta{margin-top:8px;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums}
+  .card .delta{margin-top:5px;font-size:12px;font-weight:600;font-variant-numeric:tabular-nums}
   .card .delta.up{color:var(--red)} .card .delta.eq{color:var(--muted)}
-  .card .note{font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
+  .card .note{font-size:11px;color:var(--muted);margin-top:7px;padding-top:7px;border-top:1px solid var(--line)}
 
   .chartbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
   .chartbox svg{-webkit-user-select:none;user-select:none;touch-action:none}
@@ -275,7 +275,7 @@
 
   @media(max-width:640px){
     .cards{grid-template-columns:1fr}
-    .card .price{font-size:34px}
+    .card .price{font-size:27px}
     header h1{font-size:26px}
     .s2s-field{min-width:100%}
     .th-full{display:none}
@@ -370,12 +370,16 @@
 
   /* ---- 线路图 ---- */
   .metromap{margin-top:18px;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--map-bg);position:relative}
+  .metromap .mlab-sm{fill:var(--ink);paint-order:stroke;stroke:var(--map-bg);stroke-linejoin:round;font-weight:600;pointer-events:none}
+  .metromap .mlab-sm.flag{font-weight:800;fill:var(--red)}
   .map-tip{position:absolute;transform:translate(-50%,-135%);background:#2f2c29;color:#fff;font-size:12px;line-height:1;padding:5px 9px;border-radius:6px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .14s;z-index:5}
   .map-tip.on{opacity:1}
   .map-tip:after{content:'';position:absolute;left:50%;bottom:-4px;margin-left:-4px;border:4px solid transparent;border-top-color:#2f2c29}
-  .metromap .map-cap{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);padding:9px 12px 0}
-  .metromap .map-cap span:first-child{font-weight:600;color:var(--ink)}
-  .metromap .map-hint{color:#b3aea8}
+  .metromap .map-cap{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;color:var(--muted);padding:9px 12px 0;flex-wrap:nowrap}
+  .metromap .map-cap span:first-child{font-weight:600;color:var(--ink);white-space:nowrap;flex:none}
+  .metromap .map-hint{color:#b3aea8;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .metromap .map-zoom{flex:none;white-space:nowrap}
+  @media(max-width:680px){.metromap .map-hint{display:none}}
   .metromap{aspect-ratio:2.35 / 1; height:auto}
   .metromap svg{display:block;width:100%;height:100%}
   @media(max-width:900px){.metromap{aspect-ratio:1.7 / 1}}
@@ -1291,10 +1295,17 @@ function renderCostTable(container, km, rides, useDisc){
     cards.innerHTML = html;
   }
 
-  var CW = window.innerWidth < 640 ? 430 : 920;
-  var CH = window.innerWidth < 640 ? 380 : 360;
+  var CHW = 920, CHH = 380, CHL = 42, CHR = 16, CHT = 30, CHB = 38;
+  function measureChart(){
+    var cw = svg.clientWidth || 900;
+    CHW = Math.max(300, Math.round(cw));
+    CHH = CHW < 560 ? 300 : 380;
+    CHL = CHW < 560 ? 34 : 42;
+  }
+  measureChart();
   function renderChart(){
-    var W=CW, H=CH, L=44, R=16, T=34, B=40;
+    if(svg.clientWidth && Math.abs(svg.clientWidth - CHW) > 2) measureChart();
+    var W=CHW, H=CHH, L=CHL, R=CHR, T=CHT, B=CHB;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     var xMin=0, xMax=135, yMin=0, yMax=16;
     function sx(x){ return L + (x-xMin)/(xMax-xMin)*(W-L-R); }
@@ -1388,10 +1399,19 @@ function renderCostTable(container, km, rides, useDisc){
     });
   }
 
+  /* 标签页切换/窗口变化后补一次测量，保证字号不被缩放 */
+  var chTimer = 0;
+  function remeasure(){ if(svg.clientWidth){ measureChart(); renderChart(); } }
+  window.addEventListener('resize', function(){ clearTimeout(chTimer); chTimer = setTimeout(remeasure, 140); });
+  document.addEventListener('click', function(ev){
+    var t = ev.target && ev.target.closest ? ev.target.closest('.tab') : null;
+    if(t) setTimeout(remeasure, 60);
+  });
+
   /* 点击/拖动图表直接选距离 */
   svg.style.cursor = 'crosshair';
   function svgKm(ev){
-    var W=CW, L=44, R=16, xMin=0, xMax=135;
+    var W=CHW, L=CHL, R=CHR, xMin=0, xMax=135;
     var rect = svg.getBoundingClientRect();
     var cx = (ev.touches ? ev.touches[0].clientX : ev.clientX);
     var px = (cx - rect.left) / rect.width * W;
@@ -2064,6 +2084,25 @@ const CITY_CARDS = [
     return out;
   }
 
+  /* 小图常显：起点、终点、换乘站的站名 */
+  function mapStopLabels(G, segs, from, to, k, vb){
+    var marks = {};
+    segs.forEach(function(sg, i){
+      if (i === 0) marks[sg.from] = 'flag';
+      marks[sg.to] = (i === segs.length - 1) ? 'flag' : 'inter';
+    });
+    marks[from] = 'flag'; marks[to] = 'flag';
+    var b = vb.split(' ').map(Number), out = '<g class="mlabels-sm">';
+    for (var nm in marks){
+      var q = pt(G, nm); if (!q) continue;
+      var flip = (q[0] + 10*k + nm.length*7.2*k) > (b[0] + b[2]);
+      var x = flip ? q[0] - 8*k : q[0] + 8*k;
+      out += '<text class="mlab-sm' + (marks[nm] === 'flag' ? ' flag' : '') + '" x="' + x.toFixed(1)
+           + '" y="' + (q[1] + 3.4*k).toFixed(1) + '" text-anchor="' + (flip ? 'end' : 'start') + '">' + nm + '</text>';
+    }
+    return out + '</g>';
+  }
+
   function mapMidStops(G, segs, k){
     var seen = {}, out = '';
     segs.forEach(function(sg){
@@ -2098,6 +2137,8 @@ const CITY_CARDS = [
   /* ---------- 全屏地图查看器：双指缩放 / 拖拽 / 滚轮 / 双击 ---------- */
   function openMapViewer(srcSvg){
     var full = srcSvg.cloneNode(true);
+    var smallLabels = full.querySelector('.mlabels-sm');
+    if (smallLabels) smallLabels.parentNode.removeChild(smallLabels);
     var vb0 = (srcSvg.getAttribute('data-full') || '0 0 1000 1400').split(' ').map(Number);
     var vbR = srcSvg.getAttribute('viewBox').split(' ').map(Number);   /* 初始视野=路径附近 */
     full.removeAttribute('preserveAspectRatio');
@@ -2399,8 +2440,26 @@ const CITY_CARDS = [
       + '<div class="map-cap"><span>线路图</span><span class="map-hint">高亮为官方推荐路径 · 悬停或点击站点看站名</span><button type="button" class="map-zoom" aria-label="放大线路图">⤢ 放大</button></div>'
       + '<svg viewBox="' + vb + '" data-full="0 0 1000 1400" preserveAspectRatio="xMidYMid slice" role="img" aria-label="上海地铁线路图，高亮 ' + from + ' 至 ' + to + ' 的官方路径">'
       + mapBase(G, k) + mapRoute(G, segs, k) + mapStops(G, segs, from, to, k) + mapMidStops(G, segs, k)
+      + mapStopLabels(G, segs, from, to, k, vb)
       + '</svg></div>';
   }
+
+  /* 站名按屏幕像素定字号（SVG 会被缩放） */
+  function fitMapLabels(root){
+    var scope = root || document;
+    var list = scope.querySelectorAll('.metromap svg');
+    Array.prototype.forEach.call(list, function(svg){
+      var vb = svg.getAttribute('viewBox').split(' ').map(Number);
+      var cw = svg.clientWidth || 700;
+      var fs = 11 * vb[2] / cw;
+      Array.prototype.forEach.call(svg.querySelectorAll('.mlab-sm'), function(t){
+        t.setAttribute('font-size', fs.toFixed(2));
+        t.setAttribute('stroke-width', (fs * 0.32).toFixed(2));
+      });
+    });
+  }
+  window.__fitMapLabels = fitMapLabels;
+  window.addEventListener('resize', function(){ fitMapLabels(); });
 
   /* ---------- 官方实测数据：按起点站懒加载分片 ---------- */
   var OFFICIAL = { index: null, req: null, cache: {} };
@@ -2640,6 +2699,7 @@ const CITY_CARDS = [
         html += '<div class="fare-foot"><span>里程按公开站间距推算最短路径 · 老方案（2005 版）票价按旧规则与站间距推算，可能与实际扣费有差异，仅供参考</span></div>';
 
         box.innerHTML = html;
+        if (window.__fitMapLabels) window.__fitMapLabels(box);
         wireJourney(box);
         wireMap(box);
         box.querySelectorAll('.plan-btn').forEach(function(b){
@@ -2680,6 +2740,7 @@ const CITY_CARDS = [
     });
     html += '</div><div class="fare-foot"><span class="src">估算：' + km.toFixed(2) + ' 公里 · ' + path.length + ' 站</span></div>';
     box.innerHTML = html;
+    if (window.__fitMapLabels) window.__fitMapLabels(box);
     wireJourney(box);
     wireMap(box);
     renderCostS2s();
