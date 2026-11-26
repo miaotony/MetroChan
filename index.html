@@ -103,10 +103,10 @@
   table.cost td.cheap{background:#e8f5e9;font-weight:700;color:#2e7d32}
   .city-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:16px}
   .city-prices{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-  .cp-chip{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 14px;font-size:13.5px}
-  .cp-chip .cdot{width:10px;height:10px;border-radius:3px;flex:none}
+  .cp-chip{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:5px 10px;font-size:12px}
+  .cp-chip .cdot{width:8px;height:8px;border-radius:2px;flex:none}
   .cp-chip .cp-name{color:var(--muted);font-weight:600}
-  .cp-chip .cp-fare{font-size:17px;font-weight:800;font-variant-numeric:tabular-nums}
+  .cp-chip .cp-fare{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums}
   .cp-chip.low{border-color:var(--ok-line);background:var(--ok-bg)}
   .cp-chip.low .cp-fare{color:var(--ok-ink)}
   .city-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
@@ -528,9 +528,23 @@
     color:var(--ink);font-size:19px;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.14);
     display:flex;align-items:center;justify-content:center;padding:0}
   .mfab-btn:active{transform:scale(.94)}
+  .share-btn .qr-ico{display:block;flex:none;width:16px;height:16px}
+  .mfab-btn .qr-ico{display:block;flex:none;width:22px;height:22px}
   .mfab-btn.done{border-color:var(--ok-line);background:var(--ok-bg);color:var(--ok-ink)}
   @media (max-width:999px){ .mfab{display:flex} .share-bar{display:none} }
   @media (min-width:901px) and (max-width:999px){ .mfab{bottom:78px} }
+  /* 右下角悬浮组：可整体收起，避免遮挡正文 */
+  .fab-toggle{position:fixed;right:18px;bottom:240px;z-index:83;width:30px;height:30px;border-radius:50%;
+    border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:13px;line-height:1;
+    display:none;align-items:center;justify-content:center;cursor:pointer;opacity:.62;padding:0;
+    box-shadow:0 2px 8px rgba(0,0,0,.10);transition:opacity .15s}
+  .fab-toggle:hover,.fab-toggle:active{opacity:1}
+  @media (max-width:999px){ .fab-toggle{display:flex} }
+  @media (min-width:901px) and (max-width:999px){ .fab-toggle{bottom:134px} }
+  body.fabs-hidden .mfab,
+  body.fabs-hidden .tip-fab,
+  body.fabs-hidden .to-top{display:none !important}
+  body.fabs-hidden .fab-toggle{bottom:20px}
 
   @media (max-width: 900px){
     .map-row{flex-wrap:wrap;gap:10px}
@@ -626,7 +640,7 @@
     <button type="button" class="share-btn" id="shareBtn" title="复制当前视图链接">
       <span id="shareBtnText">🔗 复制分享链接</span>
     </button>
-    <button type="button" class="share-btn" id="qrBtn" title="显示当前视图链接的二维码">📱 二维码</button>
+    <button type="button" class="share-btn" id="qrBtn" title="显示当前视图链接的二维码"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" focusable="false" class="qr-ico"><rect x="3" y="3" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="3" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="14" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="5.6" y="5.6" width="1.9" height="1.9" fill="currentColor"/><rect x="16.6" y="5.6" width="1.9" height="1.9" fill="currentColor"/><rect x="5.6" y="16.6" width="1.9" height="1.9" fill="currentColor"/><rect x="14.2" y="14.2" width="2.6" height="2.6" fill="currentColor"/><path d="M19 14.5v3M14 19.6v2M17.6 21.2h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> 二维码</button>
   </div>
   </div>
 
@@ -882,9 +896,10 @@
   <img src="assets/wechat-reward.png" alt="微信打赏二维码" loading="lazy">
 </div>
 <button type="button" class="tip-fab" id="tipFab" aria-label="打赏与分享">💰</button>
+<button type="button" class="fab-toggle" id="fabToggle" aria-label="隐藏右下角按钮" title="隐藏按钮">⌄</button>
 <div class="mfab" id="mfab">
   <button type="button" class="mfab-btn" id="mShareBtn" aria-label="复制当前视图链接" title="复制链接">🔗</button>
-  <button type="button" class="mfab-btn" id="mQrBtn" aria-label="显示二维码" title="二维码">▣</button>
+  <button type="button" class="mfab-btn" id="mQrBtn" aria-label="显示二维码" title="二维码"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false" class="qr-ico"><rect x="3" y="3" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="14" y="3" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="3" y="14" width="7" height="7" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.7"/><rect x="5.6" y="5.6" width="1.9" height="1.9" fill="currentColor"/><rect x="16.6" y="5.6" width="1.9" height="1.9" fill="currentColor"/><rect x="5.6" y="16.6" width="1.9" height="1.9" fill="currentColor"/><rect x="14.2" y="14.2" width="2.6" height="2.6" fill="currentColor"/><path d="M19 14.5v3M14 19.6v2M17.6 21.2h3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></button>
 </div>
 <button type="button" class="to-top" id="toTop" aria-label="回到顶部" title="回到顶部">↑</button>
 
@@ -1140,6 +1155,26 @@ window.addEventListener('load', function(){
       card0 = holder.closest('.qr-card'); if(card0) card0.querySelector('.qr-url').textContent = '二维码生成失败，请直接复制链接';
     }
   }
+})();
+/* 右下角悬浮按钮整体收起/展开（默认记忆上次选择） */
+(function(){
+  var t = document.getElementById('fabToggle');
+  if(!t) return;
+  var KEY = 'metrochan_fabs_hidden';
+  function paint(hidden){
+    document.body.classList.toggle('fabs-hidden', hidden);
+    t.textContent = hidden ? '⌃' : '⌄';
+    t.setAttribute('aria-label', hidden ? '显示右下角按钮' : '隐藏右下角按钮');
+    t.setAttribute('title', hidden ? '显示按钮' : '隐藏按钮');
+  }
+  var saved = false;
+  try { saved = localStorage.getItem(KEY) === '1'; } catch(e){}
+  paint(saved);
+  t.addEventListener('click', function(){
+    var hidden = !document.body.classList.contains('fabs-hidden');
+    paint(hidden);
+    try { localStorage.setItem(KEY, hidden ? '1' : '0'); } catch(e){}
+  });
 })();
 /* 移动端悬浮按钮：复制链接 / 二维码 */
 (function(){
@@ -2066,6 +2101,7 @@ const CITY_CARDS = [
       + '<button type="button" class="mapv-btn" data-z="out" aria-label="缩小">－</button>'
       + '<button type="button" class="mapv-btn" data-z="fit" aria-label="全图">全图</button>'
       + '<button type="button" class="mapv-btn mapv-mid" aria-pressed="false" aria-label="显示沿途站点">沿途站点</button>'
+      + '<button type="button" class="mapv-btn mapv-net" aria-pressed="false" aria-label="显示全网站点">全网站点</button>'
       + '<button type="button" class="mapv-close" aria-label="关闭">×</button></div>'
       + '<div class="mapv-stage"></div>';
     ov.querySelector('.mapv-stage').appendChild(full);
@@ -2077,7 +2113,7 @@ const CITY_CARDS = [
 
     /* ---- 大图：全网站点 + 站名（屏幕空间避让，绝不重叠） ---- */
     var NSV = 'http://www.w3.org/2000/svg';
-    var ROUTE = {}, FLAGS = {}, LABS = [], DOTS = [];
+    var ROUTE = {}, ROUTEX = {}, FLAGS = {}, LABS = [], DOTS = [], NETLAYER = null;
     (function(){
       var collect = function(sel, set){
         full.querySelectorAll(sel).forEach(function(c){
@@ -2087,8 +2123,11 @@ const CITY_CARDS = [
       collect('.mids circle', ROUTE); collect('.mstop.flag', ROUTE);
       collect('.mstop.inter', ROUTE); collect('.mstop.end', ROUTE);
       collect('.mstop.flag', FLAGS);
+      /* 高亮线路内的起点/终点/换乘站：默认只显示这些 */
+      collect('.mstop.flag', ROUTEX); collect('.mstop.inter', ROUTEX); collect('.mstop.end', ROUTEX);
 
       var netG = document.createElementNS(NSV, 'g'); netG.setAttribute('class', 'netdots');
+      netG.style.display = 'none'; NETLAYER = netG;
       var labG = document.createElementNS(NSV, 'g'); labG.setAttribute('class', 'mlabels');
       var G = MAPXY || {};
       Object.keys(G).forEach(function(nm){
@@ -2137,6 +2176,13 @@ const CITY_CARDS = [
       });
 
       var midOn = midBtn && midBtn.classList.contains('on');
+      var netOn = netBtn && netBtn.classList.contains('on');
+      /* 默认：只有本线的起点/终点/换乘站；勾沿途=本线全站；勾全网=全部 */
+      function showable(nm){
+        if (netOn) return true;
+        if (FLAGS[nm] || ROUTEX[nm]) return true;
+        return !!(midOn && ROUTE[nm]);
+      }
       var FS = W < 620 ? 10 : 11;
       var kx = W / vb[2], ky = H / vb[3];
       var PAD = 3;                         /* 站名之间的安全间距（屏幕像素） */
@@ -2150,6 +2196,7 @@ const CITY_CARDS = [
       var placed = [];
       arr.forEach(function(L){
         var el = L.el;
+        if (!showable(L.n)){ el.style.display = 'none'; return; }
         var sx = (L.x - vb[0]) * kx, sy = (L.y - vb[1]) * ky;
         if (sx < -40 || sx > W + 40 || sy < -20 || sy > H + 20){ el.style.display = 'none'; return; }
         var w = L.n.length * FS * 1.06 + 3, h = FS * 1.18 + 3;
@@ -2275,8 +2322,16 @@ const CITY_CARDS = [
       midBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
       scheduleLayout();
     });
+    var netBtn = ov.querySelector('.mapv-net');
+    if (netBtn) netBtn.addEventListener('click', function(){
+      var on = !netBtn.classList.contains('on');
+      netBtn.classList.toggle('on', on);
+      netBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      if (NETLAYER) NETLAYER.style.display = on ? '' : 'none';
+      scheduleLayout();
+    });
     ov.querySelectorAll('.mapv-btn').forEach(function(b){
-      if (b.classList.contains('mapv-mid')) return;
+      if (b.classList.contains('mapv-mid') || b.classList.contains('mapv-net')) return;
       b.addEventListener('click', function(){
         var z = b.getAttribute('data-z'), cx = stage.clientWidth/2, cy = stage.clientHeight/2;
         if (z === 'in') zoomAt(0.6, cx, cy);
