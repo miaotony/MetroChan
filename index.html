@@ -151,16 +151,16 @@
   .card .delta.up{color:var(--red)} .card .delta.eq{color:var(--muted)}
   .card .note{font-size:12px;color:var(--muted);margin-top:10px;padding-top:10px;border-top:1px solid var(--line)}
 
-  .chartbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px}
+  .chartbox{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px}
   .chartbox svg{-webkit-user-select:none;user-select:none;touch-action:none}
   .chartbox svg text{pointer-events:none}
-  .legend{display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--ink);margin-bottom:14px}
+  .legend{display:flex;align-items:center;gap:13px;flex-wrap:wrap;font-size:12.5px;color:var(--ink);margin-bottom:9px;line-height:1.5}
   .legend span{display:inline-flex;align-items:center;gap:7px}
   #cityLegend span{cursor:pointer;user-select:none;padding:3px 8px;border-radius:7px;border:1px solid transparent;transition:opacity .15s,background .15s}
   #cityLegend span:hover{background:var(--hover-bg)}
   #cityLegend span.off{opacity:.32}
   #cityLegend span.off .sw{background:#bbb !important}
-  .legend .sw{width:14px;height:3px;border-radius:2px;display:inline-block}
+  .legend .sw{width:10px;height:3px;border-radius:2px;display:inline-block}
   .sw.cur{background:var(--gray)} .sw.final{background:var(--red)} .sw.p1{background:var(--blue)} .sw.p2{background:#2f8f6b}
   svg{width:100%;height:auto;display:block}
   .grid line{stroke:var(--line);stroke-width:1}
@@ -521,7 +521,7 @@
     box-shadow:0 6px 18px rgba(0,0,0,.12);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;transform:translateY(6px)}
   .to-top.on{opacity:1;pointer-events:auto;transform:none}
   .to-top:hover{background:var(--hover-bg)}
-  @media (max-width:900px){.tip-fab{bottom:78px}}
+  @media (max-width:900px){.tip-fab{bottom:78px} .chartbox{padding:11px 12px} .legend{gap:10px;font-size:12px}}
   /* 移动端：复制链接 / 二维码 悬浮按钮（与打赏同款圆形，右下角堆叠） */
   .mfab{position:fixed;right:16px;bottom:134px;z-index:81;display:none;flex-direction:column;gap:8px}
   .mfab-btn{width:46px;height:46px;border-radius:50%;border:1px solid var(--border);background:var(--surface);
@@ -578,7 +578,10 @@
   .qrbox[hidden]{display:none}
   .qr-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:0 24px 70px rgba(0,0,0,.35);padding:22px 24px 18px;max-width:min(92vw,380px);text-align:center}
   .qr-card h3{margin:0 0 4px;font-size:16px;color:var(--ink)}
-  .qr-card .qr-sub{font-size:12.5px;color:var(--muted);margin-bottom:14px;word-break:break-all}
+  .qr-card .qr-sub{font-size:12.5px;color:var(--muted);margin-bottom:10px;word-break:break-all}
+  .qr-card .qr-opt{display:flex;align-items:center;justify-content:center;gap:7px;font-size:12.5px;color:var(--muted);margin:0 0 12px;cursor:pointer;user-select:none}
+  .qr-card .qr-opt input{width:14px;height:14px;accent-color:var(--red);cursor:pointer}
+  @media (min-width:1000px){ body[data-tab="s2s"] .qr-card .qr-opt{display:none} }
   .qr-card .qr-img{display:inline-block;background:#fff;padding:10px;border-radius:10px;border:1px solid var(--border)}
   .qr-card .qr-img canvas,.qr-card .qr-img img{display:block;width:min(60vw,232px);height:auto}
   .qr-card .qr-url{font-size:12px;color:var(--muted);margin-top:12px;word-break:break-all;max-height:3.2em;overflow:hidden}
@@ -670,7 +673,7 @@
           <span class="lg-hearing"><i class="sw p2"></i>方案二</span>
           <label class="toggle hearing-toggle"><input type="checkbox" id="showHearing"> 显示听证方案一、二（未采纳）</label>
         </div>
-        <svg id="chart" viewBox="0 0 920 360" preserveAspectRatio="xMidYMid slice" role="img" aria-label="上海地铁四方案全乘距票价阶梯图" aria-live="polite"></svg>
+        <svg id="chart" viewBox="0 0 920 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="上海地铁四方案全乘距票价阶梯图" aria-live="polite"></svg>
       </div>
     </section>
 
@@ -1098,6 +1101,7 @@ window.addEventListener('load', function(){
       box.innerHTML = '<div class="qr-card" role="dialog" aria-label="二维码分享">'
         + '<h3>扫码打开本页</h3>'
         + '<div class="qr-sub"></div>'
+        + '<label class="qr-opt"><input type="checkbox" id="qrWithParams" checked> 带上起点、终点和每月乘坐次数</label>'
         + '<div class="qr-img"></div>'
         + '<div class="qr-url"></div>'
         + '<div class="qr-acts"><button type="button" class="qr-copy">复制链接</button>'
@@ -1105,6 +1109,14 @@ window.addEventListener('load', function(){
       document.body.appendChild(box);
       box.addEventListener('click', function(e){ if(e.target === box) close(); });
       box.querySelector('.qr-close').addEventListener('click', close);
+      box.querySelector('#qrWithParams').addEventListener('change', function(e){
+        var main = document.getElementById('shareWithParams');
+        if(main) main.checked = e.currentTarget.checked;
+        var card1 = box.querySelector('.qr-card');
+        var u = buildShareUrl();
+        card1.querySelector('.qr-url').textContent = u;
+        drawQr(u, card1.querySelector('.qr-img'));
+      });
       box.querySelector('.qr-copy').addEventListener('click', function(e){
         var b = e.currentTarget;
         if(!window.__copyShareLink) return;
@@ -1117,6 +1129,8 @@ window.addEventListener('load', function(){
     }
     var url = buildShareUrl();
     var card = box.querySelector('.qr-card');
+    var optBox = card.querySelector('#qrWithParams');
+    if(optBox){ var mainChk = document.getElementById('shareWithParams'); if(mainChk) optBox.checked = mainChk.checked; }
     card.querySelector('.qr-sub').textContent = '当前视图：' + shareViewLabel();
     card.querySelector('.qr-url').textContent = url;
     drawQr(url, card.querySelector('.qr-img'));
@@ -1491,13 +1505,40 @@ const CITY_CARDS = [
   });
 
   /* 阶梯图 */
-  var W=(window.innerWidth < 640 ? 430 : 920), H=(window.innerWidth < 640 ? 420 : 400), L=44, R=16, T=34, B=40;
-  document.getElementById('cityChart').setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  var W=920, H=400, L=44, R=16, T=30, B=36;
+  function measureChart(){
+    var cw = svg.clientWidth || 900;
+    W = Math.max(300, Math.round(cw));
+    H = W < 560 ? 330 : 420;
+    L = W < 560 ? 34 : 42;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+  }
+  measureChart();
+  /* 容器宽度变化（含切到本标签页）时重算，保证 11px 字号不被缩放 */
+  var rtimer = 0;
+  window.addEventListener('resize', function(){
+    clearTimeout(rtimer);
+    rtimer = setTimeout(function(){ measureChart(); renderChart(); }, 140);
+  });
+  /* 标签页切换后容器才可见，补一次测量 */
+  document.addEventListener('click', function(ev){
+    var t = ev.target && ev.target.closest ? ev.target.closest('.tab') : null;
+    if(!t) return;
+    setTimeout(function(){ if(svg.clientWidth){ measureChart(); renderChart(); } }, 60);
+  });
+  if(window.ResizeObserver){
+    window.__cityChartRO = new ResizeObserver(function(){
+      var cw = svg.clientWidth;
+      if(cw && Math.abs(cw - W) > 2){ measureChart(); renderChart(); }
+    });
+    window.__cityChartRO.observe(svg);
+  }
   var xMin=0, xMax=135, yMin=0, yMax=20;
   function sx(x){ return L + (x-xMin)/(xMax-xMin)*(W-L-R); }
   function sy(y){ return H-B - (y-yMin)/(yMax-yMin)*(H-T-B); }
 
   function renderChart(){
+    if(svg.clientWidth && Math.abs(svg.clientWidth - W) > 2) measureChart();
     var km = getKm();
     var out = '';
     for(var y=0;y<=yMax;y+=2){
