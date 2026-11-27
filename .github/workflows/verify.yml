@@ -3,6 +3,11 @@ name: Verify MetroChan
 on:
   workflow_dispatch:
     inputs:
+      upload_offline:
+        description: Attach the verified offline HTML for download
+        type: boolean
+        required: false
+        default: true
       deploy_pages:
         description: Deploy the tested dist to GitHub Pages (main only)
         type: boolean
@@ -30,6 +35,11 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      - name: Check web and offline outputs are separate
+        run: |
+          test -s dist/index.html
+          test -s release/MetroChan-offline.html
+          test -z "$(find dist -name MetroChan-offline.html -print -quit)"
       - run: npx playwright install --with-deps chromium --only-shell
       - name: Test dist at /
         run: npm run test:e2e
@@ -41,18 +51,33 @@ jobs:
         env:
           TEST_SITE: dist
           TEST_PREFIX: /MetroChan/
-      - uses: actions/upload-artifact@v4
-        if: failure()
+      - name: Test the standalone offline HTML
+        shell: bash
+        run: npm run test:offline -- --trace=retain-on-failure 2>&1 | tee offline-test.log
+      - name: Attach the verified offline HTML
+        if: success() && inputs.upload_offline
+        uses: actions/upload-artifact@v4
         with:
-          name: regression-diagnostics
-          path: test-results/
+          name: MetroChan-offline
+          path: release/MetroChan-offline.html
           retention-days: 7
-          if-no-files-found: ignore
+          if-no-files-found: error
       - name: Package the tested dist for Pages
         if: inputs.deploy_pages && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
+      - name: Preserve failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-diagnostics
+          path: |
+            test-results/
+            playwright-report/
+            offline-test.log
+          retention-days: 7
+          if-no-files-found: ignore
 
   deploy-pages:
     needs: verify

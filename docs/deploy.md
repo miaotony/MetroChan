@@ -1,6 +1,9 @@
 # MetroChan 部署与回滚
 
-发布目录是 `dist/`：站点根目录应直接包含 `index.html`、构建后的资源和 `data/`，不要发布仓库根目录、`public/`，也不要多包一层 `dist/`。同一份产物须在 `/` 和 `/MetroChan/` 下都能工作。
+`npm run build` 一次生成两份产物，用途不同：
+
+- **网站 `dist/`**：只部署这个目录。站点根目录应直接包含 `index.html`、构建后的资源和 `data/`；同一份产物须在 `/` 和 `/MetroChan/` 下都能工作。
+- **离线文件 `release/MetroChan-offline.html`**：单独分发，直接用浏览器打开，无需本地服务器。不要把它复制进 `dist/`，也不要部署 `release/`、`public/` 或仓库根目录。
 
 ## 发布前验证
 
@@ -14,9 +17,16 @@ npm run build
 npx playwright install --with-deps chromium --only-shell
 TEST_SITE=dist TEST_PREFIX=/ npm run test:e2e
 TEST_SITE=dist TEST_PREFIX=/MetroChan/ npm run test:e2e
+npm run test:offline
 ```
 
-macOS 安装浏览器时可省略 `--with-deps`。两次端到端测试之间不要重新构建。视觉比对使用当前系统、同一浏览器渲染的原版和候选页；不要设置 `CAPTURE_BASELINE` 来处理失败。
+macOS 安装浏览器时可省略 `--with-deps`。两次网站验证和离线验证都使用同一次构建的产物。视觉比对使用当前系统、同一浏览器渲染的原版和候选页；不要设置 `CAPTURE_BASELINE` 来处理失败。
+
+## 下载离线版
+
+手动验证时，`upload_offline` 默认勾选。全部测试通过后，从该次 Actions 运行的 **Artifacts → MetroChan-offline** 下载压缩包，解压后打开其中的 HTML。产物保留 7 天，不创建 GitHub Release，也不发布网站。取消勾选只跳过上传，仍会测试离线文件。
+
+这是可复制的单文件快照，不是 PWA：无需先访问线上站点，也不依赖 Service Worker 缓存。更新时下载新版 HTML 替换旧文件；可安装的在线应用和缓存更新策略留待未来单独设计。
 
 ## Cloudflare Workers Builds（主站）
 
@@ -32,8 +42,8 @@ macOS 安装浏览器时可省略 `--with-deps`。两次端到端测试之间不
 ## GitHub Pages（手动备用）
 
 1. 如需启用备用站，仓库管理员先在 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**，而非 **Deploy from a branch**。无须设置自定义域名或改动主站 DNS。
-2. 在 **Actions → Verify MetroChan → Run workflow** 选择分支。默认 `deploy_pages=false`，只验证；推送和 PR 均不会触发此工作流。
-3. 真正需要发布时，选择 **main** 并显式勾选 **Deploy the tested dist to GitHub Pages (main only)**。其他分支或标签即使勾选也不会发布。两种路径均验证通过后，工作流才打包本次测试过的 `dist/`；部署作业不检出代码，也不再构建。
+2. 带 `workflow_dispatch` 的 `.github/workflows/verify.yml` 必须先存在于仓库的**默认分支**，才可在 **Actions → Verify MetroChan → Run workflow** 选择分支手动运行。默认 `deploy_pages=false`，不发布网站；推送和 PR 均不会触发此工作流。
+3. 真正需要发布时，选择 **main** 并显式勾选 **Deploy the tested dist to GitHub Pages (main only)**。其他分支或标签即使勾选也不会发布。两种网站路径和离线文件均验证通过后，工作流才打包本次测试过的 `dist/`；部署作业不检出代码，也不再构建。
 4. 从成功运行的 `github-pages` 环境打开部署 URL，确认 `/MetroChan/` 下四个标签页、线路图和票价数据正常。若验证失败，查看运行日志和 `regression-diagnostics`（有 Playwright 输出时）；失败不会替换当前站点。
 
 ## 安全回滚到重构前 v2
