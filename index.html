@@ -825,7 +825,7 @@
     </section>
 
     <section>
-      <h2>月度通勤成本估算 <span class="tag">按此站对 · 起始日 + 30 天窗口</span></h2>
+      <h2>月度通勤成本估算</h2>
       <div class="costbox calbox" id="calboxS2s">
         <div class="cal-group">
           <div class="cal-ttl">时间窗口</div>
@@ -1680,7 +1680,6 @@ function renderCostTable(container, km, rides, useDisc){
 /* ============ 共用：起始日 + 30 天日历成本区 ============ */
 /* 统一口径退票文案（逐字，见 spec C.3） */
 var REFUND_NOTE = '本版本不模拟退票，未计退票权益；实际退款规则以官方为准。';
-var GRAY_NOTE  = '灰行「不买卡」仅刷码/刷卡适用，按自然月累计、混合票价逐桶计算，超出 90 元的部分 9 折；计次票购买额不计入、溢出按全价。';
 
 /* 轻提示（页内 toast，不打断操作） */
 var _toastTimer = null;
@@ -1864,8 +1863,6 @@ function createCalController(cfg){
     evList = [];
     for(var kk=0; kk<=summary.N.length; kk++){ var ev=evaluate(summary,kk,state.pw,state.pn); ev.k=kk; evList.push(ev); }
     el('calFoot').innerHTML = '<div class="cal-foot">'
-      + '<div>'+GRAY_NOTE+'</div>'
-      + '<div>预计花费按主口径计算；更省的方案与前提见表下「省钱技巧」。</div>'
       + '<div class="cal-tip">'+REFUND_NOTE+'</div></div>';
     renderCurrent();
   }
