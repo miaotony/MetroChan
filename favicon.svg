@@ -1,4 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#c8102e"/>
-  <path d="M15 45V19h7.6l9.4 15.4L41.4 19H49v26h-7V32.2l-7.2 11.6h-5.6L22 32.2V45z" fill="#fff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">MetroChan</title>
+  <desc id="desc">A friendly metro train face on a rounded red app icon.</desc>
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F44338"/>
+      <stop offset=".55" stop-color="#EE322B"/>
+      <stop offset="1" stop-color="#D81924"/>
+    </linearGradient>
+    <radialGradient id="gloss" cx=".24" cy=".12" r=".82">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity=".22"/>
+      <stop offset=".55" stop-color="#FFFFFF" stop-opacity=".04"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="118" fill="url(#red)"/>
+  <rect width="512" height="512" rx="118" fill="url(#gloss)"/>
+  <g fill="none" stroke="#F7EFE6" stroke-width="32" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M169 425 193 382H161C141 382 127 368 127 348V207C127 151 159 113 215 113H297C353 113 385 151 385 207V348C385 368 371 382 351 382H319L343 425"/>
+  </g>
+  <path d="M183 170Q256 141 329 170" fill="none" stroke="#FFFFFF" stroke-opacity=".24" stroke-width="9" stroke-linecap="round"/>
+  <path d="M221 289Q256 312 291 289" fill="none" stroke="#F7EFE6" stroke-width="26" stroke-linecap="round"/>
+  <circle cx="211" cy="242" r="19" fill="#F7EFE6"/>
+  <circle cx="301" cy="242" r="19" fill="#F7EFE6"/>
 </svg>
