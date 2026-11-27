@@ -1,0 +1,46 @@
+.foot{margin-top:36px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px}
+.foot p{margin-bottom:4px}
+.foot a{color:var(--muted)}
+.foot a.sp-btn{color:inherit}
+.foot a.sp-star{color:#7a5200}
+.foot a.sp-issue{color:#0d4f8b}
+html[data-theme="dark"] .foot a.sp-issue{color:#8fc2ff}
+html[data-theme="dark"] .foot a.sp-star{color:#ffd666}
+.foot .disclaimer{margin-top:12px;padding:10px 14px;background:var(--red-bg);border:1px solid var(--red-line);
+  border-radius:9px;color:var(--red);font-size:13px;font-weight:600}
+.foot .disclaimer b{font-weight:800}
+.route-note{margin-top:12px;padding:9px 13px;background:var(--note-bg);border:1px solid var(--note-line);border-radius:9px;
+  font-size:12.5px;color:#8a6116;line-height:1.55}
+.foot .copyright{margin-top:12px;font-size:12.5px}
+
+.modal-mask{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:100;display:none;
+  align-items:center;justify-content:center;padding:20px}
+.modal-mask.open{display:flex}
+.modal{background:var(--surface);border-radius:16px;max-width:460px;width:100%;margin:auto;padding:26px 26px 22px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h3{font-size:17px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.modal p{font-size:14px;line-height:1.7;color:var(--ink);margin-bottom:10px}
+.modal p.small{font-size:12.5px;color:var(--muted)}
+.modal .modal-btn{display:block;width:100%;margin-top:14px;font:inherit;font-size:15px;font-weight:600;
+  color:#fff;background:var(--red);border:none;border-radius:10px;padding:11px 0;cursor:pointer}
+.modal .modal-btn:hover{opacity:.92}
+.modal .modal-check{display:flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);
+  margin-top:14px;cursor:pointer;user-select:none}
+.modal .modal-check input{accent-color:var(--red);width:15px;height:15px}
+.foot .copyright a{color:var(--red);text-decoration:none;font-weight:600}
+.foot .copyright a:hover{text-decoration:underline}
+.src a{color:var(--red)}
+.spoiler{filter:blur(5px);cursor:pointer;transition:filter .25s ease;border-radius:3px;
+  -webkit-user-select:none;user-select:none}
+.spoiler:hover,.spoiler:focus,.spoiler.revealed{filter:blur(0)}
+
+@media(max-width:640px){
+  .cards{grid-template-columns:1fr}
+  .card .price{font-size:27px}
+  header h1{font-size:26px}
+  .s2s-field{min-width:100%}
+  .th-full{display:none}
+  .th-short{display:inline}
+  table.cost th,table.cost td{padding:7px 6px;font-size:12px}
+  table.cost th{font-size:11.5px}
+}

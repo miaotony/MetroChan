@@ -1,0 +1,43 @@
+/* ---- 移动端：标签一行、下拉更宽 ---- */
+@media (max-width:600px){
+  section + section{margin-top:26px;padding-top:22px}
+  .tabs{gap:4px;margin-top:18px}
+  .tab{flex:1 1 0;min-width:0;padding:9px 2px;font-size:12.5px;white-space:nowrap;letter-spacing:-.02em}
+  .ep-selects{grid-template-columns:96px minmax(0,1fr);gap:7px}
+  .pick-btn{font-size:13.5px;padding:9px 10px}
+  .pick-panel{position:fixed;left:10px;right:10px;width:auto;min-width:0;max-width:none;
+    top:var(--pick-top,90px);max-height:min(60vh,420px);overflow-y:auto}
+  .s2s-grid{gap:10px}
+  .metromap svg{height:100%}
+}
+.foot a.lnk{color:var(--red);font-weight:600;text-decoration:none;border-bottom:1px dotted rgba(200,16,46,.45);transition:border-color .15s}
+.foot a.lnk:hover{border-bottom:1px solid var(--red)}
+
+/* ---- 地图 + 票价卡同排 ---- */
+.map-row{display:flex;gap:14px;align-items:stretch;margin-top:18px}
+.map-row .metromap{flex:1 1 auto;min-width:0;margin-top:0}
+.cards.mini{display:flex;flex-direction:column;gap:8px;flex:0 0 120px;margin-top:0}
+.cards.mini .card{padding:10px 12px;border-radius:10px;border-width:1px}
+.cards.mini .card .name{font-size:11.5px;line-height:1.35;font-weight:600}
+.cards.mini .card .price{font-size:23px;margin-top:4px;letter-spacing:-.02em}
+.cards.mini .card .price .u{font-size:11px;margin-left:1px}
+.cards.mini .card .delta{font-size:10.5px;margin-top:4px;line-height:1.3}
+@media (max-width:600px){
+  .map-row{gap:9px}
+  .cards.mini{flex:0 0 98px;gap:6px}
+  .cards.mini .card{padding:8px 9px;border-radius:9px}
+  .cards.mini .card .name{font-size:10.5px}
+  .cards.mini .card .price{font-size:19px}
+  .cards.mini .card .delta{font-size:9.5px}
+}
+
+/* ---- 改版详情强调 ---- */
+.ticket .tk-per b{color:var(--red);font-size:14.5px;font-weight:800;margin:0 1px}
+table.cmp td:first-child{color:var(--red);font-weight:800;font-size:15px}
+table.cmp td:nth-child(3){font-weight:700}
+table.cmp .dneg{font-weight:800;font-size:14.5px}
+#panel-change h3{margin-top:26px}
+#panel-change h3:first-child{margin-top:0}
+.share-bar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:30px}
+.share-opt{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none}
+.share-opt input{width:14px;height:14px;accent-color:var(--red);cursor:pointer}

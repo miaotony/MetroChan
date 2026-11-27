@@ -1,0 +1,23 @@
+/* ---- 改版详情：一页纸对比 ---- */
+.kv-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:12px;margin:4px 0 26px}
+.kv{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px}
+.kv-k{font-size:12.5px;color:var(--muted);font-weight:600}
+.kv-v{font-size:30px;font-weight:800;margin-top:6px;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.kv-v small{font-size:13px;font-weight:600;color:var(--muted);margin-left:3px}
+.kv-sub{font-size:12px;color:var(--muted);margin-top:7px}
+.kv-sub.down{color:#b3261e}
+.kv-sub.up{color:#2e7d32}
+table.cmp{width:100%;border-collapse:collapse;font-size:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+table.cmp th{font-size:12.5px;color:var(--muted);font-weight:600;text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);background:var(--th-bg)}
+table.cmp td{padding:10px 14px;border-bottom:1px solid #f0ece6;font-variant-numeric:tabular-nums}
+table.cmp tr:last-child td{border-bottom:0}
+table.cmp td:first-child{font-weight:700}
+.cmp .dneg{color:#b3261e;font-weight:600}
+.cmp .dzero{color:var(--muted)}
+.chg-cols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.chg-col{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px}
+.chg-col h3{margin:0 0 10px}
+.chg-col ul{list-style:none;padding:0;margin:0}
+.chg-col li{font-size:13.5px;line-height:1.75;padding-left:14px;position:relative;color:var(--ink)}
+.chg-col li:before{content:'';position:absolute;left:0;top:10px;width:5px;height:5px;border-radius:50%;background:#c9c4bb}
+@media(max-width:720px){ .chg-cols{grid-template-columns:1fr} table.cmp{font-size:13px} table.cmp th,table.cmp td{padding:9px 10px} }
