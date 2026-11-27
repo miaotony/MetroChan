@@ -7,10 +7,13 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/build-offline.mjs",
+    "build:web": "tsc --noEmit && vite build",
+    "build:offline": "tsc --noEmit && node scripts/build-offline.mjs",
     "preview": "vite preview",
     "test": "node --test tests/unit/*.test.mjs",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:offline": "playwright test --config playwright.offline.config.ts"
   },
   "dependencies": {
     "qrcode-generator": "1.4.4"
@@ -19,6 +22,7 @@
     "@playwright/test": "1.56.1",
     "@types/node": "^24.0.0",
     "@types/pngjs": "^6.0.5",
+    "parse5": "8.0.0",
     "pixelmatch": "7.1.0",
     "pngjs": "7.0.0",
     "typescript": "5.9.3",
