@@ -6,7 +6,7 @@
 
 🚇 **在线访问：<https://metrochan.miaotony.xyz/>**
 
-单文件静态页面（`index.html`），无构建依赖，下载后双击打开也能用。
+静态页面。完整的官方票价与路线查询需要通过 HTTP(S) 打开，以按需读取路径分片。
 
 ## 功能
 
@@ -51,14 +51,14 @@
 
 ```
 index.html              最终页面（数据内嵌，可直接部署 / GitHub Pages 托管）
-data/metro_data.json    线网数据：站点/边(站间距)/线路站序/拼音索引
+data/metro_data.json    唯一维护的线网数据：以线上页面实际解析的站点/边/线路站序/拼音索引为准
 data/stations.json      官方票价库索引（418 站）
 data/paths/*.json       官方站到站票价与路径分片（按起点站懒加载）
-data/map_xy.json        站点坐标（线路图用）
+data/map_geo.json       当前线路图使用的几何数据
 assets/wechat-reward.png 打赏二维码
 favicon.svg             站点图标
 og.png                  社交分享预览图（1200x630）
-scripts/                数据抓取与构建脚本
+scripts/                历史线网资料处理脚本（不生成站点页面）
 ```
 
 ## 计价说明
