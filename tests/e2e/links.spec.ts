@@ -1,7 +1,8 @@
 import { expect, test } from './fixtures';
 
 test('a distance QR link reopens the same panel and distance on this deployment', async ({ page }) => {
-  await page.goto('./?km=65#dist');
+  await page.goto('./?km=65');
+  await expect(page.locator('#panel-dist')).toBeVisible();
   await expect(page.locator('#kmNum')).toHaveValue('65');
   await page.locator('#qrBtn').click();
   const link = new URL(await page.locator('.qr-url').innerText());

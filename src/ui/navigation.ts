@@ -48,7 +48,9 @@ export function initNavigation(): void {
 
   function restoreTab(): void {
     const hash = location.hash.slice(1);
-    showTab(isTab(hash) ? hash : 's2s');
+    const params = new URLSearchParams(location.search);
+    const legacyDistance = !hash && params.has('km') && !params.has('from') && !params.has('to');
+    showTab(isTab(hash) ? hash : legacyDistance ? 'dist' : 's2s');
   }
   restoreTab();
   window.addEventListener('hashchange', restoreTab);
