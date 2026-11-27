@@ -1,4 +1,5 @@
-import { expect, test, type Locator, type Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
+import { expect, test } from './fixtures';
 import { routeCases, type RouteCase, type RoutePlan } from '../fixtures/routes';
 
 async function selectStation(page: Page, side: 'from' | 'to', station: string) {
