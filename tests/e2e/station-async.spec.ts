@@ -1,5 +1,21 @@
 import { expect, test } from './fixtures';
 
+test('a previous blur does not close search suggestions after the user refocuses', async ({ page }) => {
+  await page.goto('./');
+  await expect(page.locator('#routeResult .fare-big')).toBeVisible();
+  await page.clock.install();
+  const search = page.locator('#fromSearch');
+  await search.fill('人民广场');
+  await page.locator('#toSearch').focus();
+  await search.fill('滴水湖');
+  const match = page.locator('#fromSuggest').getByText('滴水湖', { exact: true });
+  await expect(match).toBeVisible();
+  await page.clock.runFor(250);
+  await expect(match).toBeVisible();
+  await match.click();
+  await expect(page.locator('#fromSelPick button')).toHaveText('滴水湖');
+});
+
 test('a late official route cannot replace a newly selected same-station result', async ({ page }) => {
   await page.goto('./');
   await expect(page.locator('#routeResult .fare-big')).toBeVisible();

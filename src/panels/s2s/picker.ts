@@ -215,7 +215,11 @@ export function createEndpoint(prefix: 'from' | 'to', defLine: string, defStatio
       });
     });
   });
-  search.addEventListener('blur', () => window.setTimeout(() => suggest.classList.remove('open'), 150));
+  let hideSuggestions: number | undefined;
+  search.addEventListener('focus', () => window.clearTimeout(hideSuggestions));
+  search.addEventListener('blur', () => {
+    hideSuggestions = window.setTimeout(() => suggest.classList.remove('open'), 150);
+  });
   search.addEventListener('keydown', event => {
     if (!suggestions.length) return;
     if (event.key === 'ArrowDown') highlighted = Math.min(suggestions.length - 1, highlighted + 1);

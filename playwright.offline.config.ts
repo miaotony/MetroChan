@@ -8,6 +8,7 @@ export default defineConfig({
     browserName: 'chromium',
     offline: true,
     serviceWorkers: 'block',
+    trace: 'retain-on-failure',
     viewport: { width: 1440, height: 900 },
     launchOptions: { executablePath: process.env.CHROME_BIN },
   },

@@ -56,8 +56,7 @@ async function selectPair(page: Page, pair: RouteCase) {
   for (const side of ['from', 'to'] as const) {
     const search = page.locator(`#${side}Search`);
     await search.fill(pair[side]);
-    await search.press('ArrowDown');
-    await search.press('Enter');
+    await page.locator(`#${side}Suggest`).getByText(pair[side], { exact: true }).click();
     await expect(page.locator(`#${side}SelPick button`)).toHaveText(pair[side]);
   }
 }
