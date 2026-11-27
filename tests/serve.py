@@ -32,7 +32,7 @@ if sys.argv[1] == 'original':
         subprocess.run(['tar', '-xf', '-', '-C', original], input=archive.stdout, check=True)
         serve(original, 4317, '/')
 else:
-    root = Path(os.environ.get('TEST_SITE', '.')).resolve()
+    root = Path(os.environ.get('TEST_SITE', 'dist')).resolve()
     if not (root / 'index.html').is_file():
         sys.exit(f'Missing {root}/index.html')
     serve(root, 4318, os.environ.get('TEST_PREFIX', '/'))

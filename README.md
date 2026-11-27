@@ -2,11 +2,11 @@
 
 上海地铁票价对比工具 · 老方案（2005 版）vs 新方案（2026-12-01 起执行），附听证方案一、二与八城横向对比
 
-![MetroChan 魔都地铁酱 — 上海地铁 2026.12 新票价：老方案 vs 新方案，站到站票价、通勤成本与八城横向对比](og.png)
+![MetroChan 魔都地铁酱 — 上海地铁 2026.12 新票价：老方案 vs 新方案，站到站票价、通勤成本与八城横向对比](public/og.png)
 
 🚇 **在线访问：<https://metrochan.miaotony.xyz/>**
 
-静态页面。完整的官方票价与路线查询需要通过 HTTP(S) 打开，以按需读取路径分片。
+开发使用 Node 24：`npm ci` 安装依赖，`npm run dev` 启动热更新。`npm run build` 生成可部署的 `dist/`，`npm run preview` 预览构建结果。仅发布 `dist/`，不直接发布源码。参见[部署说明](docs/deploy.md)和[测试说明](tests/README.md)。
 
 ## 功能
 
@@ -50,14 +50,11 @@
 ## 项目结构
 
 ```
-index.html              最终页面（数据内嵌，可直接部署 / GitHub Pages 托管）
+index.html              Vite 页面骨架（保留 SEO / 分享元信息）
+src/                    页面逻辑与样式
 data/metro_data.json    唯一维护的线网数据：以线上页面实际解析的站点/边/线路站序/拼音索引为准
-data/stations.json      官方票价库索引（418 站）
-data/paths/*.json       官方站到站票价与路径分片（按起点站懒加载）
-data/map_geo.json       当前线路图使用的几何数据
-assets/wechat-reward.png 打赏二维码
-favicon.svg             站点图标
-og.png                  社交分享预览图（1200x630）
+public/data/            线上原样提供的官方索引、路径分片、地图几何
+public/                 固定地址的分享预览图、图标和打赏图片
 scripts/                历史线网资料处理脚本（不生成站点页面）
 ```
 
@@ -79,4 +76,4 @@ scripts/                历史线网资料处理脚本（不生成站点页面�
 
 制作不易，如果这个页面对你有帮助，欢迎 Star ⭐ 或扫码投喂一下喵喵 🐱
 
-![扫码投喂喵喵](assets/wechat-reward.png)
+![扫码投喂喵喵](public/assets/wechat-reward.png)
