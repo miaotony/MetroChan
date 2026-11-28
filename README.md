@@ -2,7 +2,7 @@
 
 上海地铁票价对比工具 · 老方案（2005 版）vs 新方案（2026-12-01 起执行），附听证方案一、二与八城横向对比
 
-![MetroChan 魔都地铁酱 — 上海地铁 2026.12 新票价：老方案 vs 新方案，站到站票价、通勤成本与八城横向对比](og.png)
+![MetroChan 魔都地铁酱 — 上海地铁新票价（2026.12.01 起）：你的那一趟，现在就查。票价、路线、每月最省的买法，一页算清](og.png)
 
 🚇 **在线访问：<https://metrochan.miaotony.xyz/>**
 
@@ -59,7 +59,7 @@ data/paths/*.json       官方站到站票价与路径分片（按起点站懒�
 data/map_xy.json        站点坐标（线路图用）
 assets/wechat-reward.png 打赏二维码
 favicon.svg             站点图标
-og.png                  社交分享预览图（1200x630）
+og.png                  社交分享预览图（1200x630，与短片结尾同款，由 video/scripts/og.ts 生成）
 scripts/                数据抓取与构建脚本
 video/                  宣传短片的 Remotion 源码，成片在 video/out/MetroChanIntro.mp4
 ```

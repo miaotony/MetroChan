@@ -2,6 +2,7 @@ import React from "react";
 import { AbsoluteFill, useCurrentFrame } from "remotion";
 import { blinkAt, LogoIcon, TrainFace } from "../components/Logo";
 import { BaseNetwork, MapCamera } from "../components/NetworkMap";
+import { QrModules } from "../components/Qr";
 import { FACTS } from "../data";
 import { backOut, easeInOut, easeOut, lerp, pulse, tween } from "../lib/anim";
 import qr from "../qr.json";
@@ -15,22 +16,7 @@ const QR_SIZE = qr.size * 14;
 const QR_CARD = { x: 1300, y: 262, w: 492, h: 590 };
 const HOST = new URL(qr.url).host;
 
-/** Horizontal runs of dark modules, so the code renders as crisp bars. */
-const QR_RUNS = qr.rows.flatMap((row, y) => {
-  const runs: { x: number; y: number; w: number }[] = [];
-  let start = -1;
-  for (let x = 0; x <= row.length; x++) {
-    const on = row[x] === "1";
-    if (on && start < 0) start = x;
-    if (!on && start >= 0) {
-      runs.push({ x: start, y, w: x - start });
-      start = -1;
-    }
-  }
-  return runs;
-});
-
-const CHIPS = [
+export const CHIPS = [
   "开源在 GitHub",
   "不用登录，打开就用",
   `${FACTS.stations} 站 · ${FACTS.pairs.toLocaleString("en-US")} 个站对`,
@@ -361,16 +347,7 @@ export const Cta: React.FC = () => {
             </clipPath>
           </defs>
           <g clipPath="url(#cta-scan)">
-            {QR_RUNS.map((run) => (
-              <rect
-                key={`${run.x}-${run.y}`}
-                x={run.x}
-                y={run.y}
-                width={run.w}
-                height={1}
-                fill={C.ink}
-              />
-            ))}
+            <QrModules fill={C.ink} />
           </g>
         </svg>
         {scan > 0 && scan < 1 ? (

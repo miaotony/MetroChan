@@ -52,6 +52,7 @@ Regenerating the assets:
 ```bash
 bun run scripts/make_music.ts        # after changing timeline.ts or motion.ts
 bun run scripts/build_qr.ts          # after changing the site address
+bun run scripts/og.ts                # share card ../og.png, the closing frame at 1200×630
 python3 -m http.server 4173 --directory .. &
 bun run scripts/capture.ts           # after the page's look changes
 ```
@@ -68,9 +69,11 @@ gain reduction per bar, frames of the picture-locked sounds) and writes
 ## Files
 
 - `src/Film.tsx` — scene order and the audio track
+- `src/OgCard.tsx` — the closing frame reworked as the site's share card
 - `src/timeline.ts`, `src/motion.ts` — timing shared by picture and sound
 - `src/data.ts`, `src/theme.ts` — data, fare rules, colours and fonts
 - `src/scenes/` — `Hook`, `Title`, `StationToStation`, `Monthly`, `Distance`,
   `Anywhere`, `Cta`
 - `src/components/` — logo, cursor, network map, top bar, shared pieces
-- `scripts/` — `make_music.ts`, `stills.ts`, `capture.ts`, `build_qr.ts`
+- `scripts/` — `make_music.ts`, `stills.ts`, `capture.ts`, `build_qr.ts`,
+  `og.ts`
