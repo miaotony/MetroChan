@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { parse, serialize } from 'parse5';
 import { build } from 'vite';
 import { networkDefines } from './network-build.ts';
+import { qrImageUrl } from '../src/core/qr.ts';
 
 const root = new URL('../', import.meta.url);
 const read = (name, encoding) => readFile(new URL(name, root), encoding);
@@ -21,6 +22,7 @@ function append(parent, tagName, attributes, text) {
   node.attrs = Object.entries(attributes).map(([name, value]) => ({ name, value }));
   if (text !== undefined) node.childNodes.push({ nodeName: '#text', value: text, parentNode: node });
   parent.childNodes.push(node);
+  return node;
 }
 
 const scripts = elements.filter(node => node.tagName === 'script');
@@ -49,6 +51,15 @@ const head = elements.find(node => node.tagName === 'head');
 const body = elements.find(node => node.tagName === 'body');
 append(head, 'meta', { name: 'metrochan-offline', content: 'true' });
 append(head, 'style', {}, String(css.source));
+
+const canonicalLink = elements.find(node => node.tagName === 'link' && node.attrs.some(attr => attr.name === 'rel' && attr.value === 'canonical'));
+const homepage = canonicalLink?.attrs.find(attr => attr.name === 'href')?.value;
+assert.ok(homepage && new URL(homepage).protocol === 'https:', 'Expected an absolute HTTPS canonical URL');
+const fallback = append(elements.find(node => node.tagName === 'header'), 'noscript', {});
+append(fallback, 'p', {}, '此预览器未运行 JavaScript。可用浏览器打开文件离线查询，或扫码访问在线版。');
+const fallbackLink = append(fallback, 'a', { href: homepage, target: '_blank', rel: 'noopener noreferrer' }, '打开 MetroChan 在线版');
+append(fallbackLink, 'br', {});
+append(fallbackLink, 'img', { src: qrImageUrl(homepage), alt: '在线版首页二维码' });
 
 const publicRoot = fileURLToPath(new URL('public', root));
 const imageTypes = { '.svg': 'image/svg+xml', '.webp': 'image/webp', '.png': 'image/png' };

@@ -64,7 +64,7 @@ test('sharing includes optional station and ride parameters and restores the tri
   await openQR.click();
   const dialog = page.getByRole('dialog', { name: '二维码分享' });
   const shareText = dialog.locator('.qr-url');
-  await expect(dialog.locator('canvas')).toBeVisible();
+  await expect(dialog.getByRole('img', { name: '当前视图的分享二维码' })).toBeVisible();
   const shared = new URL(await shareText.innerText());
   expect(shared.origin).toBe(directory.origin);
   expect(shared.pathname).toBe(directory.pathname);

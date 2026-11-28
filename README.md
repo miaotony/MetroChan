@@ -9,7 +9,7 @@
 开发使用 Node 24：`npm ci` 安装依赖，`npm run dev` 启动热更新。`npm run build` 从同一套 TypeScript 源码生成两个产物：
 
 - **网站**：发布 `dist/`，`npm run preview` 可本地预览。官方路径按需加载，不随首屏打包。只要网站时运行 `npm run build:web`。
-- **离线文件**：将 `release/MetroChan-offline.html` 单独复制到其他电脑，用浏览器打开即可。地图、官方路径、图片和二维码都内置，无需启动服务。分享链接指向在线版，而不是本机文件地址。只做离线版时运行 `npm run build:offline`。
+- **离线文件**：用浏览器打开 `release/MetroChan-offline.html` 即可查询，无需网络或本地服务。分享二维码可扫码，也可点按；打开的是在线版的对应行程，不会泄露本机路径或附件地址。禁用脚本的文件预览器仅显示通往在线首页的备用码。只做离线版时运行 `npm run build:offline`。
 
 不要直接托管源码。Cloudflare 主站和 Pages 备用站的切换见[部署说明](docs/deploy.md)，回归验证见[测试说明](tests/README.md)。离线文件不是 PWA；添加到桌面、Service Worker 缓存与更新策略留待后续单独实现。
 

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { expect, test as base, type Page } from '@playwright/test';
+import qrcode from 'qrcode-generator';
 import { routeCases, type RouteCase } from '../fixtures/routes';
 
 const release = new URL('../../release/MetroChan-offline.html', import.meta.url);
@@ -114,17 +115,28 @@ test('the QR code and copied trip link share the canonical website, never the lo
   await page.getByRole('button', { name: '52 次 · 26 天往返' }).click();
   await page.getByRole('button', { name: '二维码', exact: true }).click();
   const dialog = page.getByRole('dialog', { name: '二维码分享' });
-  const canvas = dialog.locator('canvas');
-  await expect(canvas).toBeVisible();
-  const colors = await canvas.evaluate((image: HTMLCanvasElement) => {
-    const pixels = image.getContext('2d')!.getImageData(0, 0, image.width, image.height).data;
-    return new Set(new Uint32Array(pixels.buffer)).size;
-  });
-  expect(colors).toBeGreaterThan(1);
   const shared = new URL(await dialog.locator('.qr-url').innerText());
   expect(shared.origin + shared.pathname).toBe('https://metrochan.miaotony.xyz/');
   expect(shared.hash).toBe('#s2s');
   expect(Object.fromEntries(shared.searchParams)).toEqual({ from: pair.from, to: pair.to, rides: '52' });
+  const encoder = qrcode(0, 'M');
+  encoder.addData(shared.href);
+  encoder.make();
+  const modules = encoder.getModuleCount();
+  const image = dialog.getByRole('img', { name: '当前视图的分享二维码' });
+  const actual = await image.evaluate(async (element: HTMLImageElement, count) => {
+    await element.decode();
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = count + 8;
+    const context = canvas.getContext('2d')!;
+    context.imageSmoothingEnabled = false;
+    context.drawImage(element, 0, 0, canvas.width, canvas.height);
+    const rgba = context.getImageData(0, 0, canvas.width, canvas.height).data;
+    return Array.from({ length: canvas.width * canvas.height }, (_, index) => rgba[4 * index] === 0 ? '1' : '0').join('');
+  }, modules);
+  const expected = Array.from({ length: modules + 8 }, (_, row) => Array.from({ length: modules + 8 }, (_, col) =>
+    row >= 4 && col >= 4 && row < modules + 4 && col < modules + 4 && encoder.isDark(row - 4, col - 4) ? '1' : '0').join('')).join('');
+  expect(actual).toBe(expected);
   await dialog.getByRole('button', { name: '关闭' }).click();
 
   const clipboard = await page.evaluateHandle(() => {

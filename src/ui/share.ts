@@ -36,7 +36,8 @@ export function initShare(stations: Stations): void {
   const rides = byId<HTMLInputElement>('ridesS2s');
 
   function buildUrl(): string {
-    const base = location.protocol === 'file:'
+    const portable = document.querySelector('meta[name="metrochan-offline"]') !== null || !['https:', 'http:'].includes(location.protocol);
+    const base = portable
       ? document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href ?? 'https://metrochan.miaotony.xyz/'
       : location.origin + location.pathname;
     const url = new URL(base);
