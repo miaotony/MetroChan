@@ -6,6 +6,8 @@
 
 🚇 **在线访问：<https://metrochan.miaotony.xyz/>**
 
+https://github.com/user-attachments/assets/b283f053-b7ce-441b-8f2f-979c4e7f6616
+
 单文件静态页面（`index.html`），无构建依赖，下载后双击打开也能用。
 
 ## 功能
@@ -59,7 +61,19 @@ assets/wechat-reward.png 打赏二维码
 favicon.svg             站点图标
 og.png                  社交分享预览图（1200x630）
 scripts/                数据抓取与构建脚本
+video/                  宣传短片的 Remotion 源码，成片在 video/out/MetroChanIntro.mp4
 ```
+
+## 宣传短片
+
+🎬 **77 秒短片：[每一趟、每个月，都帮你算清楚 ▶](video/out/MetroChanIntro.mp4)** —— 站到站票价、月度通勤成本、「计次票 + 单程票」组合价，一遍看完。
+
+成片 76.8 秒、1920×1080，用 Remotion 制作，源码在 `video/`。
+
+- 30fps、100 BPM；配乐由脚本合成，与画面共用同一份时间轴，逐拍卡点
+- 7 个场景：改价引子、片头、站到站、月度通勤与组合价、按乘距、随身用（手机端、亮色 / 暗色、分享链接）、结尾二维码
+- 画面里的票价、里程、路径和线路图都由 `data/*.json` 按页面同一套计价规则算出；拖动滑块时数字实时重算
+- 重新渲染：`cd video && bun install && bun x remotion render MetroChanIntro out/MetroChanIntro.mp4`，更多说明见 `video/README.md`
 
 ## 计价说明
 
