@@ -7,6 +7,7 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { bundle } from "@remotion/bundler";
 import { renderStill, selectComposition } from "@remotion/renderer";
+import "./prepare-data";
 
 const frames = process.argv.slice(2).map(Number).filter(Number.isFinite);
 if (!frames.length) {

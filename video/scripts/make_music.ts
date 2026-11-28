@@ -12,14 +12,7 @@
 import { spawnSync } from "node:child_process";
 import { readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import {
-  bestPlanIndex,
-  fareNew,
-  fareOld,
-  meterFare,
-  monthlyPlans,
-  TRIP,
-} from "../src/data";
+import "./prepare-data";
 import { easeInOut, easeOut, tween } from "../src/lib/anim";
 import { kmAt, ridesAt } from "../src/motion";
 import {
@@ -40,6 +33,9 @@ import {
   TOTAL_BARS,
   TYPED,
 } from "../src/timeline";
+
+const { bestPlanIndex, fareNew, fareOld, meterFare, monthlyPlans, TRIP } =
+  await import("../src/data");
 
 const SR = 44100;
 const LENGTH = Math.round((DURATION / FPS) * SR);

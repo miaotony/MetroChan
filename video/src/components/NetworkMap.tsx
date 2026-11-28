@@ -5,7 +5,7 @@ export const MAP_W = 1000;
 export const MAP_H = 1400;
 
 /**
- * The real Shanghai network, drawn from data/map_geo.json.
+ * The real Shanghai network, drawn from data/official/map.bin.
  * `radius` grows the coloured lines outward from People's Square.
  */
 export const ColorNetwork: React.FC<{

@@ -20,29 +20,39 @@ Seven scenes, weighted towards what people come back for:
 
 ## Where the numbers come from
 
-Nothing on screen is typed in by hand.
-
-- `src/data.ts` reads the site's own `../data/*.json` and mirrors the fare
-  rules of `index.html`: fares, distances, routes, the map, station search and
-  the monthly plans are all computed from there.
+- `scripts/prepare-data.ts` uses the V2 station dictionary and the site's own
+  official decoder to read **one** block from `../data/official/routes/` and
+  look up 莘庄 → 陆家嘴. It uses the first official option and the site's route
+  helpers for the stops and distance. `../data/official/map.bin` supplies the
+  whole map: the film draws the network as well as the highlighted trip.
+  Only that trip and map are written to `generated/film.json` (Git-ignored).
+- `src/data.ts` combines this with `../data/metro_data.json` for station search
+  and line memberships, `../data/meta.json` for the snapshot facts,
+  and the site's distance-fare functions for the animated fare meter.
 - `src/timeline.ts` is the single source of timing and `src/motion.ts` holds
   the values of the two dragged sliders. The scenes and
   `scripts/make_music.ts` both import them, so each number that changes on
   screen has a sound on exactly that frame.
-- `src/qr.json` is built with the QR library the site ships and points to the
-  live site.
+- `src/qr.json` uses the site's `qrcode-generator` package and points to the live site.
 - `public/shots/` holds screenshots of the real page in both themes.
 
 ## Commands
 
+Run these from `video/`. The site build does not install or run Remotion.
+
 ```bash
-bun install
-bun run dev                          # Remotion Studio
-bun run lint                         # eslint + tsc
-bun run scripts/stills.ts 470 1152   # half-size stills of those frames in out/stills/
-bun x remotion render MetroChanIntro out/MetroChanIntro.mp4 \
-  --crf=17 --audio-bitrate=256k
+bun install --frozen-lockfile
+bun run dev               # Remotion Studio
+bun run typecheck         # TypeScript only
+bun run lint              # ESLint + typecheck
+bun run build             # bundle in out/bundle/
+bun run stills 470 1152   # half-size frames in out/stills/
+bun run render            # replace out/MetroChanIntro.mp4
 ```
+
+The commands that consume film data prepare it automatically, including the
+music and OG scripts. Before a raw `bun x remotion …` command, or after editing
+the official data while Studio is open, run `bun run prepare:data`.
 
 The finished film, `out/MetroChanIntro.mp4`, is checked in because the root
 README links to it. Everything else in `out/` is ignored by Git.
@@ -50,12 +60,20 @@ README links to it. Everything else in `out/` is ignored by Git.
 Regenerating the assets:
 
 ```bash
-bun run scripts/make_music.ts        # after changing timeline.ts or motion.ts
-bun run scripts/build_qr.ts          # after changing the site address
-bun run scripts/og.ts                # share card ../og.png, the closing frame at 1200×630
-python3 -m http.server 4173 --directory .. &
-bun run scripts/capture.ts           # after the page's look changes
+bun run music             # after changing timeline.ts or motion.ts
+bun run qr                # after changing the site address; requires npm ci at repo root
+bun run og                # native 1920×1008 share card in out/og.png
 ```
+
+The OG script never writes a site asset. Manually resize/compress the master
+to the published 1200×630 `../public/og.png` when ready.
+
+To refresh the site screenshots, run `npm ci`, `npm run build:web`, then
+`npm run preview -- --host 127.0.0.1 --port 4173 --strictPort` at the repo
+root. Alternatively, serve the **built `dist/`**, not the source tree, at
+`http://127.0.0.1:4173/`. In a second terminal in `video/`, run
+`bun run capture out/review-shots` to preview, or `bun run capture` to replace
+`public/shots/`. Capture waits for the official trip map before taking shots.
 
 ## Soundtrack
 
@@ -75,5 +93,4 @@ gain reduction per bar, frames of the picture-locked sounds) and writes
 - `src/scenes/` — `Hook`, `Title`, `StationToStation`, `Monthly`, `Distance`,
   `Anywhere`, `Cta`
 - `src/components/` — logo, cursor, network map, top bar, shared pieces
-- `scripts/` — `make_music.ts`, `stills.ts`, `capture.ts`, `build_qr.ts`,
-  `og.ts`
+- `scripts/` — data preparation, music, stills, capture, QR and OG exports
