@@ -24,9 +24,17 @@
     "typescript": "5.9.3"
   },
   "scripts": {
-    "dev": "remotionb studio",
-    "build": "remotionb bundle",
+    "prepare:data": "bun scripts/prepare-data.ts",
+    "dev": "bun run prepare:data && remotionb studio",
+    "build": "bun run prepare:data && remotionb bundle --out-dir=out/bundle",
+    "render": "bun run prepare:data && remotionb render MetroChanIntro out/MetroChanIntro.mp4 --crf=17 --audio-bitrate=256k",
+    "stills": "bun scripts/stills.ts",
+    "og": "bun scripts/og.ts",
+    "music": "bun scripts/make_music.ts",
+    "capture": "bun scripts/capture.ts",
+    "qr": "bun scripts/build_qr.ts",
     "upgrade": "remotionb upgrade",
-    "lint": "eslint src && tsc"
+    "typecheck": "bun run prepare:data && tsc --noEmit",
+    "lint": "eslint src && bun run typecheck"
   }
 }

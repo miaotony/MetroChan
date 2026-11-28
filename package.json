@@ -1,0 +1,32 @@
+{
+  "name": "metrochan",
+  "version": "2.0.0-dev",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24.0.0" },
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "build": "tsc --noEmit && vite build && node scripts/build-offline.mjs && node scripts/check-size.mjs",
+    "build:web": "tsc --noEmit && vite build && node scripts/check-size.mjs web",
+    "build:offline": "tsc --noEmit && node scripts/build-offline.mjs && node scripts/check-size.mjs offline",
+    "size": "node scripts/check-size.mjs",
+    "preview": "vite preview",
+    "test": "node --test tests/unit/*.test.mjs",
+    "test:e2e": "playwright test",
+    "test:offline": "playwright test --config playwright.offline.config.ts"
+  },
+  "dependencies": {
+    "qrcode-generator": "1.4.4"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "^24.0.0",
+    "@types/pngjs": "^6.0.5",
+    "parse5": "8.0.0",
+    "pixelmatch": "7.1.0",
+    "pngjs": "7.0.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.8"
+  }
+}

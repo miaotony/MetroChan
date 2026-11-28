@@ -1,25 +1,20 @@
 /**
  * Captures the real site (light + dark, desktop + phone) for the
- * "随身用" scene. Serve the repo root first:
+ * "随身用" scene. Start the site's Vite preview first:
  *
- *   python3 -m http.server 4173 --directory ..
- *   bun run scripts/capture.ts
+ *   (cd .. && npm run build:web && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort)
+ *   bun run capture
  */
-import { mkdir, readdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { openBrowser } from "@remotion/renderer";
 
 const ORIGIN = "http://127.0.0.1:4173/";
 const TRIP = { from: "莘庄", to: "陆家嘴", rides: 44 };
-const OUT = "public/shots";
-
-const shellRoot = "node_modules/.remotion/chrome-headless-shell";
-const [version] = await readdir(shellRoot);
-const executable = `${shellRoot}/${version}/mac-arm64/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
+const OUT = process.argv[2] ?? "public/shots";
 
 await mkdir(OUT, { recursive: true });
 
 const browser = await openBrowser("chrome", {
-  browserExecutable: executable,
   chromeMode: "headless-shell",
   chromiumOptions: { gl: "angle" },
 });
@@ -65,6 +60,15 @@ const setTheme = (theme: "light" | "dark") =>
     window.dispatchEvent(new Event("resize"));
   }, theme);
 
+const hasTripMap = () =>
+  page.evaluate(({ from, to }) => {
+    const ends = Array.from(
+      document.querySelectorAll("#routeResult .mstop.flag title"),
+      (node) => node.textContent,
+    );
+    return ends.includes(from) && ends.includes(to);
+  }, TRIP);
+
 const capture = async (
   name: string,
   viewport: { width: number; height: number; deviceScaleFactor: number },
@@ -72,7 +76,15 @@ const capture = async (
 ) => {
   await page.setViewport(viewport);
   await page.goto({ url, timeout: 30000 });
-  await wait(1800);
+  const deadline = Date.now() + 15000;
+  while (!(await hasTripMap())) {
+    if (Date.now() > deadline) {
+      throw new Error(
+        `No official trip map at ${url}; serve the Vite build, not the source tree.`,
+      );
+    }
+    await wait(100);
+  }
   for (const theme of ["light", "dark"] as const) {
     await setTheme(theme);
     await tidy();
@@ -81,11 +93,17 @@ const capture = async (
   }
 };
 
-await capture(
-  "desk",
-  { width: 1440, height: 900, deviceScaleFactor: 1.5 },
-  1240,
-);
-await capture("phone", { width: 390, height: 844, deviceScaleFactor: 2 }, 2140);
-
-await browser.close({ silent: true });
+try {
+  await capture(
+    "desk",
+    { width: 1440, height: 900, deviceScaleFactor: 1.5 },
+    1240,
+  );
+  await capture(
+    "phone",
+    { width: 390, height: 844, deviceScaleFactor: 2 },
+    2140,
+  );
+} finally {
+  await browser.close({ silent: true });
+}

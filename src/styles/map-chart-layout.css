@@ -1,0 +1,21 @@
+@media (max-width: 900px){
+  .map-row{flex-wrap:wrap;gap:10px}
+  .map-row .metromap{flex:1 0 100%;width:100%}
+  .map-row .cards.mini{flex:1 0 100%;flex-direction:row;gap:8px}
+  .map-row .cards.mini .card{flex:1 1 0;padding:9px 10px}
+  .map-row .cards.mini .card .price{font-size:21px}
+}
+
+.map-zoom{margin-left:auto;font:inherit;font-size:11.5px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:2px 8px;cursor:pointer}
+.map-zoom:hover{color:var(--ink);background:var(--hover-bg)}
+.metromap.zoom{position:fixed;inset:10px;z-index:200;aspect-ratio:auto !important;height:auto;border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.4)}
+.metromap.zoom svg{height:100%}
+.metromap.zoom .map-zoom{position:absolute;right:10px;top:36px;z-index:3;background:var(--surface)}
+body.map-zoom-open{overflow:hidden}
+
+html[data-theme="dark"] #chart,
+html[data-theme="dark"] #cityChart{filter:brightness(1.3) saturate(1.05)}
+@media (prefers-color-scheme: dark){
+  html:not([data-theme="light"]) #chart,
+  html:not([data-theme="light"]) #cityChart{filter:brightness(1.3) saturate(1.05)}
+}

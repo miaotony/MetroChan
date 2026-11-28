@@ -1,0 +1,19 @@
+/* 全屏地图查看器 */
+.mapv{position:fixed;inset:0;z-index:300;background:var(--map-bg);display:flex;flex-direction:column}
+.mapv-bar{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--muted)}
+.mapv-bar span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mapv-btn.on{background:var(--red);color:#fff;border-color:var(--red)}
+.mapv-btn{font:inherit;font-size:15px;min-width:40px;height:40px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--ink);cursor:pointer}
+.mapv-close{font:inherit;font-size:28px;line-height:1;width:46px;height:46px;border-radius:50%;border:none;background:var(--red);color:#fff;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.25);margin-left:4px}
+.mapv-stage{flex:1;position:relative;overflow:hidden;touch-action:none;cursor:grab}
+.mapv-stage:active{cursor:grabbing}
+.mapv-stage svg{width:100%;height:100%;display:block}
+/* 大图：全网站点 + 站名标签（屏幕空间避让，绝不重叠） */
+.mapv .netdots circle{fill:var(--surface);stroke:#b8b2aa}
+.mapv .netdots circle.tr{stroke:#5d5750}
+.mapv .mlabels text{fill:var(--ink);font-weight:500;paint-order:stroke;stroke:var(--map-bg);
+  stroke-width:3px;stroke-linejoin:round;stroke-linecap:round;pointer-events:none;user-select:none}
+.mapv .mlabels text.tr{font-weight:700}
+html[data-theme="dark"] .mapv .netdots circle{stroke:#6f6862}
+html[data-theme="dark"] .mapv .netdots circle.tr{stroke:#a49a8e}
+@media (max-width:600px){ .mapv-bar span{font-size:11.5px} .mapv-btn{min-width:38px;height:38px} }

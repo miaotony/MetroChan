@@ -2,13 +2,18 @@
 
 上海地铁票价对比工具 · 老方案（2005 版）vs 新方案（2026-12-01 起执行），附听证方案一、二与八城横向对比
 
-![MetroChan 魔都地铁酱 — 上海地铁新票价（2026.12.01 起）：你的那一趟，现在就查。票价、路线、每月最省的买法，一页算清](og.png)
+![MetroChan 魔都地铁酱 — 你的那一趟，现在就查：莘庄到陆家嘴的新旧票价、月度通勤组合价与扫码票根](public/og.png)
 
 🚇 **在线访问：<https://metrochan.miaotony.xyz/>**
 
 https://github.com/user-attachments/assets/b283f053-b7ce-441b-8f2f-979c4e7f6616
 
-单文件静态页面（`index.html`），无构建依赖，下载后双击打开也能用。
+开发使用 Node 24：`npm ci` 安装依赖，`npm run dev` 启动热更新。`npm run build` 从同一套 TypeScript 源码生成两个产物：
+
+- **网站**：发布 `dist/`，`npm run preview` 可本地预览。官方路径按需加载，不随首屏打包。只要网站时运行 `npm run build:web`。
+- **离线文件**：用浏览器打开 `release/MetroChan-offline.html` 即可查询，无需网络或本地服务。分享二维码可扫码，也可点按；打开的是在线版的对应行程，不会泄露本机路径或附件地址。禁用脚本的文件预览器仅显示通往在线首页的备用码。只做离线版时运行 `npm run build:offline`。
+
+不要直接托管源码。Cloudflare 主站和 Pages 备用站的切换见[部署说明](docs/deploy.md)，回归验证见[测试说明](tests/README.md)。离线文件不是 PWA；添加到桌面、Service Worker 缓存与更新策略留待后续单独实现。
 
 ## 功能
 
@@ -52,17 +57,16 @@ https://github.com/user-attachments/assets/b283f053-b7ce-441b-8f2f-979c4e7f6616
 ## 项目结构
 
 ```
-index.html              最终页面（数据内嵌，可直接部署 / GitHub Pages 托管）
-data/metro_data.json    线网数据：站点/边(站间距)/线路站序/拼音索引
-data/stations.json      官方票价库索引（418 站）
-data/paths/*.json       官方站到站票价与路径分片（按起点站懒加载）
-data/map_xy.json        站点坐标（线路图用）
-assets/wechat-reward.png 打赏二维码
-favicon.svg             站点图标
-og.png                  社交分享预览图（1200x630，与短片结尾同款，由 video/scripts/og.ts 生成）
-scripts/                数据抓取与构建脚本
-video/                  宣传短片的 Remotion 源码，成片在 video/out/MetroChanIntro.mp4
+index.html              Vite 页面骨架（保留 SEO / 分享元信息）
+src/                    页面逻辑与样式
+data/metro_data.json    唯一维护的线网数据：以线上页面实际解析的站点/边/线路站序/拼音索引为准
+data/official/          官方站点字典、无损压缩的路径与地图；见下文维护说明
+public/                 固定地址的分享预览图、图标和打赏图片
+scripts/                数据转换、离线构建及历史线网资料处理脚本
+video/                  独立的 Remotion 宣传短片项目，不进入网站或离线包
 ```
+
+官方数据的导出、更新、校验和格式说明见[数据维护](docs/data.md)。网站按查询下载带内容哈希的数据块；单文件使用同一组字节，不需要首次联网。请使用同时支持 ES2022 和 `DecompressionStream('gzip')` 的现代浏览器（如 Safari / iOS 16.4+、Firefox 113+、Chrome / Edge 107+）。
 
 ## 宣传短片
 
@@ -72,8 +76,7 @@ video/                  宣传短片的 Remotion 源码，成片在 video/out/Me
 
 - 30fps、100 BPM；配乐由脚本合成，与画面共用同一份时间轴，逐拍卡点
 - 7 个场景：改价引子、片头、站到站、月度通勤与组合价、按乘距、随身用（手机端、亮色 / 暗色、分享链接）、结尾二维码
-- 画面里的票价、里程、路径和线路图都由 `data/*.json` 按页面同一套计价规则算出；拖动滑块时数字实时重算
-- 重新渲染：`cd video && bun install && bun x remotion render MetroChanIntro out/MetroChanIntro.mp4`，更多说明见 `video/README.md`
+- 画面中的莘庄至陆家嘴算例使用网站的线网与官方数据；重新生成素材、短片或发布分享图，见[短片制作说明](video/README.md)。
 
 ## 计价说明
 
@@ -93,4 +96,4 @@ video/                  宣传短片的 Remotion 源码，成片在 video/out/Me
 
 制作不易，如果这个页面对你有帮助，欢迎 Star ⭐ 或扫码投喂一下喵喵 🐱
 
-![扫码投喂喵喵](assets/wechat-reward.png)
+![扫码投喂喵喵](public/assets/wechat-reward.webp)

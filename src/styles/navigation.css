@@ -1,0 +1,41 @@
+/* ---- 导航：桌面左侧栏（tab + 复制链接），移动端顶部吸顶 ---- */
+.share-opt{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer;user-select:none}
+body:not([data-tab="s2s"]) .share-opt{display:none !important}
+@media (min-width: 1000px){
+  .wrap{display:grid;grid-template-columns:150px minmax(0,1fr);column-gap:30px;max-width:1180px}
+  header{grid-column:1 / -1}
+  .sidenav{grid-column:1;grid-row:2 / span 14;position:sticky;top:20px;align-self:start}
+  .tabs{display:flex;flex-direction:column;gap:2px;margin-top:6px;border-bottom:0;border-right:1px solid var(--line);padding-right:11px}
+  .tab{width:100%;text-align:left;padding:8px 11px;border-radius:8px;border-bottom:0;margin-bottom:0;font-size:14px;transition:background .15s,color .15s}
+  .tab:hover{background:var(--hover-bg);color:var(--ink)}
+  .tab.active{background:var(--red-bg);color:var(--red);border-bottom-color:transparent}
+  .share-bar{display:flex;flex-direction:column;align-items:stretch;gap:8px;margin-top:24px;padding:20px 11px 0 0;border-top:1px solid var(--line);border-right:1px solid var(--line)}
+  .share-btn{width:100%;justify-content:center;font-size:12.5px;padding:9px 6px;white-space:nowrap;gap:4px}
+  .panel,.support,.foot{grid-column:2}
+  .panel{margin-top:8px}
+}
+@media (max-width: 999px){
+  .sidenav{display:contents}
+  .tabs{position:sticky;top:0;z-index:60;background:var(--bg);margin:18px -20px 0;padding:7px 20px 0;
+    border-bottom:1px solid var(--line);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex:0 0 auto;padding:9px 15px;font-size:14px;white-space:nowrap}
+  .share-bar{margin-top:12px}
+}
+
+.to-top{position:fixed;right:16px;bottom:22px;width:44px;height:44px;border-radius:50%;border:1px solid var(--border);
+  background:var(--surface);color:var(--ink);font-size:18px;line-height:1;cursor:pointer;z-index:79;
+  box-shadow:0 6px 18px rgba(0,0,0,.12);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;transform:translateY(6px)}
+.to-top.on{opacity:1;pointer-events:auto;transform:none}
+.to-top:hover{background:var(--hover-bg)}
+@media (max-width:900px){.tip-fab{bottom:78px} .chartbox{padding:11px 12px} .legend{gap:10px;font-size:12px}}
+/* 移动端：复制链接 / 二维码 悬浮按钮（与打赏同款圆形，右下角堆叠） */
+.mfab{position:fixed;right:16px;bottom:134px;z-index:81;display:none;flex-direction:column;gap:8px}
+.mfab-btn{width:46px;height:46px;border-radius:50%;border:1px solid var(--border);background:var(--surface);
+  color:var(--ink);font-size:19px;line-height:1;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.14);
+  display:flex;align-items:center;justify-content:center;padding:0}
+.mfab-btn:active{transform:scale(.94)}
+.share-btn .qr-ico{display:block;flex:none;width:16px;height:16px}
+.mfab-btn .qr-ico{display:block;flex:none;width:22px;height:22px}
+@media (max-width:999px){ .mfab{display:flex} .share-bar{display:none} }
+@media (min-width:901px) and (max-width:999px){ .mfab{bottom:78px} }

@@ -1,0 +1,18 @@
+/* ---- 改版详情：票种 ---- */
+.ticket-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(142px,1fr));gap:12px;margin-top:14px}
+.ticket{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 15px}
+.ticket .tk-name{font-size:12.5px;color:var(--muted);font-weight:600}
+.ticket .tk-price{font-size:26px;font-weight:800;margin-top:4px;font-variant-numeric:tabular-nums}
+.ticket .tk-price small{font-size:12px;color:var(--muted);font-weight:600;margin-left:2px}
+.ticket .tk-per{font-size:12px;color:var(--muted);margin-top:4px}
+table td.up{color:var(--red);font-weight:600}
+table td.down{color:#2e7d32;font-weight:600}
+table td.eq{color:var(--muted)}
+
+/* ---- 听证方案开关 / 次数滑块 ---- */
+.hearing-toggle{margin-top:10px;display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--muted);cursor:pointer}
+.legend .hearing-toggle{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.legend .lg-hearing{display:none}
+body.show-hearing .legend .lg-hearing{display:inline-flex;align-items:center}
+.rides-range{width:170px;height:20px;accent-color:var(--red);vertical-align:middle;cursor:pointer}
+@media (max-width:560px){ .rides-range{width:130px} }

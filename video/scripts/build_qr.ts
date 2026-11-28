@@ -1,10 +1,10 @@
 /**
- * Builds src/qr.json with the same QR library the site ships
- * (assets/qrcode.min.js), so the code in the film is the real, scannable one.
+ * Builds src/qr.json with the site's installed qrcode-generator package.
  *
  *   bun run scripts/build_qr.ts
  */
-import { readFile, writeFile } from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
+import { createRequire } from "node:module";
 
 const SITE_URL = "https://metrochan.miaotony.xyz/";
 
@@ -15,16 +15,10 @@ type QrCode = {
   isDark: (row: number, col: number) => boolean;
 };
 
-const source = await readFile(
-  new URL("../../assets/qrcode.min.js", import.meta.url),
-  "utf8",
+const requireSite = createRequire(
+  new URL("../../package.json", import.meta.url),
 );
-const factory = new Function(`${source}\nreturn qrcode;`)() as (
-  typeNumber: number,
-  level: string,
-) => QrCode;
-
-const qr = factory(0, "M");
+const qr: QrCode = requireSite("qrcode-generator")(0, "M");
 qr.addData(SITE_URL);
 qr.make();
 

@@ -1,73 +1,25 @@
-/**
- * Everything the film shows is computed from the site's own data files and
- * the same fare rules as index.html — no numbers are typed in by hand.
- */
-import geoJson from "../../data/map_geo.json";
-import metaJson from "../../data/meta.json";
+import META from "../../data/meta.json";
 import metroJson from "../../data/metro_data.json";
-import originPathsJson from "../../data/paths/0.json";
-import stationsJson from "../../data/stations.json";
+import {
+  fareCurrent as fareOld,
+  fareFinal as fareNew,
+} from "../../src/core/fares";
+import type { Network } from "../../src/data/network-codec";
+import type { MapGeometry } from "../../src/data/official";
+import film from "../generated/film.json";
 import { LINE_COLORS } from "./theme";
 
 export type Pt = [number, number];
 
-type OfficialPair = {
-  p: number;
-  r: { n: string; opts: { desc: string; min: number; tr: number }[] }[];
-};
+const { trip } = film;
+const GEO = film.map as unknown as MapGeometry;
+const METRO: Network = metroJson;
 
-const GEO = geoJson as unknown as {
-  st: Record<string, Pt>;
-  base: string[];
-  seg: Record<string, string>;
-};
-const METRO = metroJson as unknown as {
-  stations: Record<string, string[]>;
-  edges: { a: string; b: string; d: number; l: string }[];
-  lines: Record<string, string[]>;
-  py: Record<string, [string, string]>;
-};
-const STATION_INDEX = (
-  stationsJson as unknown as { index: Record<string, number> }
-).index;
-const ORIGIN_PATHS = originPathsJson as unknown as Record<string, OfficialPair>;
-const META = metaJson as unknown as {
-  stations: number;
-  pairs_filled: number;
-  generated_at: string;
-  policy_effective: string;
-};
-
-export const HERO_FROM = "莘庄";
-export const HERO_TO = "陆家嘴";
 export const MAP_CENTER = "人民广场";
 
-if (STATION_INDEX[HERO_FROM] !== 0) {
-  throw new Error("data/paths/0.json no longer belongs to the hero origin");
-}
+/* ---------- fare rules ---------- */
 
-/* ---------- fare rules (mirrors index.html) ---------- */
-
-export const fareOld = (km: number) =>
-  km <= 6 ? 3 : 3 + Math.ceil((km - 6) / 10);
-
-const NEW_TIERS: [number, number][] = [
-  [4, 3],
-  [8, 4],
-  [12, 5],
-  [16, 6],
-  [23, 7],
-  [30, 8],
-  [40, 9],
-  [50, 10],
-];
-
-export const fareNew = (km: number) => {
-  for (const [limit, price] of NEW_TIERS) {
-    if (km <= limit) return price;
-  }
-  return 10 + Math.ceil((km - 50) / 15);
-};
+export { fareOld, fareNew };
 
 export const PASSES = [
   { rides: 35, price: 190 },
@@ -290,51 +242,6 @@ export const NETWORK = buildNetwork();
 
 /* ---------- the hero trip, straight from the official fare table ---------- */
 
-const parseOfficialPath = (desc: string) => {
-  const legs: { line: string; from: string; to: string }[] = [];
-  let previous = "";
-  for (const rawPart of desc.replace(/[。\s]+$/, "").split(/[，,]/)) {
-    const part = rawPart.trim().replace(/^(出站)?换乘/, "");
-    const match = part.match(/^(.+?线)(.*?)至(.+)$/);
-    if (!match) continue;
-    const from = (match[2] || previous).trim();
-    const to = match[3].trim();
-    legs.push({ line: match[1].trim(), from, to });
-    previous = to;
-  }
-  return legs;
-};
-
-const lineSlice = (line: string, from: string, to: string) => {
-  const adjacency: Record<string, string[]> = {};
-  const link = (a: string, b: string) => {
-    (adjacency[a] ??= []).push(b);
-    (adjacency[b] ??= []).push(a);
-  };
-  for (const edge of METRO.edges) {
-    if (edge.l === line) link(edge.a, edge.b);
-  }
-  const order = METRO.lines[line] ?? [];
-  for (let i = 0; i < order.length - 1; i++) link(order[i], order[i + 1]);
-  const previous: Record<string, string | null> = { [from]: null };
-  const queue = [from];
-  while (queue.length) {
-    const node = queue.shift() as string;
-    if (node === to) break;
-    for (const next of adjacency[node] ?? []) {
-      if (!(next in previous)) {
-        previous[next] = node;
-        queue.push(next);
-      }
-    }
-  }
-  const stations: string[] = [];
-  for (let node: string | null = to; node; node = previous[node] ?? null) {
-    stations.unshift(node);
-  }
-  return stations;
-};
-
 const legGeometry = (line: string, stations: string[]) => {
   const pts: Pt[] = [];
   /** Length along the leg at which each station sits. */
@@ -354,37 +261,11 @@ const legGeometry = (line: string, stations: string[]) => {
   return { pts, marks };
 };
 
-const shortestKm = (from: string, to: string) => {
-  const neighbours: Record<string, { to: string; w: number }[]> = {};
-  for (const edge of METRO.edges) {
-    (neighbours[edge.a] ??= []).push({ to: edge.b, w: edge.d });
-    (neighbours[edge.b] ??= []).push({ to: edge.a, w: edge.d });
-  }
-  const dist: Record<string, number> = { [from]: 0 };
-  const queue: [number, string][] = [[0, from]];
-  while (queue.length) {
-    queue.sort((x, y) => x[0] - y[0]);
-    const [d, node] = queue.shift() as [number, string];
-    if (node === to) return d / 1000;
-    if (d > (dist[node] ?? Infinity)) continue;
-    for (const next of neighbours[node] ?? []) {
-      const nd = d + next.w;
-      if (nd < (dist[next.to] ?? Infinity)) {
-        dist[next.to] = nd;
-        queue.push([nd, next.to]);
-      }
-    }
-  }
-  return 0;
-};
-
 const buildTrip = () => {
-  const official = ORIGIN_PATHS[String(STATION_INDEX[HERO_TO])];
-  const option = official.r[0].opts[0];
-  const rawLegs = parseOfficialPath(option.desc).map((leg) => {
-    const stations = lineSlice(leg.line, leg.from, leg.to);
-    return { ...leg, stations, ...legGeometry(leg.line, stations) };
-  });
+  const rawLegs = trip.legs.map((leg) => ({
+    ...leg,
+    ...legGeometry(leg.line, leg.stations),
+  }));
   const total = rawLegs.reduce((sum, leg) => sum + polyLength(leg.pts), 0);
   let offset = 0;
   const legs = rawLegs.map((leg) => {
@@ -408,17 +289,7 @@ const buildTrip = () => {
       stationT: leg.marks.map((mark) => t0 + mark / total),
     };
   });
-  const km = shortestKm(HERO_FROM, HERO_TO);
-  return {
-    from: HERO_FROM,
-    to: HERO_TO,
-    fare: official.p,
-    oldFare: fareOld(km),
-    km,
-    minutes: option.min,
-    transfers: option.tr,
-    legs,
-  };
+  return { ...trip, oldFare: fareOld(trip.km), legs };
 };
 
 export const TRIP = buildTrip();
@@ -446,6 +317,6 @@ export const meterFare = (t: number) =>
   t >= 1 ? TRIP.fare : fareNew(Math.max(0.1, t * TRIP.km));
 
 /** 0–1 positions at which the meter steps up to the next fare tier. */
-export const METER_STEPS = NEW_TIERS.map(([limit]) => limit / TRIP.km).filter(
-  (t) => t < 1,
-);
+export const METER_STEPS = META.tiers
+  .map(([limit]) => limit / TRIP.km)
+  .filter((t) => t < 1);

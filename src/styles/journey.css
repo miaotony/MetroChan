@@ -1,0 +1,39 @@
+/* ---- 站到站：官方实测结果 ---- */
+.fare-head{display:flex;align-items:center;gap:20px;padding:20px 0 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.fare-meta{display:flex;flex-direction:column;justify-content:center}
+.fare-big{font-size:46px;font-weight:800;line-height:1;letter-spacing:-.02em;color:var(--red);font-variant-numeric:tabular-nums}
+.fare-big .u{font-size:16px;font-weight:600;margin-left:5px;color:var(--muted);letter-spacing:0}
+.fare-big.est{color:#b8b4ac;font-size:34px}
+.fare-meta .fm-1{font-size:15px;font-weight:700;color:var(--ink)}
+.fare-meta .fm-2{font-size:13px;color:var(--muted);margin-top:5px;line-height:1.6}
+.jny{margin:18px 0 4px}
+.jny-stop{display:flex;align-items:center;gap:9px;padding:3px 0}
+.jny-dot{width:11px;height:11px;border-radius:50%;background:var(--c,#888);box-shadow:0 0 0 3px var(--surface);position:relative;z-index:1;flex:none;margin-left:1px}
+.jny-dot.end{background:var(--surface);border:3px solid var(--c,#888);width:11px;height:11px;box-shadow:none}
+.jny-name{font-size:15px;font-weight:650}
+.jny-badge{font-size:11px;padding:1px 7px;border:1px solid var(--border);border-radius:3px;color:var(--muted);background:var(--bg)}
+.jny-badge.walk{background:#fff4e6;color:#b06500;border:1px solid rgba(176,101,0,.25)}
+.jny-tagline{font-size:11px;color:#a8a49c}
+.jny-leg{display:grid;grid-template-columns:13px 1fr;gap:0 9px;cursor:pointer;padding:1px 0}
+.jny-leg:focus-visible{outline:2px solid var(--red);outline-offset:2px;border-radius:4px}
+.jny-line{grid-row:1/3;justify-self:center;width:3px;background:var(--c,#888);border-radius:2px;min-height:36px}
+.jny-info{display:flex;align-items:center;gap:9px;font-size:12.5px;color:var(--muted);padding:3px 0}
+.jny-chip{background:var(--c,#888);color:#fff;font-size:11.5px;font-weight:700;padding:1px 7px;border-radius:3px;line-height:1.6;white-space:nowrap}
+.jny-hops,.jny-time{color:var(--muted)}
+.jny-more{margin-left:auto;font-size:11.5px;color:#a8a49c;border-bottom:1px dotted #c9c5bd;padding-bottom:1px}
+.jny-leg.open .jny-more{color:var(--red);border-color:var(--red)}
+.jny-stations{grid-column:2;display:none;font-size:12.5px;color:var(--muted);line-height:1.9;padding:1px 0 7px 2px}
+.jny-leg.open .jny-stations{display:block}
+.plan-switch{display:flex;gap:8px;margin:14px 0 0;flex-wrap:wrap}
+.plan-btn{font:inherit;font-size:12.5px;padding:5px 12px;border:1px solid var(--border);background:var(--surface);border-radius:4px;color:var(--muted);cursor:pointer}
+.plan-btn:hover{border-color:#cfcac1}
+.plan-btn.active{border-color:var(--red);color:var(--red);font-weight:700;background:var(--red-bg)}
+.fare-foot{margin-top:16px;font-size:11.5px;color:#a8a49c;line-height:1.8}
+.fare-foot .src{color:var(--muted)}
+.fare-foot .sep{margin:0 5px;color:#ddd8d0}
+.delta.down{color:#2f8f6b}
+@media (max-width:720px){
+  .fare-big{font-size:38px}
+  .fare-head{gap:12px}
+  .jny-more{font-size:11px}
+}

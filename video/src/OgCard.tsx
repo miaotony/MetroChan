@@ -10,7 +10,6 @@ import { CHIPS } from "./scenes/Cta";
 import { C, F } from "./theme";
 import { RIDES } from "./timeline";
 
-/** Drawn on the film's grid; `scripts/og.ts` exports it at 1200×630. */
 export const OG = { width: 1920, height: 1008 } as const;
 
 const LEFT = 128;
