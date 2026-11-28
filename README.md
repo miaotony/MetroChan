@@ -83,4 +83,4 @@ scripts/                数据转换、离线构建及历史线网资料处理�
 
 制作不易，如果这个页面对你有帮助，欢迎 Star ⭐ 或扫码投喂一下喵喵 🐱
 
-![扫码投喂喵喵](public/assets/wechat-reward.png)
+![扫码投喂喵喵](public/assets/wechat-reward.webp)

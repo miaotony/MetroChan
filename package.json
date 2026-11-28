@@ -7,9 +7,10 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc --noEmit",
-    "build": "tsc --noEmit && vite build && node scripts/build-offline.mjs",
-    "build:web": "tsc --noEmit && vite build",
-    "build:offline": "tsc --noEmit && node scripts/build-offline.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/build-offline.mjs && node scripts/check-size.mjs",
+    "build:web": "tsc --noEmit && vite build && node scripts/check-size.mjs web",
+    "build:offline": "tsc --noEmit && node scripts/build-offline.mjs && node scripts/check-size.mjs offline",
+    "size": "node scripts/check-size.mjs",
     "preview": "vite preview",
     "test": "node --test tests/unit/*.test.mjs",
     "test:e2e": "playwright test",

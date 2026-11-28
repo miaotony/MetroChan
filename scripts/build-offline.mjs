@@ -4,6 +4,7 @@ import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse, serialize } from 'parse5';
 import { build } from 'vite';
+import { networkDefines } from './network-build.ts';
 
 const root = new URL('../', import.meta.url);
 const read = (name, encoding) => readFile(new URL(name, root), encoding);
@@ -33,6 +34,7 @@ const bundles = await build({
   root: fileURLToPath(root),
   configFile: false,
   publicDir: false,
+  define: networkDefines(),
   build: {
     write: false, target: 'es2022', modulePreload: false, cssCodeSplit: false,
     lib: { entry: fileURLToPath(new URL(`.${entryPath}`, root)), name: 'MetroChan', formats: ['iife'] },
@@ -49,7 +51,10 @@ append(head, 'meta', { name: 'metrochan-offline', content: 'true' });
 append(head, 'style', {}, String(css.source));
 
 const publicRoot = fileURLToPath(new URL('public', root));
-const imageTypes = { '.svg': 'image/svg+xml', '.png': 'image/png' };
+const imageTypes = { '.svg': 'image/svg+xml', '.webp': 'image/webp', '.png': 'image/png' };
+const images = elements.filter(node => node.tagName === 'img');
+const firstImage = new Map();
+const copies = [];
 for (const node of elements) {
   const rel = node.attrs.find(attr => attr.name === 'rel')?.value;
   const key = node.tagName === 'img' ? 'src' : node.tagName === 'link' && ['icon', 'apple-touch-icon'].includes(rel) ? 'href' : null;
@@ -57,10 +62,19 @@ for (const node of elements) {
   if (!attr) continue;
   const file = resolve(publicRoot, attr.value);
   assert.ok(file.startsWith(publicRoot + sep) && imageTypes[extname(file)], `Unsupported offline image: ${attr.value}`);
+  if (node.tagName === 'img') {
+    const index = images.indexOf(node);
+    if (firstImage.has(file)) {
+      node.attrs = node.attrs.filter(attribute => attribute !== attr);
+      copies.push(`document.images[${index}].src=document.images[${firstImage.get(file)}].src;`);
+      continue;
+    }
+    firstImage.set(file, index);
+  }
   attr.value = `data:${imageTypes[extname(file)]};base64,${(await readFile(file)).toString('base64')}`;
 }
 
-append(body, 'script', {}, js.code.replace(/<\/script/gi, '<\\/script'));
+append(body, 'script', {}, copies.join('') + js.code.replace(/<\/script/gi, '<\\/script'));
 const target = new URL('../release/', import.meta.url);
 await mkdir(target, { recursive: true });
 const html = serialize(page);

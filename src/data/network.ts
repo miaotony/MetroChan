@@ -1,10 +1,9 @@
 import deployed from '../../data/metro_data.json' with { type: 'json' };
+import { unpackNetwork, type Network } from './network-codec.ts';
 
-export interface Network {
-  stations: Record<string, string[]>;
-  edges: { a: string; b: string; d: number; l: string }[];
-  lines: Record<string, string[]>;
-  py: Record<string, string[]>;
-}
+export type { Network } from './network-codec.ts';
 
-export const METRO_DATA: Network = deployed;
+declare const __PACKED_NETWORK__: string;
+
+export const METRO_DATA: Network = typeof __PACKED_NETWORK__ === 'string'
+  ? unpackNetwork(__PACKED_NETWORK__) : deployed;

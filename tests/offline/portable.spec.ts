@@ -61,6 +61,26 @@ async function selectPair(page: Page, pair: RouteCase) {
   }
 }
 
+test('both offline reward images decode to the original 432×432 pixels', async ({ portable: page }) => {
+  const images = page.getByRole('img', { name: '微信打赏二维码', exact: true });
+  await expect(images).toHaveCount(2);
+  for (const image of await images.all()) {
+    await image.scrollIntoViewIfNeeded();
+    const digest = await image.evaluate(async (element: HTMLImageElement) => {
+      await element.decode();
+      const canvas = document.createElement('canvas');
+      canvas.width = element.naturalWidth;
+      canvas.height = element.naturalHeight;
+      const context = canvas.getContext('2d')!;
+      context.drawImage(element, 0, 0);
+      const rgba = context.getImageData(0, 0, canvas.width, canvas.height).data;
+      const hash = new Uint8Array(await crypto.subtle.digest('SHA-256', rgba));
+      return [canvas.width, canvas.height, Array.from(hash, byte => byte.toString(16).padStart(2, '0')).join('')];
+    });
+    expect(digest).toEqual([432, 432, '84db26c9cc0f4748d27405127652dd3cb729c9cfabd422ad227d8f30d8e846af']);
+  }
+});
+
 test('unseen direct, transfer and long routes show official prices, recommendations and maps', async ({ portable: page }) => {
   const result = page.locator('#routeResult');
   for (const pair of [routeCases.direct, routeCases.transfer, routeCases.long]) {
