@@ -5,13 +5,17 @@ import test from 'node:test';
 import { gunzipSync } from 'node:zlib';
 import { decodeRouteBlock } from '../../src/data/route-pack.ts';
 
-const publicData = new URL('../../public/data/', import.meta.url);
-const routeBlocks = new URL('../../data/official/routes/', import.meta.url);
+const officialData = new URL('../../data/official/', import.meta.url);
 const originCount = 417;
 const blockSize = 16;
 
-async function readJson(name) {
-  return JSON.parse(await readFile(new URL(name, publicData), 'utf8'));
+async function readStations() {
+  return JSON.parse(await readFile(new URL('stations.json', officialData), 'utf8'));
+}
+
+async function readGeometry() {
+  const compressed = await readFile(new URL('map.bin', officialData));
+  return JSON.parse(gunzipSync(compressed).toString('utf8'));
 }
 
 function canonicalJson(value) {
@@ -26,20 +30,20 @@ function sha256(text) {
 }
 
 async function readBlock(first, stations) {
-  const compressed = await readFile(new URL(`${first}.bin`, routeBlocks));
+  const compressed = await readFile(new URL(`routes/${first}.bin`, officialData));
   return decodeRouteBlock(gunzipSync(compressed), stations);
 }
 
 test('the complete station dictionary and map geometry match the official JSON', async () => {
-  const stations = await readJson('stations.json');
-  const geometry = await readJson('map_geo.json');
+  const stations = await readStations();
+  const geometry = await readGeometry();
   assert.equal(stations.order.length, 418);
   assert.equal(sha256(canonicalJson(stations)), 'K6Q1QA0d6kAY-_WZ3OcZ_D9k3-4kUFwD4tpPBuW1HIU', 'stations.json');
   assert.equal(sha256(canonicalJson(geometry)), 'MPicInUsvx8DWmT7qSdfItFcHHzkWJigtfQQt3UqWRw', 'map_geo.json');
 });
 
 test('a reverse trip has no second stored record; the slower first recommendation stays first', async () => {
-  const stations = await readJson('stations.json');
+  const stations = await readStations();
   const block = await readBlock(80, stations.order);
   assert.equal(block.pair(93, 84), null);
   assert.deepEqual(block.pair(84, 93), {
@@ -52,7 +56,7 @@ test('a reverse trip has no second stored record; the slower first recommendatio
 
 test('all 87,153 decoded pairs reproduce the 417 legacy shards and the complete dataset fingerprint', async () => {
   const [stations, geometry, fixture] = await Promise.all([
-    readJson('stations.json'), readJson('map_geo.json'),
+    readStations(), readGeometry(),
     readFile(new URL('./legacy-route-shards.sha256', import.meta.url), 'utf8'),
   ]);
   const expectedHashes = fixture.trimEnd().split(/\r?\n/);

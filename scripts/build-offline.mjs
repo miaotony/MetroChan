@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parse, serialize } from 'parse5';
@@ -60,18 +60,9 @@ for (const node of elements) {
   attr.value = `data:${imageTypes[extname(file)]};base64,${(await readFile(file)).toString('base64')}`;
 }
 
-const shardNames = await readdir(new URL('../public/data/paths/', import.meta.url));
-const { order } = JSON.parse(await read('public/data/stations.json', 'utf8'));
-const shards = order.slice(0, -1).map((_, index) => `${index}.json`);
-assert.deepEqual(shardNames.sort(), [...shards].sort(), 'Missing or unexpected official route shards');
-for (const key of ['stations.json', 'map_geo.json', ...shards.map(name => `paths/${name}`)]) {
-  const json = await read(`public/data/${key}`, 'utf8');
-  JSON.parse(json);
-  append(body, 'script', { type: 'application/json', id: `metro-data:${key}` }, json.replaceAll('<', '\\u003c'));
-}
 append(body, 'script', {}, js.code.replace(/<\/script/gi, '<\\/script'));
 const target = new URL('../release/', import.meta.url);
 await mkdir(target, { recursive: true });
 const html = serialize(page);
 await writeFile(new URL('MetroChan-offline.html', target), html);
-console.log(`release/MetroChan-offline.html (${(Buffer.byteLength(html) / (1024 * 1024)).toFixed(2)} MiB, ${shards.length} route shards)`);
+console.log(`release/MetroChan-offline.html (${Buffer.byteLength(html).toLocaleString('en-US')} bytes)`);

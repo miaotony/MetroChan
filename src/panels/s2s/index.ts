@@ -1,6 +1,6 @@
 import { onHearingChange } from '../../core/hearing';
 import { graph, dijkstra, parseOfficialPath } from '../../core/route';
-import { officialPair, loadGeometry } from '../../data/official';
+import { officialPair, loadGeometry } from '../../data/packed-assets';
 import { renderCostTable } from '../../ui/cost-table';
 import { byId } from '../../ui/dom';
 import { maybeShowS2sModal } from '../../ui/estimate-notice';

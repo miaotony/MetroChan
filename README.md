@@ -58,10 +58,12 @@
 index.html              Vite 页面骨架（保留 SEO / 分享元信息）
 src/                    页面逻辑与样式
 data/metro_data.json    唯一维护的线网数据：以线上页面实际解析的站点/边/线路站序/拼音索引为准
-public/data/            线上原样提供的官方索引、路径分片、地图几何
+data/official/          官方站点字典、无损压缩的路径与地图；见下文维护说明
 public/                 固定地址的分享预览图、图标和打赏图片
-scripts/                历史线网资料处理脚本（不生成站点页面）
+scripts/                数据转换、离线构建及历史线网资料处理脚本
 ```
+
+官方数据的导出、更新、校验和格式说明见[数据维护](docs/data.md)。网站按查询下载带内容哈希的数据块；单文件使用同一组字节，不需要首次联网。请使用同时支持 ES2022 和 `DecompressionStream('gzip')` 的现代浏览器（如 Safari / iOS 16.4+、Firefox 113+、Chrome / Edge 107+）。
 
 ## 计价说明
 

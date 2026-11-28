@@ -2,7 +2,7 @@
 
 `npm run build` 一次生成两份产物，用途不同：
 
-- **网站 `dist/`**：只部署这个目录。站点根目录应直接包含 `index.html`、构建后的资源和 `data/`；同一份产物须在 `/` 和 `/MetroChan/` 下都能工作。
+- **网站 `dist/`**：只部署这个目录。站点根目录应直接包含 `index.html` 和 `assets/` 等静态资源；同一份产物须在 `/` 和 `/MetroChan/` 下都能工作。地图和路径的 `.bin` 是应用自己的 gzip 数据，不要给这些文件手动设置 `Content-Encoding: gzip`。
 - **离线文件 `release/MetroChan-offline.html`**：单独分发，直接用浏览器打开，无需本地服务器。不要把它复制进 `dist/`，也不要部署 `release/`、`public/` 或仓库根目录。
 
 ## 发布前验证

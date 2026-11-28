@@ -21,7 +21,7 @@ test('a late official route cannot replace a newly selected same-station result'
   await expect(page.locator('#routeResult .fare-big')).toBeVisible();
   let release!: () => void;
   const hold = new Promise<void>(resolve => { release = resolve; });
-  const shard = '**/data/paths/376.json';
+  const shard = '**/assets/368-*.bin';
   await page.route(shard, async route => { await hold; await route.continue(); });
   const requested = page.waitForRequest(shard);
   await page.locator('#s2sPresets [data-pair="滴水湖,西岑"]').click();
