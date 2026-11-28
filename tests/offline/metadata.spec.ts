@@ -40,7 +40,7 @@ test('static search and share cards agree on fares, effective date, features and
   for (const term of ['票价', '换乘', '计次票']) assert.ok(fields.description.includes(term), `description: missing ${term}`);
   for (const term of ['上海地铁票价', '查询', '换乘', '通勤', '八城']) assert.ok(fields.keywords.includes(term), `keywords: missing ${term}`);
   const alt = fields['og:image:alt'];
-  for (const detail of [/起步价.*3元/, /6公里.*4公里/, /九折|9折/, /70元.*90元/]) assert.match(alt, detail);
+  for (const detail of [/莘庄.*陆家嘴/, /5\s*元.*7\s*元/, /44\s*次.*210\s*元/, /52\s*次.*259\s*元/, /扫码/]) assert.match(alt, detail);
   for (const [key, expected] of Object.entries({
     canonical: homepage, 'og:url': homepage, 'og:type': 'website', 'og:locale': 'zh_CN',
     'og:site_name': 'MetroChan · 魔都地铁酱', 'twitter:card': 'summary_large_image',
@@ -57,7 +57,7 @@ for (const file of ['dist/index.html', 'release/MetroChan-offline.html']) {
   });
 }
 
-test('the published preview is the original PNG at the advertised size', async () => {
+test('the published preview is the optimized PNG at the advertised dimensions', async () => {
   const published = await readFile('dist/og.png');
   assert.ok(published.equals(await readFile('public/og.png')), 'dist/og.png differs from public/og.png');
   const { width, height } = PNG.sync.read(published);
