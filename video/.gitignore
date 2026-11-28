@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.DS_Store
+.env
+.env.*
+*.local
+
+# Ignore render output, except the finished film the root README links to.
+/out/*
+!/out/MetroChanIntro.mp4
+
+# Keep the MP3 render asset; the generated WAV is only an intermediate.
+/public/metrochan-beat.wav

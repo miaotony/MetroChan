@@ -1,0 +1,60 @@
+export const LINE_COLORS: Record<string, string> = {
+  "1号线": "#E3002B",
+  "2号线": "#82BF25",
+  "3号线": "#FCD600",
+  "4号线": "#461D84",
+  "5号线": "#944D9A",
+  "6号线": "#D40068",
+  "7号线": "#ED6F00",
+  "8号线": "#0094D8",
+  "9号线": "#87CAED",
+  "10号线": "#C6AFD4",
+  "11号线": "#871C2B",
+  "12号线": "#007B61",
+  "13号线": "#E999C0",
+  "14号线": "#626020",
+  "15号线": "#BCA886",
+  "16号线": "#98D1C0",
+  "17号线": "#BC796F",
+  "18号线": "#C4984F",
+  浦江线: "#B5B5B6",
+};
+
+export const DARK_TEXT_LINES = [
+  "2号线",
+  "3号线",
+  "9号线",
+  "10号线",
+  "13号线",
+  "15号线",
+  "16号线",
+  "浦江线",
+];
+
+export const C = {
+  paper: "#F5F0E6",
+  paperDeep: "#EDE6D8",
+  card: "#FFFDF9",
+  ink: "#17171A",
+  inkSoft: "#3A3936",
+  muted: "#7C766C",
+  faint: "#B4AC9E",
+  hair: "#E2DACB",
+  red: "#E5322B",
+  redDeep: "#C8102E",
+  redSoft: "#FCE9E4",
+  cream: "#F7EFE6",
+  night: "#0C0E11",
+  nightCard: "#171A1F",
+  nightHair: "#2A2F37",
+  nightInk: "#EFEBE3",
+  nightMuted: "#8F8A80",
+  green: "#2E9E6B",
+} as const;
+
+export const F = {
+  zh: '"PingFang SC", "Hiragino Sans GB", "Heiti SC", sans-serif',
+  num: '"DIN Alternate", "Avenir Next", "PingFang SC", sans-serif',
+  latin: '"Avenir Next", "DIN Alternate", "PingFang SC", sans-serif',
+  mono: '"SF Mono", Menlo, monospace',
+} as const;

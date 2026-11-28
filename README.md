@@ -2,9 +2,11 @@
 
 上海地铁票价对比工具 · 老方案（2005 版）vs 新方案（2026-12-01 起执行），附听证方案一、二与八城横向对比
 
-![MetroChan 魔都地铁酱 — 上海地铁 2026.12 新票价：老方案 vs 新方案，站到站票价、通勤成本与八城横向对比](og.png)
+![MetroChan 魔都地铁酱 — 上海地铁新票价（2026.12.01 起）：你的那一趟，现在就查。票价、路线、每月最省的买法，一页算清](og.png)
 
 🚇 **在线访问：<https://metrochan.miaotony.xyz/>**
+
+https://github.com/user-attachments/assets/b283f053-b7ce-441b-8f2f-979c4e7f6616
 
 单文件静态页面（`index.html`），无构建依赖，下载后双击打开也能用。
 
@@ -57,9 +59,21 @@ data/paths/*.json       官方站到站票价与路径分片（按起点站懒�
 data/map_xy.json        站点坐标（线路图用）
 assets/wechat-reward.png 打赏二维码
 favicon.svg             站点图标
-og.png                  社交分享预览图（1200x630）
+og.png                  社交分享预览图（1200x630，与短片结尾同款，由 video/scripts/og.ts 生成）
 scripts/                数据抓取与构建脚本
+video/                  宣传短片的 Remotion 源码，成片在 video/out/MetroChanIntro.mp4
 ```
+
+## 宣传短片
+
+🎬 **77 秒短片：[每一趟、每个月，都帮你算清楚 ▶](video/out/MetroChanIntro.mp4)** —— 站到站票价、月度通勤成本、「计次票 + 单程票」组合价，一遍看完。
+
+成片 76.8 秒、1920×1080，用 Remotion 制作，源码在 `video/`。
+
+- 30fps、100 BPM；配乐由脚本合成，与画面共用同一份时间轴，逐拍卡点
+- 7 个场景：改价引子、片头、站到站、月度通勤与组合价、按乘距、随身用（手机端、亮色 / 暗色、分享链接）、结尾二维码
+- 画面里的票价、里程、路径和线路图都由 `data/*.json` 按页面同一套计价规则算出；拖动滑块时数字实时重算
+- 重新渲染：`cd video && bun install && bun x remotion render MetroChanIntro out/MetroChanIntro.mp4`，更多说明见 `video/README.md`
 
 ## 计价说明
 
