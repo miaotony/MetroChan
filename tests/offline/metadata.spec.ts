@@ -35,9 +35,9 @@ async function readMetadata(file: string) {
 test('static search and share cards agree on fares, effective date, features and preview', async () => {
   const fields = await readMetadata('index.html');
   for (const term of ['上海地铁', '票价', 'MetroChan', '魔都地铁酱']) assert.ok(fields.title.includes(term), term);
-  for (const term of ['2005年老方案', '2026年12月1日生效的新票价', '按站查询', '换乘', '通勤', '八城', '听证方案均未采纳']) {
-    assert.ok(fields.description.includes(term), `description: missing ${term}`);
-  }
+  assert.doesNotMatch(fields.description, /听证|未采纳/);
+  assert.match(fields.description, /2026\s*年\s*12\s*月\s*1\s*日/);
+  for (const term of ['票价', '换乘', '计次票']) assert.ok(fields.description.includes(term), `description: missing ${term}`);
   for (const term of ['上海地铁票价', '查询', '换乘', '通勤', '八城']) assert.ok(fields.keywords.includes(term), `keywords: missing ${term}`);
   const alt = fields['og:image:alt'];
   for (const detail of [/起步价.*3元/, /6公里.*4公里/, /九折|9折/, /70元.*90元/]) assert.match(alt, detail);
